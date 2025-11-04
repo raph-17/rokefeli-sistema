@@ -10,7 +10,7 @@ Este es el backend del sistema de ventas, inventario y gestión de pedidos para 
 - PostgreSQL
 - Maven
 - Lombok
-- REST API
+- REST API  
 
 ## 📂 Estructura del proyecto
 src/main/java/com/rokefeli/colmenares/  
@@ -38,7 +38,7 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 
-Reemplazar TU_PASSWORD con tu contraseña real de PostgreSQL.
+Reemplazar TU_PASSWORD con tu contraseña real de PostgreSQL.  
 
 ## ▶️ Ejecución del proyecto
 
@@ -46,16 +46,16 @@ Reemplazar TU_PASSWORD con tu contraseña real de PostgreSQL.
 ./mvnw spring-boot:run
 
 ### Windows:
-mvnw spring-boot:run
+mvnw spring-boot:run  
 
 ## 🧾 Estado del proyecto
-Módulo	                    Estado
-Base del proyecto	          ✅ Completo
-Modelado BD	                ✅ Completo
-Entidades JPA               ⏳ Siguiente paso
-Servicios y Controladores	  ⏳
-Seguridad JWT	              ⏳
-Frontend (React)	          Pendiente
+Módulo	                    Estado  
+Base del proyecto	          ✅ Completo  
+Modelado BD	                ✅ Completo  
+Entidades JPA               ⏳ Siguiente paso  
+Servicios y Controladores	  ⏳  
+Seguridad JWT	              ⏳  
+Frontend (React)	          Pendiente  
 
 
 ## 👤 Autor
