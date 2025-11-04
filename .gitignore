@@ -1,0 +1,47 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+
+# Logs
+*.log
+logs/
+*.out
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.ipr
+*.iws
+*.iml
+out/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Spring Boot config (if sensitive)
+application-dev.properties
+application-dev.yml
+application-local.properties
+application-local.yml
+
+# Node (for cuando agregues frontend react)
+node_modules/
+dist/
+build/
+.env
