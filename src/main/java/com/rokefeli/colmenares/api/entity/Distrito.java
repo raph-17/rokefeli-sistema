@@ -1,0 +1,24 @@
+package com.rokefeli.colmenares.api.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Entity
+@Table(name = "distritos")
+public class Distrito {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_provincia", nullable = false)
+    private Provincia provincia;
+
+    @Column(length = 50, nullable = false, unique = true)
+    private String nombre;
+}
