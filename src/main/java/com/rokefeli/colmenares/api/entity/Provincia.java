@@ -15,7 +15,7 @@ public class Provincia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_departamento", nullable = false)
     private Departamento departamento;
 

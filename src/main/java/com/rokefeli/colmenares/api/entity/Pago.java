@@ -20,7 +20,7 @@ public class Pago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_venta", nullable = false)
     private Venta venta;
 

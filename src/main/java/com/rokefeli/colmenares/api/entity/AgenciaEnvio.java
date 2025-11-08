@@ -1,5 +1,6 @@
 package com.rokefeli.colmenares.api.entity;
 
+import com.rokefeli.colmenares.api.entity.enums.EstadoAgencia;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class AgenciaEnvio {
     @Column(length = 100, nullable = false, unique = true)
     private String nombre;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
-    private Boolean estado;
+    private EstadoAgencia estado;
 }

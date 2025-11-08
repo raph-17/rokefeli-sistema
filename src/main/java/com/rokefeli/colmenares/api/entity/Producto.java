@@ -26,7 +26,7 @@ public class Producto {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_categoria", nullable = false)
     private Categoria categoria;
 
@@ -50,4 +50,6 @@ public class Producto {
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro;
 
+    @Version
+    private Long version;
 }

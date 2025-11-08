@@ -17,11 +17,11 @@ public class DetalleVenta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_venta", nullable = false)
     private Venta venta;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_producto", nullable = false)
     private Producto producto;
 
@@ -33,4 +33,9 @@ public class DetalleVenta {
 
     @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
+
+    public BigDecimal calcularSubtotal() {
+        if (precioUnitario == null || cantidad == null) return BigDecimal.ZERO;
+        return precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+    }
 }

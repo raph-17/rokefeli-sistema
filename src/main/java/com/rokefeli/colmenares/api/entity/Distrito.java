@@ -15,7 +15,7 @@ public class Distrito {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_provincia", nullable = false)
     private Provincia provincia;
 

@@ -19,11 +19,11 @@ public class TarifaEnvio {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_agencia", nullable = false)
     private AgenciaEnvio agenciaEnvio;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_distrito", nullable = false)
     private Distrito distrito;
 
