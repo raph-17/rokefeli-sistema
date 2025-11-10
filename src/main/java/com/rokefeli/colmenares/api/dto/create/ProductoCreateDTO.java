@@ -17,6 +17,8 @@ public class ProductoCreateDTO {
     @NotNull
     private BigDecimal precio;
     @NotNull
+    private BigDecimal precioInterno;
+    @NotNull
     private Integer stockActual;
     @NotNull
     private Integer stockMinimo;

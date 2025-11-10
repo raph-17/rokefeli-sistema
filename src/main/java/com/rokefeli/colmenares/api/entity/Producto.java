@@ -33,6 +33,9 @@ public class Producto {
     @Column(name = "precio", nullable = false, precision = 10, scale = 2)
     private BigDecimal precio;
 
+    @Column(name = "precio_interno", precision = 10, scale = 2)
+    private BigDecimal precioInterno;
+
     @Column(name = "stock_actual", nullable = false)
     private Integer stockActual;
 
