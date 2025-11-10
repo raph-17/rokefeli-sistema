@@ -1,5 +1,6 @@
 package com.rokefeli.colmenares.api.entity;
 
+import com.rokefeli.colmenares.api.entity.enums.EstadoTarifa;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,4 +33,8 @@ public class TarifaEnvio {
 
     @Column(name = "dias_estimados", nullable = false)
     private Integer diasEstimados;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false)
+    private EstadoTarifa estado;
 }
