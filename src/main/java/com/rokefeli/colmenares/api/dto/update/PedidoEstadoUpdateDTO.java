@@ -1,4 +1,4 @@
-package com.rokefeli.colmenares.api.dto.response;
+package com.rokefeli.colmenares.api.dto.update;
 
 import com.rokefeli.colmenares.api.entity.enums.EstadoPedido;
 import jakarta.validation.constraints.NotNull;
