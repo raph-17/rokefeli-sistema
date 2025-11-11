@@ -1,7 +1,7 @@
 package com.rokefeli.colmenares.api.service;
 
 import com.rokefeli.colmenares.api.entity.AgenciaEnvio;
-import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
+import com.rokefeli.colmenares.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.repository.AgenciaEnvioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
