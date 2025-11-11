@@ -13,12 +13,13 @@ Este es el backend del sistema de ventas, inventario y gestión de pedidos para 
 - REST API  
 
 ## 📂 Estructura del proyecto
-src/main/java/com/rokefeli/colmenares/  
+src/main/java/com/rokefeli/colmenares/api  
 ├── controller/  
 ├── service/  
 ├── repository/  
 ├── entity/  
 ├── dto/  
+├── mapper/  
 ├── config/  
 ├── security/  
 └── exception/  
