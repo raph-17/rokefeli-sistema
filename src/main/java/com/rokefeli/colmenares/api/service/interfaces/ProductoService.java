@@ -18,5 +18,5 @@ public interface ProductoService {
     ProductoResponseDTO update(Long id, ProductoUpdateDTO updateDTO);
     void ajustarStock(StockAdjustmentDTO adjustmentDTO);
     void descontinuar(Long id);
-    void hardDelete(Long id);
+    void delete(Long id);
 }

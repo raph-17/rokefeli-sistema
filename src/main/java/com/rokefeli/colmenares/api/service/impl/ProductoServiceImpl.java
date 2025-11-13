@@ -106,7 +106,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional
-    public void hardDelete(Long id) {
+    public void delete(Long id) {
         if (!productoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Producto", id);
         }

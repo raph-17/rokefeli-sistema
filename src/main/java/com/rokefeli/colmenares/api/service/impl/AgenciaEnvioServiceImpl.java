@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
 
     @Autowired
@@ -34,6 +34,14 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
     }
 
     @Override
+    public List<AgenciaEnvioResponseDTO> findByEstado(EstadoAgencia estado) {
+        return repository.findByEstado(estado)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     public AgenciaEnvioResponseDTO findById(Long id) {
         AgenciaEnvio agenciaEnvio = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
@@ -41,13 +49,19 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
     }
 
     @Override
+    @Transactional
     public AgenciaEnvioResponseDTO create(AgenciaEnvioCreateDTO createDTO) {
+        if(repository.existsByNombre(createDTO.getNombre())) {
+            throw new IllegalArgumentException("Ya existe una agencia de envío con el nombre: " + createDTO.getNombre());
+        }
         AgenciaEnvio agenciaEnvio = mapper.toEntity(createDTO);
+        agenciaEnvio.setEstado(EstadoAgencia.ACTIVO);
         AgenciaEnvio saved = repository.save(agenciaEnvio);
         return mapper.toResponseDTO(saved);
     }
 
     @Override
+    @Transactional
     public AgenciaEnvioResponseDTO update(Long id, AgenciaEnvioUpdateDTO updateDTO) {
         AgenciaEnvio existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
@@ -57,7 +71,8 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
     }
 
     @Override
-    public void softDelete(Long id) {
+    @Transactional
+    public void desactivar(Long id) {
         AgenciaEnvio existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
         existing.setEstado(EstadoAgencia.INACTIVO);
@@ -65,7 +80,17 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
     }
 
     @Override
-    public void hardDelete(Long id) {
+    @Transactional
+    public void activar(Long id) {
+        AgenciaEnvio existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
+        existing.setEstado(EstadoAgencia.ACTIVO);
+        repository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("AgenciaEnvio", id);
         }
