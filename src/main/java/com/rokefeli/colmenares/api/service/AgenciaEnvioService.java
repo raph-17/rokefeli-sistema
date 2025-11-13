@@ -1,12 +1,16 @@
 package com.rokefeli.colmenares.api.service;
 
 import java.util.List;
-import com.rokefeli.colmenares.api.entity.AgenciaEnvio;
+
+import com.rokefeli.colmenares.api.dto.create.AgenciaEnvioCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.AgenciaEnvioResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.AgenciaEnvioUpdateDTO;
 
 public interface AgenciaEnvioService {
-    List<AgenciaEnvio> findAll();
-    AgenciaEnvio findById(Long id);
-    AgenciaEnvio create(AgenciaEnvio agenciaenvio);
-    AgenciaEnvio update(Long id, AgenciaEnvio agenciaenvio);
-    void delete(Long id);
+    List<AgenciaEnvioResponseDTO> findAll();
+    AgenciaEnvioResponseDTO findById(Long id);
+    AgenciaEnvioResponseDTO create(AgenciaEnvioCreateDTO createDTO);
+    AgenciaEnvioResponseDTO update(Long id, AgenciaEnvioUpdateDTO updateDTO);
+    void softDelete(Long id);
+    void hardDelete(Long id);
 }

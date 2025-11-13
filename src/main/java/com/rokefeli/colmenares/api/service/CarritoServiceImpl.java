@@ -1,8 +1,11 @@
 package com.rokefeli.colmenares.api.service;
 
+import com.rokefeli.colmenares.api.dto.response.CarritoResponseDTO;
 import com.rokefeli.colmenares.api.entity.Carrito;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
+import com.rokefeli.colmenares.api.mapper.CarritoMapper;
 import com.rokefeli.colmenares.api.repository.CarritoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,39 +15,29 @@ import java.util.List;
 @Transactional
 public class CarritoServiceImpl implements CarritoService {
 
-    private final CarritoRepository repository;
+    @Autowired
+    private CarritoRepository repository;
 
-    public CarritoServiceImpl(CarritoRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private CarritoMapper mapper;
+
+    @Override
+    public List<CarritoResponseDTO> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
     @Override
-    public List<Carrito> findAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public Carrito findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Carrito", id));
-    }
-
-    @Override
-    public Carrito create(Carrito carrito) {
-        return repository.save(carrito);
-    }
-
-    @Override
-    public Carrito update(Long id, Carrito carrito) {
+    public CarritoResponseDTO findById(Long id) {
         Carrito existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Carrito", id));
-        // Simple replacement: preserve id
-        carrito.setId(existing.getId());
-        return repository.save(carrito);
+        return mapper.toResponseDTO(existing);
     }
 
     @Override
-    public void delete(Long id) {
+    public void hardDelete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Carrito", id);
         }

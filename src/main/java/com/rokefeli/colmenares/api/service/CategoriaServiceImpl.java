@@ -1,8 +1,13 @@
 package com.rokefeli.colmenares.api.service;
 
+import com.rokefeli.colmenares.api.dto.create.CategoriaCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.CategoriaResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.CategoriaUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Categoria;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
+import com.rokefeli.colmenares.api.mapper.CategoriaMapper;
 import com.rokefeli.colmenares.api.repository.CategoriaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,39 +17,45 @@ import java.util.List;
 @Transactional
 public class CategoriaServiceImpl implements CategoriaService {
 
-    private final CategoriaRepository repository;
+    @Autowired
+    private CategoriaRepository repository;
 
-    public CategoriaServiceImpl(CategoriaRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private CategoriaMapper mapper;
+
+    @Override
+    public List<CategoriaResponseDTO> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
     @Override
-    public List<Categoria> findAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public Categoria findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoria", id));
-    }
-
-    @Override
-    public Categoria create(Categoria categoria) {
-        return repository.save(categoria);
-    }
-
-    @Override
-    public Categoria update(Long id, Categoria categoria) {
+    public CategoriaResponseDTO findById(Long id) {
         Categoria existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria", id));
-        // Simple replacement: preserve id
-        categoria.setId(existing.getId());
-        return repository.save(categoria);
+        return mapper.toResponseDTO(existing);
     }
 
     @Override
-    public void delete(Long id) {
+    public CategoriaResponseDTO create(CategoriaCreateDTO createDTO) {
+        Categoria categoria = mapper.toEntity(createDTO);
+        Categoria saved = repository.save(categoria);
+        return mapper.toResponseDTO(saved);
+    }
+
+    @Override
+    public CategoriaResponseDTO update(Long id, CategoriaUpdateDTO updateDTO) {
+        Categoria existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria", id));
+        mapper.updateEntityFromDTO(updateDTO, existing);
+        Categoria updated = repository.save(existing);
+        return mapper.toResponseDTO(updated);
+    }
+
+    @Override
+    public void hardDelete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Categoria", id);
         }

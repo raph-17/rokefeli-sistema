@@ -1,12 +1,11 @@
 package com.rokefeli.colmenares.api.service;
 
 import java.util.List;
-import com.rokefeli.colmenares.api.entity.Carrito;
+
+import com.rokefeli.colmenares.api.dto.response.CarritoResponseDTO;
 
 public interface CarritoService {
-    List<Carrito> findAll();
-    Carrito findById(Long id);
-    Carrito create(Carrito carrito);
-    Carrito update(Long id, Carrito carrito);
-    void delete(Long id);
+    List<CarritoResponseDTO> findAll();
+    CarritoResponseDTO findById(Long id);
+    void hardDelete(Long id);
 }

@@ -1,8 +1,13 @@
 package com.rokefeli.colmenares.api.service;
 
+import com.rokefeli.colmenares.api.dto.create.DepartamentoCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.DepartamentoResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.DepartamentoUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Departamento;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
+import com.rokefeli.colmenares.api.mapper.DepartamentoMapper;
 import com.rokefeli.colmenares.api.repository.DepartamentoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,35 +17,41 @@ import java.util.List;
 @Transactional
 public class DepartamentoServiceImpl implements DepartamentoService {
 
-    private final DepartamentoRepository repository;
+    @Autowired
+    private DepartamentoRepository repository;
 
-    public DepartamentoServiceImpl(DepartamentoRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private DepartamentoMapper mapper;
+
+    @Override
+    public List<DepartamentoResponseDTO> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
     @Override
-    public List<Departamento> findAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public Departamento findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Departamento", id));
-    }
-
-    @Override
-    public Departamento create(Departamento departamento) {
-        return repository.save(departamento);
-    }
-
-    @Override
-    public Departamento update(Long id, Departamento departamento) {
+    public DepartamentoResponseDTO findById(Long id) {
         Departamento existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Departamento", id));
-        // Simple replacement: preserve id
-        departamento.setId(existing.getId());
-        return repository.save(departamento);
+        return mapper.toResponseDTO(existing);
+    }
+
+    @Override
+    public DepartamentoResponseDTO create(DepartamentoCreateDTO createDTO) {
+        Departamento departamento = mapper.toEntity(createDTO);
+        Departamento saved = repository.save(departamento);
+        return mapper.toResponseDTO(saved);
+    }
+
+    @Override
+    public DepartamentoResponseDTO update(Long id, DepartamentoUpdateDTO updateDTO) {
+        Departamento existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Departamento", id));
+        mapper.updateEntityFromDTO(updateDTO, existing);
+        Departamento updated = repository.save(existing);
+        return mapper.toResponseDTO(updated);
     }
 
     @Override
