@@ -6,5 +6,4 @@ import lombok.Data;
 
 @Data
 public class ProductoUpdateDTO extends ProductoCreateDTO {
-    private EstadoProducto estado;
 }

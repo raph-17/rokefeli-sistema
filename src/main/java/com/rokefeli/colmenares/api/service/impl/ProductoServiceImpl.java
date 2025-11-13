@@ -3,10 +3,13 @@ package com.rokefeli.colmenares.api.service.impl;
 import com.rokefeli.colmenares.api.dto.create.ProductoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.ProductoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.ProductoUpdateDTO;
+import com.rokefeli.colmenares.api.dto.update.StockAdjustmentDTO;
+import com.rokefeli.colmenares.api.entity.Categoria;
 import com.rokefeli.colmenares.api.entity.Producto;
 import com.rokefeli.colmenares.api.entity.enums.EstadoProducto;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.ProductoMapper;
+import com.rokefeli.colmenares.api.repository.CategoriaRepository;
 import com.rokefeli.colmenares.api.repository.ProductoRepository;
 import com.rokefeli.colmenares.api.service.interfaces.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +19,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ProductoServiceImpl implements ProductoService {
 
     @Autowired
-    private ProductoRepository repository;
+    private ProductoRepository productoRepository;
+
+    @Autowired
+    private CategoriaRepository categoriaRepository;
 
     @Autowired
     private ProductoMapper mapper;
 
     @Override
     public List<ProductoResponseDTO> findAll() {
-        return repository.findAll()
+        return productoRepository.findAll()
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();
@@ -35,40 +41,88 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public ProductoResponseDTO findById(Long id) {
-        Producto existing = repository.findById(id)
+        Producto existing = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto", id));
         return mapper.toResponseDTO(existing);
     }
 
     @Override
+    public List<ProductoResponseDTO> findByCategoria(Long idCategoria) {
+        return productoRepository.findByCategoria_Id(idCategoria)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ProductoResponseDTO> findByEstado(EstadoProducto estado) {
+        return productoRepository.findByEstado(estado)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ProductoResponseDTO> findByNombreContaining(String nombre) {
+        return productoRepository.findByNombreContainingIgnoreCase(nombre)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional
     public ProductoResponseDTO create(ProductoCreateDTO createDTO) {
-        Producto producto = mapper.toEntity(createDTO);
-        Producto saved = repository.save(producto);
+        Categoria categoria = categoriaRepository.findById(createDTO.getIdCategoria())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria", createDTO.getIdCategoria())); // Busca la categoria asociada
+        Producto producto = mapper.toEntity(createDTO); // Crea el producto a partir del DTO
+        producto.setCategoria(categoria); // Asocia la categoria al producto
+        producto.setEstado(EstadoProducto.ACTIVO); // Inicializa el producto como ACTIVO
+        Producto saved = productoRepository.save(producto); // Guarda el producto en la base de datos
         return mapper.toResponseDTO(saved);
     }
 
     @Override
+    @Transactional
     public ProductoResponseDTO update(Long id, ProductoUpdateDTO updateDTO) {
-        Producto existing = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto", id));
+        Producto existing = productoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto", id)); // Confirma que el producto existe
+        Categoria categoria = categoriaRepository.findById(updateDTO.getIdCategoria())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria", updateDTO.getIdCategoria())); // Busca la categoria a asociar
         mapper.updateEntityFromDTO(updateDTO, existing);
-        Producto updated = repository.save(existing);
+        existing.setCategoria(categoria); // Actualiza la categoria del producto
+        Producto updated = productoRepository.save(existing);
         return mapper.toResponseDTO(updated);
     }
 
     @Override
-    public void softDelete(Long id) {
-        Producto existing = repository.findById(id)
+    @Transactional
+    public void descontinuar(Long id) {
+        Producto existing = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto", id));
         existing.setEstado(EstadoProducto.DESCONTINUADO);
-        repository.save(existing);
+        productoRepository.save(existing);
     }
 
     @Override
+    @Transactional
     public void hardDelete(Long id) {
-        if (!repository.existsById(id)) {
+        if (!productoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Producto", id);
         }
-        repository.deleteById(id);
+        productoRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void ajustarStock(StockAdjustmentDTO dto) {
+        Producto producto = productoRepository.findById(dto.getProductoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Producto", dto.getProductoId()));
+        int nuevoStock = producto.getStockActual() + dto.getCantidadCambio();
+        if (nuevoStock < 0) {
+            throw new IllegalArgumentException("El stock no puede ser negativo.");
+        }
+        producto.setStockActual(nuevoStock);
+        productoRepository.save(producto);
     }
 }
