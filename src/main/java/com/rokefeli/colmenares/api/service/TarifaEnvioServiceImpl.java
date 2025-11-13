@@ -1,8 +1,13 @@
 package com.rokefeli.colmenares.api.service;
 
+import com.rokefeli.colmenares.api.dto.create.TarifaEnvioCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.TarifaEnvioResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.TarifaEnvioUpdateDTO;
 import com.rokefeli.colmenares.api.entity.TarifaEnvio;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
+import com.rokefeli.colmenares.api.mapper.TarifaEnvioMapper;
 import com.rokefeli.colmenares.api.repository.TarifaEnvioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,35 +17,41 @@ import java.util.List;
 @Transactional
 public class TarifaEnvioServiceImpl implements TarifaEnvioService {
 
-    private final TarifaEnvioRepository repository;
+    @Autowired
+    private TarifaEnvioRepository repository;
 
-    public TarifaEnvioServiceImpl(TarifaEnvioRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private TarifaEnvioMapper mapper;
+
+    @Override
+    public List<TarifaEnvioResponseDTO> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
     @Override
-    public List<TarifaEnvio> findAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public TarifaEnvio findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("TarifaEnvio", id));
-    }
-
-    @Override
-    public TarifaEnvio create(TarifaEnvio tarifaenvio) {
-        return repository.save(tarifaenvio);
-    }
-
-    @Override
-    public TarifaEnvio update(Long id, TarifaEnvio tarifaenvio) {
+    public TarifaEnvioResponseDTO findById(Long id) {
         TarifaEnvio existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TarifaEnvio", id));
-        // Simple replacement: preserve id
-        tarifaenvio.setId(existing.getId());
-        return repository.save(tarifaenvio);
+        return mapper.toResponseDTO(existing);
+    }
+
+    @Override
+    public TarifaEnvioResponseDTO create(TarifaEnvioCreateDTO createDTO) {
+        TarifaEnvio tarifaenvio = mapper.toEntity(createDTO);
+        TarifaEnvio saved = repository.save(tarifaenvio);
+        return mapper.toResponseDTO(saved);
+    }
+
+    @Override
+    public TarifaEnvioResponseDTO update(Long id, TarifaEnvioUpdateDTO updateDTO) {
+        TarifaEnvio existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("TarifaEnvio", id));
+        mapper.updateEntityFromDTO(updateDTO, existing);
+        TarifaEnvio updated = repository.save(existing);
+        return mapper.toResponseDTO(updated);
     }
 
     @Override

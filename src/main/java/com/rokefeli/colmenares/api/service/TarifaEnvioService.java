@@ -1,12 +1,15 @@
 package com.rokefeli.colmenares.api.service;
 
 import java.util.List;
-import com.rokefeli.colmenares.api.entity.TarifaEnvio;
+
+import com.rokefeli.colmenares.api.dto.create.TarifaEnvioCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.TarifaEnvioResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.TarifaEnvioUpdateDTO;
 
 public interface TarifaEnvioService {
-    List<TarifaEnvio> findAll();
-    TarifaEnvio findById(Long id);
-    TarifaEnvio create(TarifaEnvio tarifaenvio);
-    TarifaEnvio update(Long id, TarifaEnvio tarifaenvio);
+    List<TarifaEnvioResponseDTO> findAll();
+    TarifaEnvioResponseDTO findById(Long id);
+    TarifaEnvioResponseDTO create(TarifaEnvioCreateDTO createDTO);
+    TarifaEnvioResponseDTO update(Long id, TarifaEnvioUpdateDTO updateDTO);
     void delete(Long id);
 }

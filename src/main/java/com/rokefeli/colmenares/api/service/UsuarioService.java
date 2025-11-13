@@ -1,12 +1,15 @@
 package com.rokefeli.colmenares.api.service;
 
 import java.util.List;
-import com.rokefeli.colmenares.api.entity.Usuario;
+
+import com.rokefeli.colmenares.api.dto.create.UsuarioCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.UsuarioResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.UsuarioUpdateDTO;
 
 public interface UsuarioService {
-    List<Usuario> findAll();
-    Usuario findById(Long id);
-    Usuario create(Usuario usuario);
-    Usuario update(Long id, Usuario usuario);
+    List<UsuarioResponseDTO> findAll();
+    UsuarioResponseDTO findById(Long id);
+    UsuarioResponseDTO create(UsuarioCreateDTO createDTO);
+    UsuarioResponseDTO update(Long id, UsuarioUpdateDTO updateDTO);
     void delete(Long id);
 }

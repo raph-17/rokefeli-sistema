@@ -1,8 +1,13 @@
 package com.rokefeli.colmenares.api.service;
 
+import com.rokefeli.colmenares.api.dto.create.UsuarioCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.UsuarioResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.UsuarioUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Usuario;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
+import com.rokefeli.colmenares.api.mapper.UsuarioMapper;
 import com.rokefeli.colmenares.api.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,35 +17,41 @@ import java.util.List;
 @Transactional
 public class UsuarioServiceImpl implements UsuarioService {
 
-    private final UsuarioRepository repository;
+    @Autowired
+    private UsuarioRepository repository;
 
-    public UsuarioServiceImpl(UsuarioRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private UsuarioMapper mapper;
+
+    @Override
+    public List<UsuarioResponseDTO> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
     @Override
-    public List<Usuario> findAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public Usuario findById(Long id) {
-        return repository.findById(id)
+    public UsuarioResponseDTO findById(Long id) {
+        Usuario usuario = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
+        return mapper.toResponseDTO(usuario);
     }
 
     @Override
-    public Usuario create(Usuario usuario) {
-        return repository.save(usuario);
+    public UsuarioResponseDTO create(UsuarioCreateDTO createDTO) {
+        Usuario usuario = mapper.toEntity(createDTO);
+        Usuario saved = repository.save(usuario);
+        return mapper.toResponseDTO(saved);
     }
 
     @Override
-    public Usuario update(Long id, Usuario usuario) {
+    public UsuarioResponseDTO update(Long id, UsuarioUpdateDTO updateDTO) {
         Usuario existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
-        // Simple replacement: preserve id
-        usuario.setId(existing.getId());
-        return repository.save(usuario);
+        mapper.updateEntityFromDTO(updateDTO, existing);
+        Usuario updated = repository.save(existing);
+        return mapper.toResponseDTO(updated);
     }
 
     @Override

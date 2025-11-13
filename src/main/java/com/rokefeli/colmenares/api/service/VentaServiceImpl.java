@@ -1,8 +1,12 @@
 package com.rokefeli.colmenares.api.service;
 
+import com.rokefeli.colmenares.api.dto.create.VentaCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
 import com.rokefeli.colmenares.api.entity.Venta;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
+import com.rokefeli.colmenares.api.mapper.VentaMapper;
 import com.rokefeli.colmenares.api.repository.VentaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,35 +16,32 @@ import java.util.List;
 @Transactional
 public class VentaServiceImpl implements VentaService {
 
-    private final VentaRepository repository;
+    @Autowired
+    private VentaRepository repository;
 
-    public VentaServiceImpl(VentaRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private VentaMapper mapper;
+
+    @Override
+    public List<VentaResponseDTO> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
     @Override
-    public List<Venta> findAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public Venta findById(Long id) {
-        return repository.findById(id)
+    public VentaResponseDTO findById(Long id) {
+        Venta venta = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venta", id));
+        return mapper.toResponseDTO(venta);
     }
 
     @Override
-    public Venta create(Venta venta) {
-        return repository.save(venta);
-    }
-
-    @Override
-    public Venta update(Long id, Venta venta) {
-        Venta existing = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Venta", id));
-        // Simple replacement: preserve id
-        venta.setId(existing.getId());
-        return repository.save(venta);
+    public VentaResponseDTO create(VentaCreateDTO createDTO) {
+        Venta venta = mapper.toEntity(createDTO);
+        Venta saved = repository.save(venta);
+        return mapper.toResponseDTO(saved);
     }
 
     @Override

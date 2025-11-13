@@ -1,8 +1,13 @@
 package com.rokefeli.colmenares.api.service;
 
+import com.rokefeli.colmenares.api.dto.create.ProvinciaCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.ProvinciaResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.ProvinciaUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Provincia;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
+import com.rokefeli.colmenares.api.mapper.ProvinciaMapper;
 import com.rokefeli.colmenares.api.repository.ProvinciaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,35 +17,41 @@ import java.util.List;
 @Transactional
 public class ProvinciaServiceImpl implements ProvinciaService {
 
-    private final ProvinciaRepository repository;
+    @Autowired
+    private ProvinciaRepository repository;
 
-    public ProvinciaServiceImpl(ProvinciaRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private ProvinciaMapper mapper;
+
+    @Override
+    public List<ProvinciaResponseDTO> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
     @Override
-    public List<Provincia> findAll() {
-        return repository.findAll();
-    }
-
-    @Override
-    public Provincia findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
-    }
-
-    @Override
-    public Provincia create(Provincia provincia) {
-        return repository.save(provincia);
-    }
-
-    @Override
-    public Provincia update(Long id, Provincia provincia) {
+    public ProvinciaResponseDTO findById(Long id) {
         Provincia existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
-        // Simple replacement: preserve id
-        provincia.setId(existing.getId());
-        return repository.save(provincia);
+        return mapper.toResponseDTO(existing);
+    }
+
+    @Override
+    public ProvinciaResponseDTO create(ProvinciaCreateDTO createDTO) {
+        Provincia provincia = mapper.toEntity(createDTO);
+        Provincia saved = repository.save(provincia);
+        return mapper.toResponseDTO(saved);
+    }
+
+    @Override
+    public ProvinciaResponseDTO update(Long id, ProvinciaUpdateDTO updateDTO) {
+        Provincia existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
+        mapper.updateEntityFromDTO(updateDTO, existing);
+        Provincia updated = repository.save(existing);
+        return mapper.toResponseDTO(updated);
     }
 
     @Override

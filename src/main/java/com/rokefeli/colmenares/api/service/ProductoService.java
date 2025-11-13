@@ -1,12 +1,16 @@
 package com.rokefeli.colmenares.api.service;
 
 import java.util.List;
-import com.rokefeli.colmenares.api.entity.Producto;
+
+import com.rokefeli.colmenares.api.dto.create.ProductoCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.ProductoResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.ProductoUpdateDTO;
 
 public interface ProductoService {
-    List<Producto> findAll();
-    Producto findById(Long id);
-    Producto create(Producto producto);
-    Producto update(Long id, Producto producto);
-    void delete(Long id);
+    List<ProductoResponseDTO> findAll();
+    ProductoResponseDTO findById(Long id);
+    ProductoResponseDTO create(ProductoCreateDTO createDTO);
+    ProductoResponseDTO update(Long id, ProductoUpdateDTO updateDTO);
+    void softDelete(Long id);
+    void hardDelete(Long id);
 }
