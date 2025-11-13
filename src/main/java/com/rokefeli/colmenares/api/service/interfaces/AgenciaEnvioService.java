@@ -1,4 +1,4 @@
-package com.rokefeli.colmenares.api.service;
+package com.rokefeli.colmenares.api.service.interfaces;
 
 import java.util.List;
 

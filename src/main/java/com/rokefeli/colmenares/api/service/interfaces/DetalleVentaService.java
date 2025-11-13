@@ -1,10 +1,9 @@
-package com.rokefeli.colmenares.api.service;
+package com.rokefeli.colmenares.api.service.interfaces;
 
 import java.util.List;
 
 import com.rokefeli.colmenares.api.dto.create.DetalleVentaCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.DetalleVentaResponseDTO;
-import com.rokefeli.colmenares.api.entity.DetalleVenta;
 
 public interface DetalleVentaService {
     List<DetalleVentaResponseDTO> findAll();

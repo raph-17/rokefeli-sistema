@@ -1,11 +1,10 @@
-package com.rokefeli.colmenares.api.service;
+package com.rokefeli.colmenares.api.service.interfaces;
 
 import java.util.List;
 
 import com.rokefeli.colmenares.api.dto.create.DepartamentoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.DepartamentoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.DepartamentoUpdateDTO;
-import com.rokefeli.colmenares.api.entity.Departamento;
 
 public interface DepartamentoService {
     List<DepartamentoResponseDTO> findAll();

@@ -1,4 +1,4 @@
-package com.rokefeli.colmenares.api.service;
+package com.rokefeli.colmenares.api.service.impl;
 
 import com.rokefeli.colmenares.api.dto.create.DistritoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.DistritoResponseDTO;
@@ -7,6 +7,7 @@ import com.rokefeli.colmenares.api.entity.Distrito;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.DistritoMapper;
 import com.rokefeli.colmenares.api.repository.DistritoRepository;
+import com.rokefeli.colmenares.api.service.interfaces.DistritoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

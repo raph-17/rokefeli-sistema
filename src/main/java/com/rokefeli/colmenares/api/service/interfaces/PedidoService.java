@@ -1,11 +1,10 @@
-package com.rokefeli.colmenares.api.service;
+package com.rokefeli.colmenares.api.service.interfaces;
 
 import java.util.List;
 
 import com.rokefeli.colmenares.api.dto.create.PedidoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.PedidoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.PedidoUpdateDTO;
-import com.rokefeli.colmenares.api.entity.Pedido;
 
 public interface PedidoService {
     List<PedidoResponseDTO> findAll();

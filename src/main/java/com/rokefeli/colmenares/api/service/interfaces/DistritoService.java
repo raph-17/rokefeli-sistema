@@ -1,11 +1,10 @@
-package com.rokefeli.colmenares.api.service;
+package com.rokefeli.colmenares.api.service.interfaces;
 
 import java.util.List;
 
 import com.rokefeli.colmenares.api.dto.create.DistritoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.DistritoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.DistritoUpdateDTO;
-import com.rokefeli.colmenares.api.entity.Distrito;
 
 public interface DistritoService {
     List<DistritoResponseDTO> findAll();

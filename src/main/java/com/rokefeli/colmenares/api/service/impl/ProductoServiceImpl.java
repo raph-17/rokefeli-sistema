@@ -1,4 +1,4 @@
-package com.rokefeli.colmenares.api.service;
+package com.rokefeli.colmenares.api.service.impl;
 
 import com.rokefeli.colmenares.api.dto.create.ProductoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.ProductoResponseDTO;
@@ -8,6 +8,7 @@ import com.rokefeli.colmenares.api.entity.enums.EstadoProducto;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.ProductoMapper;
 import com.rokefeli.colmenares.api.repository.ProductoRepository;
+import com.rokefeli.colmenares.api.service.interfaces.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

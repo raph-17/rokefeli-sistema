@@ -1,4 +1,4 @@
-package com.rokefeli.colmenares.api.service;
+package com.rokefeli.colmenares.api.service.impl;
 
 import com.rokefeli.colmenares.api.dto.create.CategoriaCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.CategoriaResponseDTO;
@@ -7,6 +7,7 @@ import com.rokefeli.colmenares.api.entity.Categoria;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.CategoriaMapper;
 import com.rokefeli.colmenares.api.repository.CategoriaRepository;
+import com.rokefeli.colmenares.api.service.interfaces.CategoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.rokefeli.colmenares.api.service;
+package com.rokefeli.colmenares.api.service.impl;
 
 import com.rokefeli.colmenares.api.dto.create.UsuarioCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.UsuarioResponseDTO;
@@ -7,6 +7,7 @@ import com.rokefeli.colmenares.api.entity.Usuario;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.UsuarioMapper;
 import com.rokefeli.colmenares.api.repository.UsuarioRepository;
+import com.rokefeli.colmenares.api.service.interfaces.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
