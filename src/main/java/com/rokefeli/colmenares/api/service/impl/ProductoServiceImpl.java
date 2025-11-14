@@ -6,6 +6,7 @@ import com.rokefeli.colmenares.api.dto.update.ProductoUpdateDTO;
 import com.rokefeli.colmenares.api.dto.update.StockAdjustmentDTO;
 import com.rokefeli.colmenares.api.entity.Categoria;
 import com.rokefeli.colmenares.api.entity.Producto;
+import com.rokefeli.colmenares.api.entity.enums.EstadoCategoria;
 import com.rokefeli.colmenares.api.entity.enums.EstadoProducto;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.ProductoMapper;
@@ -73,7 +74,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional
     public ProductoResponseDTO create(ProductoCreateDTO createDTO) {
-        Categoria categoria = categoriaRepository.findById(createDTO.getIdCategoria())
+        Categoria categoria = categoriaRepository.findByIdAndEstado(createDTO.getIdCategoria(), EstadoCategoria.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria", createDTO.getIdCategoria())); // Busca la categoria asociada
         Producto producto = mapper.toEntity(createDTO); // Crea el producto a partir del DTO
         producto.setCategoria(categoria); // Asocia la categoria al producto
@@ -87,7 +88,7 @@ public class ProductoServiceImpl implements ProductoService {
     public ProductoResponseDTO update(Long id, ProductoUpdateDTO updateDTO) {
         Producto existing = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto", id)); // Confirma que el producto existe
-        Categoria categoria = categoriaRepository.findById(updateDTO.getIdCategoria())
+        Categoria categoria = categoriaRepository.findByIdAndEstado(updateDTO.getIdCategoria(), EstadoCategoria.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria", updateDTO.getIdCategoria())); // Busca la categoria a asociar
         mapper.updateEntityFromDTO(updateDTO, existing);
         existing.setCategoria(categoria); // Actualiza la categoria del producto
