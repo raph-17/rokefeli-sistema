@@ -48,24 +48,8 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
-    public List<ProductoResponseDTO> findByCategoria(Long idCategoria) {
-        return productoRepository.findByCategoria_Id(idCategoria)
-                .stream()
-                .map(mapper::toResponseDTO)
-                .toList();
-    }
-
-    @Override
-    public List<ProductoResponseDTO> findByEstado(EstadoProducto estado) {
-        return productoRepository.findByEstado(estado)
-                .stream()
-                .map(mapper::toResponseDTO)
-                .toList();
-    }
-
-    @Override
-    public List<ProductoResponseDTO> findByNombreContaining(String nombre) {
-        return productoRepository.findByNombreContainingIgnoreCase(nombre)
+    public List<ProductoResponseDTO> buscar(String nombre, Long idCategoria, EstadoProducto estado) {
+        return productoRepository.buscarProductos(nombre, idCategoria, estado)
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();

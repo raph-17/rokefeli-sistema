@@ -11,9 +11,7 @@ import com.rokefeli.colmenares.api.entity.enums.EstadoProducto;
 public interface ProductoService {
     List<ProductoResponseDTO> findAll();
     ProductoResponseDTO findById(Long id);
-    List<ProductoResponseDTO> findByCategoria(Long idCategoria);
-    List<ProductoResponseDTO> findByEstado(EstadoProducto estado);
-    List<ProductoResponseDTO> findByNombreContaining(String nombre);
+    List<ProductoResponseDTO> buscar(String nombre, Long idCategoria, EstadoProducto estado);
     ProductoResponseDTO create(ProductoCreateDTO createDTO);
     ProductoResponseDTO update(Long id, ProductoUpdateDTO updateDTO);
     void ajustarStock(StockAdjustmentDTO adjustmentDTO);
