@@ -72,8 +72,14 @@ public class ProvinciaServiceImpl implements ProvinciaService {
     public ProvinciaResponseDTO update(Long id, ProvinciaUpdateDTO updateDTO) {
         Provincia existing = provinciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
+
         Departamento departamento = departamentoRepository.findByIdAndEstado(updateDTO.getIdDepartamento(), EstadoDepartamento.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Departamento", updateDTO.getIdDepartamento()));
+
+        if (provinciaRepository.existsByNombreIgnoreCaseAndDepartamento_IdAndIdNot(updateDTO.getNombre(), updateDTO.getIdDepartamento(), id)) {
+            throw new IllegalArgumentException("Ya existe una provincia con ese nombre en este departamento.");
+        }
+
         mapper.updateEntityFromDTO(updateDTO, existing);
         existing.setDepartamento(departamento);
         Provincia updated = provinciaRepository.save(existing);

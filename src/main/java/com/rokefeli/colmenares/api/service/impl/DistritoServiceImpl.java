@@ -57,7 +57,7 @@ public class DistritoServiceImpl implements DistritoService {
     @Override
     @Transactional
     public DistritoResponseDTO create(DistritoCreateDTO createDTO) {
-        if (distritoRepository.existsByNombreAndProvincia_Id(createDTO.getNombre(), createDTO.getIdProvincia())) {
+        if (distritoRepository.existsByNombreIgnoreCaseAndProvincia_Id(createDTO.getNombre(), createDTO.getIdProvincia())) {
             throw new IllegalArgumentException("Ya existe un distrito con el mismo nombre en la provincia especificada.");
         }
         Provincia provincia = provinciaRepository.findByIdAndEstado(createDTO.getIdProvincia(), EstadoProvincia.ACTIVO).
@@ -79,7 +79,7 @@ public class DistritoServiceImpl implements DistritoService {
         Provincia provincia = provinciaRepository.findByIdAndEstado(updateDTO.getIdProvincia(), EstadoProvincia.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Provincia", updateDTO.getIdProvincia()));
 
-        if (distritoRepository.existsByNombreAndProvincia_IdAndIdNot(updateDTO.getNombre(), updateDTO.getIdProvincia(), id)) {
+        if (distritoRepository.existsByNombreIgnoreCaseAndProvincia_IdAndIdNot(updateDTO.getNombre(), updateDTO.getIdProvincia(), id)) {
             throw new IllegalArgumentException("Ya existe un distrito con ese nombre en esta provincia.");
         }
         

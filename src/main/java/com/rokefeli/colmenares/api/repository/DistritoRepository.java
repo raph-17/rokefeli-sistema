@@ -9,7 +9,7 @@ import java.util.List;
 public interface DistritoRepository extends JpaRepository<Distrito, Long> {
     List<Distrito> findByProvincia_Id(Long provinciaId);
     List<Distrito> findByEstado(EstadoDistrito estado);
-    boolean existsByNombreAndProvincia_Id(String nombre, Long provinciaId);
+    boolean existsByNombreIgnoreCaseAndProvincia_Id(String nombre, Long provinciaId);
     boolean existsByProvincia_Id(Long provinciaId);
-    boolean existsByNombreAndProvincia_IdAndIdNot(String nombre, Long provinciaId, Long id);
+    boolean existsByNombreIgnoreCaseAndProvincia_IdAndIdNot(String nombre, Long provinciaId, Long id);
 }

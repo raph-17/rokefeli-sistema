@@ -15,4 +15,6 @@ public interface ProvinciaRepository extends JpaRepository<Provincia, Long> {
     boolean existsByDepartamento_Id(Long departamentoId);
 
     boolean existsByNombreIgnoreCaseAndDepartamento_Id(String nombre, Long departamentoId);
+
+    boolean existsByNombreIgnoreCaseAndDepartamento_IdAndIdNot(String nombre, Long departamentoId, Long id);
 }
