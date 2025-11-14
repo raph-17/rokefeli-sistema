@@ -11,5 +11,7 @@ public interface ProvinciaService {
     ProvinciaResponseDTO findById(Long id);
     ProvinciaResponseDTO create(ProvinciaCreateDTO createDTO);
     ProvinciaResponseDTO update(Long id, ProvinciaUpdateDTO updateDTO);
+    void desactivar(Long id);
+    void activar(Long id);
     void delete(Long id);
 }

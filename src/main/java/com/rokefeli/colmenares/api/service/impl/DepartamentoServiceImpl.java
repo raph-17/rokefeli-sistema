@@ -55,6 +55,9 @@ public class DepartamentoServiceImpl implements DepartamentoService {
     @Override
     @Transactional
     public DepartamentoResponseDTO create(DepartamentoCreateDTO createDTO) {
+        if(departamentoRepository.existsByNombreIgnoreCase(createDTO.getNombre())) {
+            throw new IllegalStateException("El departamento con nombre " + createDTO.getNombre() + " ya existe.");
+        }
         Departamento departamento = mapper.toEntity(createDTO);
         departamento.setEstado(EstadoDepartamento.ACTIVO);
         Departamento saved = departamentoRepository.save(departamento);

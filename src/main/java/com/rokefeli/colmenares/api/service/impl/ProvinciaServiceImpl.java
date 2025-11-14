@@ -3,9 +3,16 @@ package com.rokefeli.colmenares.api.service.impl;
 import com.rokefeli.colmenares.api.dto.create.ProvinciaCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.ProvinciaResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.ProvinciaUpdateDTO;
+import com.rokefeli.colmenares.api.entity.Departamento;
+import com.rokefeli.colmenares.api.entity.Distrito;
 import com.rokefeli.colmenares.api.entity.Provincia;
+import com.rokefeli.colmenares.api.entity.enums.EstadoDepartamento;
+import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
+import com.rokefeli.colmenares.api.entity.enums.EstadoProvincia;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.ProvinciaMapper;
+import com.rokefeli.colmenares.api.repository.DepartamentoRepository;
+import com.rokefeli.colmenares.api.repository.DistritoRepository;
 import com.rokefeli.colmenares.api.repository.ProvinciaRepository;
 import com.rokefeli.colmenares.api.service.interfaces.ProvinciaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,18 +22,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ProvinciaServiceImpl implements ProvinciaService {
 
     @Autowired
-    private ProvinciaRepository repository;
+    private ProvinciaRepository provinciaRepository;
+
+    @Autowired
+    private DepartamentoRepository departamentoRepository;
+
+    @Autowired
+    private DistritoRepository distritoRepository;
 
     @Autowired
     private ProvinciaMapper mapper;
 
     @Override
     public List<ProvinciaResponseDTO> findAll() {
-        return repository.findAll()
+        return provinciaRepository.findAll()
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();
@@ -34,32 +47,74 @@ public class ProvinciaServiceImpl implements ProvinciaService {
 
     @Override
     public ProvinciaResponseDTO findById(Long id) {
-        Provincia existing = repository.findById(id)
+        Provincia existing = provinciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
         return mapper.toResponseDTO(existing);
     }
 
     @Override
+    @Transactional
     public ProvinciaResponseDTO create(ProvinciaCreateDTO createDTO) {
+        if(provinciaRepository.existsByNombreIgnoreCaseAndDepartamento_Id(createDTO.getNombre(), createDTO.getIdDepartamento())) {
+            throw new IllegalStateException("Ya existe una provincia con ese nombre en este departamento.");
+        }
+        Departamento departamento = departamentoRepository.findByIdAndEstado(createDTO.getIdDepartamento(), EstadoDepartamento.ACTIVO)
+                .orElseThrow(() -> new ResourceNotFoundException("Departamento", createDTO.getIdDepartamento()));
         Provincia provincia = mapper.toEntity(createDTO);
-        Provincia saved = repository.save(provincia);
+        provincia.setEstado(EstadoProvincia.ACTIVO);
+        provincia.setDepartamento(departamento);
+        Provincia saved = provinciaRepository.save(provincia);
         return mapper.toResponseDTO(saved);
     }
 
     @Override
+    @Transactional
     public ProvinciaResponseDTO update(Long id, ProvinciaUpdateDTO updateDTO) {
-        Provincia existing = repository.findById(id)
+        Provincia existing = provinciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
+        Departamento departamento = departamentoRepository.findByIdAndEstado(updateDTO.getIdDepartamento(), EstadoDepartamento.ACTIVO)
+                .orElseThrow(() -> new ResourceNotFoundException("Departamento", updateDTO.getIdDepartamento()));
         mapper.updateEntityFromDTO(updateDTO, existing);
-        Provincia updated = repository.save(existing);
+        existing.setDepartamento(departamento);
+        Provincia updated = provinciaRepository.save(existing);
         return mapper.toResponseDTO(updated);
     }
 
     @Override
+    @Transactional
+    public void desactivar(Long id) {
+        Provincia existing = provinciaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
+        existing.setEstado(EstadoProvincia.INACTIVO);
+        provinciaRepository.save(existing);
+
+        List<Distrito> distritos = distritoRepository.findByProvincia_Id(id);
+        distritos.forEach(d -> d.setEstado(EstadoDistrito.INACTIVO));
+        distritoRepository.saveAll(distritos);
+    }
+
+    @Override
+    @Transactional
+    public void activar(Long id) {
+        Provincia existing = provinciaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
+        existing.setEstado(EstadoProvincia.ACTIVO);
+        provinciaRepository.save(existing);
+
+        List<Distrito> distritos = distritoRepository.findByProvincia_Id(id);
+        distritos.forEach(d -> d.setEstado(EstadoDistrito.ACTIVO));
+        distritoRepository.saveAll(distritos);
+    }
+
+    @Override
+    @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
+        if (!provinciaRepository.existsById(id)) {
             throw new ResourceNotFoundException("Provincia", id);
         }
-        repository.deleteById(id);
+        if (distritoRepository.existsByProvincia_Id(id)) {
+            throw new IllegalStateException("No se puede eliminar la provincia porque tiene distritos asociados.");
+        }
+        provinciaRepository.deleteById(id);
     }
 }
