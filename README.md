@@ -56,7 +56,7 @@ Modelado BD	                ✅ Completo
 Entidades JPA               ✅ Siguiente paso  
 Servicios y Controladores	  ⏳  
 Seguridad JWT	              ⏳  
-Frontend (React)	          Pendiente  
+Frontend (Angular)	        Pendiente  
 
 
 ## 👤 Autor
