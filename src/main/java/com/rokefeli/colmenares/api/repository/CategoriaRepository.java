@@ -9,7 +9,10 @@ import java.util.Optional;
 
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     List<Categoria> findByEstado(EstadoCategoria estado);
+
     List<Categoria> findByNombreContainingIgnoreCase(String nombre);
+
     Optional<Categoria> findByIdAndEstado(Long idCategoria, EstadoCategoria estado);
+
     boolean existsByNombreIgnoreCase(String nombre);
 }

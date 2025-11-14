@@ -7,5 +7,8 @@ import java.util.List;
 
 public interface ProvinciaRepository extends JpaRepository<Provincia, Long> {
     List<Provincia> findByDepartamento_Id(Long departamentoId);
+
     boolean existsByDepartamento_Id(Long departamentoId);
+
     boolean existsByNombreIgnoreCaseAndDepartamento_Id(String nombre, Long departamentoId);
+}

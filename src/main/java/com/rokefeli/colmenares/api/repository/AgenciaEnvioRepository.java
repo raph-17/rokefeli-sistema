@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface AgenciaEnvioRepository extends JpaRepository<AgenciaEnvio, Long> {
     List<AgenciaEnvio> findByEstado(EstadoAgencia estado);
+
     boolean existsByNombre(String nombre);
 }

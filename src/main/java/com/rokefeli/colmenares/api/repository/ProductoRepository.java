@@ -20,5 +20,4 @@ SELECT p FROM Producto p
             @Param("idCategoria") Long idCategoria,
             @Param("estado") EstadoProducto estado
     );
-
 }
