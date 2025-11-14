@@ -1,5 +1,6 @@
 package com.rokefeli.colmenares.api.entity;
 
+import com.rokefeli.colmenares.api.entity.enums.EstadoCategoria;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,6 +24,10 @@ public class Categoria {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String descripcion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoCategoria estado;
 
     @CreationTimestamp
     @Column(name = "fecha_registro", updatable = false)

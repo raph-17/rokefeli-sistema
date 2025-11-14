@@ -91,9 +91,9 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("AgenciaEnvio", id);
-        }
+        repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria", id));
+
         repository.deleteById(id);
     }
 }
