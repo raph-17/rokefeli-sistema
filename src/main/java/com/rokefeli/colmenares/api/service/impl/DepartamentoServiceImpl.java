@@ -53,6 +53,14 @@ public class DepartamentoServiceImpl implements DepartamentoService {
     }
 
     @Override
+    public List<DepartamentoResponseDTO> findByEstado(EstadoDepartamento estado) {
+        return departamentoRepository.findByEstado(estado)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public DepartamentoResponseDTO create(DepartamentoCreateDTO createDTO) {
         if(departamentoRepository.existsByNombreIgnoreCase(createDTO.getNombre())) {

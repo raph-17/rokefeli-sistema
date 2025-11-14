@@ -4,9 +4,13 @@ import com.rokefeli.colmenares.api.dto.create.DistritoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.DistritoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.DistritoUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Distrito;
+import com.rokefeli.colmenares.api.entity.Provincia;
+import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
+import com.rokefeli.colmenares.api.entity.enums.EstadoProvincia;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.DistritoMapper;
 import com.rokefeli.colmenares.api.repository.DistritoRepository;
+import com.rokefeli.colmenares.api.repository.ProvinciaRepository;
 import com.rokefeli.colmenares.api.service.interfaces.DistritoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,18 +19,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class DistritoServiceImpl implements DistritoService {
 
     @Autowired
-    private DistritoRepository repository;
+    private DistritoRepository distritoRepository;
+
+    @Autowired
+    private ProvinciaRepository provinciaRepository;
 
     @Autowired
     private DistritoMapper mapper;
 
     @Override
     public List<DistritoResponseDTO> findAll() {
-        return repository.findAll()
+        return distritoRepository.findAll()
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();
@@ -34,32 +41,78 @@ public class DistritoServiceImpl implements DistritoService {
 
     @Override
     public DistritoResponseDTO findById(Long id) {
-        Distrito existing = repository.findById(id)
+        Distrito existing = distritoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Distrito", id));
         return mapper.toResponseDTO(existing);
     }
 
     @Override
-    public DistritoResponseDTO create(DistritoCreateDTO createDTO) {
-        Distrito distrito = mapper.toEntity(createDTO);
-        Distrito saved = repository.save(distrito);
-        return mapper.toResponseDTO(saved);
+    public List<DistritoResponseDTO> findByEstado(EstadoDistrito estado) {
+        return distritoRepository.findByEstado(estado)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
     }
 
     @Override
+    @Transactional
+    public DistritoResponseDTO create(DistritoCreateDTO createDTO) {
+        if (distritoRepository.existsByNombreAndProvincia_Id(createDTO.getNombre(), createDTO.getIdProvincia())) {
+            throw new IllegalArgumentException("Ya existe un distrito con el mismo nombre en la provincia especificada.");
+        }
+        Provincia provincia = provinciaRepository.findByIdAndEstado(createDTO.getIdProvincia(), EstadoProvincia.ACTIVO).
+                orElseThrow(() -> new ResourceNotFoundException("Provincia", createDTO.getIdProvincia()));
+
+        Distrito distrito = mapper.toEntity(createDTO);
+        distrito.setProvincia(provincia);
+        distrito.setEstado(EstadoDistrito.ACTIVO);
+        return mapper.toResponseDTO(distritoRepository.save(distrito));
+    }
+
+
+    @Override
+    @Transactional
     public DistritoResponseDTO update(Long id, DistritoUpdateDTO updateDTO) {
-        Distrito existing = repository.findById(id)
+        Distrito existing = distritoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Distrito", id));
+
+        Provincia provincia = provinciaRepository.findByIdAndEstado(updateDTO.getIdProvincia(), EstadoProvincia.ACTIVO)
+                .orElseThrow(() -> new ResourceNotFoundException("Provincia", updateDTO.getIdProvincia()));
+
+        if (distritoRepository.existsByNombreAndProvincia_IdAndIdNot(updateDTO.getNombre(), updateDTO.getIdProvincia(), id)) {
+            throw new IllegalArgumentException("Ya existe un distrito con ese nombre en esta provincia.");
+        }
+        
         mapper.updateEntityFromDTO(updateDTO, existing);
-        Distrito updated = repository.save(existing);
+        existing.setProvincia(provincia);
+        Distrito updated = distritoRepository.save(existing);
         return mapper.toResponseDTO(updated);
     }
 
     @Override
+    @Transactional
+    public void desactivar(Long id) {
+        Distrito existing = distritoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Distrito", id));
+        existing.setEstado(EstadoDistrito.INACTIVO);
+        distritoRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void activar(Long id) {
+        Distrito existing = distritoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Distrito", id));
+        existing.setEstado(EstadoDistrito.ACTIVO);
+        distritoRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
+        if (!distritoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Distrito", id);
         }
-        repository.deleteById(id);
+        distritoRepository.deleteById(id);
     }
 }
