@@ -11,5 +11,7 @@ public interface DepartamentoService {
     DepartamentoResponseDTO findById(Long id);
     DepartamentoResponseDTO create(DepartamentoCreateDTO createDTO);
     DepartamentoResponseDTO update(Long id, DepartamentoUpdateDTO updateDTO);
+    void desactivar(Long id);
+    void activar(Long id);
     void delete(Long id);
 }

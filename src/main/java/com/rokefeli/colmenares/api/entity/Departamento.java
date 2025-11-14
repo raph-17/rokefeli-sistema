@@ -1,5 +1,6 @@
 package com.rokefeli.colmenares.api.entity;
 
+import com.rokefeli.colmenares.api.entity.enums.EstadoDepartamento;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,4 +18,8 @@ public class Departamento {
 
     @Column(length = 50, nullable = false, unique = true)
     private String nombre;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoDepartamento estado;
 }
