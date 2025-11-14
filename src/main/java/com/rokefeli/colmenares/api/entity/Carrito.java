@@ -6,7 +6,10 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter @Setter
 @AllArgsConstructor
@@ -24,6 +27,12 @@ public class Carrito {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
+    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetalleCarrito> detalles = new ArrayList<>();
+
+    @Column(name = "monto_total", precision = 10, scale = 2)
+    private BigDecimal montoTotal;
+
     @UpdateTimestamp
     @Column(name = "fecha_actualizacion", nullable = false)
     private LocalDateTime fechaActualizacion;
@@ -34,4 +43,16 @@ public class Carrito {
     @CreationTimestamp
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
+
+    public void calcularTotal() {
+        if (detalles == null || detalles.isEmpty()) {
+            montoTotal = BigDecimal.ZERO;
+            return;
+        }
+
+        montoTotal = detalles.stream()
+                .map(DetalleCarrito::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
 }

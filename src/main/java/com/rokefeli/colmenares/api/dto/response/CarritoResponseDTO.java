@@ -14,5 +14,5 @@ public class CarritoResponseDTO {
     private EstadoCarrito estado;
     private LocalDateTime fechaActualizacion;
     private List<DetalleCarritoResponseDTO> detalles;
-    private BigDecimal total;
+    private BigDecimal montoTotal;
 }

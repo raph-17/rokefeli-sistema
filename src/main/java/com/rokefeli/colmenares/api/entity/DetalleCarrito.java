@@ -34,7 +34,7 @@ public class DetalleCarrito {
     @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
 
-    public BigDecimal calcularSubtotal() {
-        return precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+    public void calcularSubtotal() {
+        subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
     }
 }
