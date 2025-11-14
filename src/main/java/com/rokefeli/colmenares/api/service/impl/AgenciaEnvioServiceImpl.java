@@ -4,10 +4,13 @@ import com.rokefeli.colmenares.api.dto.create.AgenciaEnvioCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.AgenciaEnvioResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.AgenciaEnvioUpdateDTO;
 import com.rokefeli.colmenares.api.entity.AgenciaEnvio;
+import com.rokefeli.colmenares.api.entity.TarifaEnvio;
 import com.rokefeli.colmenares.api.entity.enums.EstadoAgencia;
+import com.rokefeli.colmenares.api.entity.enums.EstadoTarifa;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.AgenciaEnvioMapper;
 import com.rokefeli.colmenares.api.repository.AgenciaEnvioRepository;
+import com.rokefeli.colmenares.api.repository.TarifaEnvioRepository;
 import com.rokefeli.colmenares.api.service.interfaces.AgenciaEnvioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,14 +23,17 @@ import java.util.List;
 public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
 
     @Autowired
-    private AgenciaEnvioRepository repository;
+    private AgenciaEnvioRepository agenciaRepository;
+
+    @Autowired
+    private TarifaEnvioRepository tarifaRepository;
 
     @Autowired
     private AgenciaEnvioMapper mapper;
 
     @Override
     public List<AgenciaEnvioResponseDTO> findAll() {
-        return repository.findAll()
+        return agenciaRepository.findAll()
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();
@@ -35,7 +41,7 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
 
     @Override
     public List<AgenciaEnvioResponseDTO> findByEstado(EstadoAgencia estado) {
-        return repository.findByEstado(estado)
+        return agenciaRepository.findByEstado(estado)
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();
@@ -43,7 +49,7 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
 
     @Override
     public AgenciaEnvioResponseDTO findById(Long id) {
-        AgenciaEnvio agenciaEnvio = repository.findById(id)
+        AgenciaEnvio agenciaEnvio = agenciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
         return mapper.toResponseDTO(agenciaEnvio);
     }
@@ -51,49 +57,55 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
     @Override
     @Transactional
     public AgenciaEnvioResponseDTO create(AgenciaEnvioCreateDTO createDTO) {
-        if(repository.existsByNombre(createDTO.getNombre())) {
+        if(agenciaRepository.existsByNombre(createDTO.getNombre())) {
             throw new IllegalArgumentException("Ya existe una agencia de envío con el nombre: " + createDTO.getNombre());
         }
         AgenciaEnvio agenciaEnvio = mapper.toEntity(createDTO);
         agenciaEnvio.setEstado(EstadoAgencia.ACTIVO);
-        AgenciaEnvio saved = repository.save(agenciaEnvio);
+        AgenciaEnvio saved = agenciaRepository.save(agenciaEnvio);
         return mapper.toResponseDTO(saved);
     }
 
     @Override
     @Transactional
     public AgenciaEnvioResponseDTO update(Long id, AgenciaEnvioUpdateDTO updateDTO) {
-        AgenciaEnvio existing = repository.findById(id)
+        AgenciaEnvio existing = agenciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
         mapper.updateEntityFromDTO(updateDTO, existing);
-        AgenciaEnvio updated = repository.save(existing);
+        AgenciaEnvio updated = agenciaRepository.save(existing);
         return mapper.toResponseDTO(updated);
     }
 
     @Override
     @Transactional
     public void desactivar(Long id) {
-        AgenciaEnvio existing = repository.findById(id)
+        AgenciaEnvio existing = agenciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
         existing.setEstado(EstadoAgencia.INACTIVO);
-        repository.save(existing);
+        agenciaRepository.save(existing);
+
+        List<TarifaEnvio> tarifas = tarifaRepository.findByAgenciaEnvio_Id(id);
+
+        tarifas.forEach(t -> t.setEstado(EstadoTarifa.INACTIVO));
+
+        tarifaRepository.saveAll(tarifas);
     }
 
     @Override
     @Transactional
     public void activar(Long id) {
-        AgenciaEnvio existing = repository.findById(id)
+        AgenciaEnvio existing = agenciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
         existing.setEstado(EstadoAgencia.ACTIVO);
-        repository.save(existing);
+        agenciaRepository.save(existing);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoria", id));
+        agenciaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
 
-        repository.deleteById(id);
+        agenciaRepository.deleteById(id);
     }
 }
