@@ -7,9 +7,7 @@ import com.rokefeli.colmenares.api.dto.response.PagoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.PagoUpdateDTO;
 
 public interface PagoService {
-    List<PagoResponseDTO> findAll();
-    PagoResponseDTO findById(Long id);
-    PagoResponseDTO create(PagoCreateDTO createDTO);
-    PagoResponseDTO update(Long id, PagoUpdateDTO updateDTO);
-    void delete(Long id);
+    PagoResponseDTO procesarPago(PagoCreateDTO dto);
 }
+
+

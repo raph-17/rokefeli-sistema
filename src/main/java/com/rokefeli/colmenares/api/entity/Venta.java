@@ -1,6 +1,7 @@
 package com.rokefeli.colmenares.api.entity;
 
 import com.rokefeli.colmenares.api.entity.enums.CanalVenta;
+import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -39,4 +40,8 @@ public class Venta {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime fecha;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoVenta estado;
 }

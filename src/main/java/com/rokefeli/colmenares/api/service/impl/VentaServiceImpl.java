@@ -7,6 +7,7 @@ import com.rokefeli.colmenares.api.entity.DetalleVenta;
 import com.rokefeli.colmenares.api.entity.Producto;
 import com.rokefeli.colmenares.api.entity.Usuario;
 import com.rokefeli.colmenares.api.entity.Venta;
+import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.DetalleVentaMapper;
 import com.rokefeli.colmenares.api.mapper.VentaMapper;
@@ -49,6 +50,7 @@ public class VentaServiceImpl implements VentaService {
 
         Venta venta = ventaMapper.toEntity(dto);
         venta.setUsuario(usuario);
+        venta.setEstado(EstadoVenta.PENDIENTE);
 
         BigDecimal total = BigDecimal.ZERO;
 

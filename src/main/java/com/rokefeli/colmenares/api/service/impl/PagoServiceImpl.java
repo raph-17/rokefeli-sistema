@@ -2,64 +2,80 @@ package com.rokefeli.colmenares.api.service.impl;
 
 import com.rokefeli.colmenares.api.dto.create.PagoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.PagoResponseDTO;
-import com.rokefeli.colmenares.api.dto.update.PagoUpdateDTO;
-import com.rokefeli.colmenares.api.entity.Pago;
+import com.rokefeli.colmenares.api.entity.*;
+import com.rokefeli.colmenares.api.entity.enums.EstadoPago;
+import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.PagoMapper;
 import com.rokefeli.colmenares.api.repository.PagoRepository;
+import com.rokefeli.colmenares.api.repository.ProductoRepository;
+import com.rokefeli.colmenares.api.repository.VentaRepository;
 import com.rokefeli.colmenares.api.service.interfaces.PagoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
 public class PagoServiceImpl implements PagoService {
 
     @Autowired
-    private PagoRepository repository;
+    private PagoRepository pagoRepository;
 
     @Autowired
-    private PagoMapper mapper;
+    private VentaRepository ventaRepository;
+
+    @Autowired
+    private ProductoRepository productoRepository;
+
+    @Autowired
+    private PagoMapper pagoMapper;
 
     @Override
-    public List<PagoResponseDTO> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponseDTO)
-                .toList();
-    }
+    public PagoResponseDTO procesarPago(PagoCreateDTO dto) {
 
-    @Override
-    public PagoResponseDTO findById(Long id) {
-        Pago existing = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pago", id));
-        return mapper.toResponseDTO(existing);
-    }
+        Venta venta = ventaRepository.findById(dto.getIdVenta())
+                .orElseThrow(() -> new ResourceNotFoundException("Venta", dto.getIdVenta()));
 
-    @Override
-    public PagoResponseDTO create(PagoCreateDTO createDTO) {
-        Pago pago = mapper.toEntity(createDTO);
-        Pago saved = repository.save(pago);
-        return mapper.toResponseDTO(saved);
-    }
-
-    @Override
-    public PagoResponseDTO update(Long id, PagoUpdateDTO updateDTO) {
-        Pago existing = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pago", id));
-        mapper.updateEntityFromDTO(updateDTO, existing);
-        Pago updated = repository.save(existing);
-        return mapper.toResponseDTO(updated);
-    }
-
-    @Override
-    public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Pago", id);
+        if (venta.getEstado() != EstadoVenta.PENDIENTE) {
+            throw new IllegalStateException("La venta no está disponible para pago.");
         }
-        repository.deleteById(id);
+
+        if (dto.getMonto().compareTo(venta.getMontoTotal()) != 0) {
+            throw new IllegalArgumentException("El monto enviado no coincide con el monto total de la venta.");
+        }
+
+        Pago pago = pagoMapper.toEntity(dto);
+        pago.setVenta(venta);
+        pago.setEstadoPago(EstadoPago.PENDIENTE);
+
+        boolean aprobado = procesarConPasarelaExterna(dto);
+
+        if (aprobado) {
+            pago.setFechaPago(LocalDateTime.now());
+            pago.setEstadoPago(EstadoPago.APROBADO);
+            venta.setEstado(EstadoVenta.PAGADA);
+        }
+        else {
+            pago.setEstadoPago(EstadoPago.RECHAZADO);
+            venta.setEstado(EstadoVenta.CANCELADA);
+
+            for (DetalleVenta det : venta.getDetalles()) {
+                Producto p = det.getProducto();
+                p.setStockActual(p.getStockActual() + det.getCantidad());
+                productoRepository.save(p);
+            }
+        }
+
+        pagoRepository.save(pago);
+        ventaRepository.save(venta);
+
+        return pagoMapper.toResponseDTO(pago);
+    }
+
+    private boolean procesarConPasarelaExterna(PagoCreateDTO dto) {
+        return true; // simular aprobado
     }
 }
