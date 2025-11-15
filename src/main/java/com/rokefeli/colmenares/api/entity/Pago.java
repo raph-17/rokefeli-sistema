@@ -24,6 +24,10 @@ public class Pago {
     @JoinColumn(name = "id_venta")
     private Venta venta;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tarifa_envio")
+    private TarifaEnvio tarifaEnvio;
+
     @Column(name = "fecha_pago")
     private LocalDateTime fechaPago;
 

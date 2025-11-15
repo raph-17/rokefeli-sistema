@@ -13,6 +13,9 @@ public class PagoCreateDTO {
     private Long idVenta;
 
     @NotNull
+    private Long idTarifaEnvio;
+
+    @NotNull
     private MetodoPago metodoPago;
 
     @NotNull

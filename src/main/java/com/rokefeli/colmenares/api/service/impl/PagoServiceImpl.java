@@ -9,6 +9,7 @@ import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.PagoMapper;
 import com.rokefeli.colmenares.api.repository.PagoRepository;
 import com.rokefeli.colmenares.api.repository.ProductoRepository;
+import com.rokefeli.colmenares.api.repository.TarifaEnvioRepository;
 import com.rokefeli.colmenares.api.repository.VentaRepository;
 import com.rokefeli.colmenares.api.service.interfaces.PagoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class PagoServiceImpl implements PagoService {
     private ProductoRepository productoRepository;
 
     @Autowired
+    private TarifaEnvioRepository tarifaRepository;
+
+    @Autowired
     private PagoMapper pagoMapper;
 
     @Override
@@ -43,7 +47,10 @@ public class PagoServiceImpl implements PagoService {
             throw new IllegalStateException("La venta no está disponible para pago.");
         }
 
-        if (dto.getMonto().compareTo(venta.getMontoTotal()) != 0) {
+        TarifaEnvio tarifa = tarifaRepository.findById(dto.getIdTarifaEnvio())
+                .orElseThrow(() -> new ResourceNotFoundException("Tarifa", dto.getIdTarifaEnvio()));
+
+        if (dto.getMonto().compareTo(venta.getMontoTotal().add(tarifa.getCostoEnvio())) != 0) {
             throw new IllegalArgumentException("El monto enviado no coincide con el monto total de la venta.");
         }
 
