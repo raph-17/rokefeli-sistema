@@ -7,6 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter @Setter
 @AllArgsConstructor
@@ -27,6 +29,9 @@ public class Venta {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CanalVenta canal;
+
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetalleVenta> detalles = new ArrayList<>();
 
     @Column(name = "monto_total", nullable = false, precision = 10, scale = 2)
     private BigDecimal montoTotal;

@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface VentaMapper {
 
+    @Mapping(target = "detalles", ignore = true)
     Venta toEntity(VentaCreateDTO dto);
 
     @Mapping(source = "usuario.id", target = "idUsuario")
