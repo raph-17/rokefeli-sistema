@@ -58,6 +58,14 @@ public class PedidoServiceImpl implements PedidoService {
     }
 
     @Override
+    public List<PedidoResponseDTO> findByEstado(EstadoPedido estado) {
+        return pedidoRepository.findByEstado(estado)
+                .stream()
+                .map(pedidoMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     public PedidoResponseDTO create(PedidoCreateDTO dto) {
 
         Venta venta = ventaRepository.findById(dto.getIdVenta())
