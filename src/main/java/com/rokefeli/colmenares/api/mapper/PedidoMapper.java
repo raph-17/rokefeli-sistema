@@ -2,7 +2,6 @@ package com.rokefeli.colmenares.api.mapper;
 
 import com.rokefeli.colmenares.api.dto.create.PedidoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.PedidoResponseDTO;
-import com.rokefeli.colmenares.api.dto.update.PedidoEstadoUpdateDTO;
 import com.rokefeli.colmenares.api.dto.update.PedidoUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Pedido;
 import org.mapstruct.BeanMapping;
@@ -24,7 +23,4 @@ public interface PedidoMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDTO(PedidoUpdateDTO dto, @MappingTarget Pedido entity);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
-    void updateFromEstadoDTO(PedidoEstadoUpdateDTO dto, @MappingTarget Pedido entity);
 }
