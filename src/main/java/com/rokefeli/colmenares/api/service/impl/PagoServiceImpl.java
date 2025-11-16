@@ -4,6 +4,7 @@ import com.rokefeli.colmenares.api.dto.create.PagoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.PagoResponseDTO;
 import com.rokefeli.colmenares.api.entity.*;
 import com.rokefeli.colmenares.api.entity.enums.EstadoPago;
+import com.rokefeli.colmenares.api.entity.enums.EstadoTarifa;
 import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.PagoMapper;
@@ -47,7 +48,7 @@ public class PagoServiceImpl implements PagoService {
             throw new IllegalStateException("La venta no está disponible para pago.");
         }
 
-        TarifaEnvio tarifa = tarifaRepository.findById(dto.getIdTarifaEnvio())
+        TarifaEnvio tarifa = tarifaRepository.findByIdAndEstado(dto.getIdTarifaEnvio(), EstadoTarifa.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Tarifa", dto.getIdTarifaEnvio()));
 
         if (dto.getMonto().compareTo(venta.getMontoTotal().add(tarifa.getCostoEnvio())) != 0) {
@@ -56,6 +57,7 @@ public class PagoServiceImpl implements PagoService {
 
         Pago pago = pagoMapper.toEntity(dto);
         pago.setVenta(venta);
+        pago.setTarifaEnvio(tarifa);
         pago.setEstadoPago(EstadoPago.PENDIENTE);
 
         boolean aprobado = procesarConPasarelaExterna(dto);

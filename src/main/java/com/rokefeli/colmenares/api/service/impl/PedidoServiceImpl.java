@@ -7,6 +7,8 @@ import com.rokefeli.colmenares.api.entity.AgenciaEnvio;
 import com.rokefeli.colmenares.api.entity.Distrito;
 import com.rokefeli.colmenares.api.entity.Pedido;
 import com.rokefeli.colmenares.api.entity.Venta;
+import com.rokefeli.colmenares.api.entity.enums.EstadoAgencia;
+import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
 import com.rokefeli.colmenares.api.entity.enums.EstadoPedido;
 import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
@@ -75,10 +77,10 @@ public class PedidoServiceImpl implements PedidoService {
             throw new IllegalStateException("Solo se puede generar un pedido para una venta pagada.");
         }
 
-        Distrito distrito = distritoRepository.findById(dto.getIdDistrito())
+        Distrito distrito = distritoRepository.findByIdAndEstado(dto.getIdDistrito(), EstadoDistrito.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Distrito", dto.getIdDistrito()));
 
-        AgenciaEnvio agenciaEnvio = agenciaRepository.findById(dto.getIdAgenciaEnvio())
+        AgenciaEnvio agenciaEnvio = agenciaRepository.findByIdAndEstado(dto.getIdAgenciaEnvio(), EstadoAgencia.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", dto.getIdAgenciaEnvio()));
 
         if (pedidoRepository.existsByVenta_Id(dto.getIdVenta())) {
