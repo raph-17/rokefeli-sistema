@@ -58,8 +58,10 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional
     public ProductoResponseDTO create(ProductoCreateDTO createDTO) {
-        Categoria categoria = categoriaRepository.findByIdAndEstado(createDTO.getIdCategoria(), EstadoCategoria.ACTIVO)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoria", createDTO.getIdCategoria())); // Busca la categoria asociada
+        Categoria categoria = categoriaRepository.findByIdAndEstado(createDTO.getIdCategoria(),
+                        EstadoCategoria.ACTIVO)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria",
+                        createDTO.getIdCategoria())); // Busca la categoria asociada
         Producto producto = mapper.toEntity(createDTO); // Crea el producto a partir del DTO
         producto.setCategoria(categoria); // Asocia la categoria al producto
         producto.setEstado(EstadoProducto.ACTIVO); // Inicializa el producto como ACTIVO

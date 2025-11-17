@@ -124,5 +124,10 @@ public class PedidoServiceImpl implements PedidoService {
 
         pedidoRepository.delete(save);
     }
+
+    @Override
+    public List<PedidoResponseDTO> findByUsuarioId(long l) {
+        return List.of();
+    }
 }
 
