@@ -8,6 +8,7 @@ class ColmenaresBackendApplicationTests {
 
 	@Test
 	void contextLoads() {
+        System.out.println("La configuración es estable.");
 	}
 
 }
