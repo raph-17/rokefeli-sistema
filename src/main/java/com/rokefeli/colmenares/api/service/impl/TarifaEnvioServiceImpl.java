@@ -62,4 +62,9 @@ public class TarifaEnvioServiceImpl implements TarifaEnvioService {
         }
         repository.deleteById(id);
     }
+
+    @Override
+    public List<TarifaEnvioResponseDTO> findByDistritoId(Long idDistrito) {
+        return List.of();
+    }
 }

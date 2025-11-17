@@ -58,7 +58,8 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
     @Transactional
     public AgenciaEnvioResponseDTO create(AgenciaEnvioCreateDTO createDTO) {
         if(agenciaRepository.existsByNombre(createDTO.getNombre())) {
-            throw new IllegalArgumentException("Ya existe una agencia de envío con el nombre: " + createDTO.getNombre());
+            throw new IllegalArgumentException("Ya existe una agencia de envío con el nombre: "
+                    + createDTO.getNombre());
         }
         AgenciaEnvio agenciaEnvio = mapper.toEntity(createDTO);
         agenciaEnvio.setEstado(EstadoAgencia.ACTIVO);

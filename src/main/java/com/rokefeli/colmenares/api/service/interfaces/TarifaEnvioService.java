@@ -12,4 +12,6 @@ public interface TarifaEnvioService {
     TarifaEnvioResponseDTO create(TarifaEnvioCreateDTO createDTO);
     TarifaEnvioResponseDTO update(Long id, TarifaEnvioUpdateDTO updateDTO);
     void delete(Long id);
+
+    List<TarifaEnvioResponseDTO> findByDistritoId(Long idDistrito);
 }
