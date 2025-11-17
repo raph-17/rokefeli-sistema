@@ -62,4 +62,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         repository.deleteById(id);
     }
+
+    @Override
+    public UsuarioResponseDTO actualizarPerfilUsuarioActual(UsuarioUpdateDTO dto) {
+        return null;
+    }
+
+    @Override
+    public UsuarioResponseDTO obtenerPerfilUsuarioActual() {
+        return null;
+    }
 }
