@@ -13,7 +13,7 @@ public interface VentaMapper {
     Venta toEntity(VentaCreateDTO dto);
 
     @Mapping(source = "usuario.id", target = "idUsuario")
-    @Mapping(source = "usuario.nombre", target = "nombreUsuario")
+    @Mapping(source = "usuario.nombres", target = "nombreUsuario")
     VentaResponseDTO toResponseDTO(Venta entity);
 
 }
