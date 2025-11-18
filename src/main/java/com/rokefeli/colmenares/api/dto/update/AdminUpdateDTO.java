@@ -12,6 +12,4 @@ public class AdminUpdateDTO extends UsuarioUpdateDTO {
     private String dni;
     @NotNull
     private Rol rol;
-    @NotNull
-    private EstadoUsuario estado;
 }
