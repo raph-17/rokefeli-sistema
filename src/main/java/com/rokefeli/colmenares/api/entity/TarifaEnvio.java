@@ -32,7 +32,7 @@ public class TarifaEnvio {
     private BigDecimal costoEnvio;
 
     @Column(name = "dias_estimados", nullable = false)
-    private Integer diasEstimados;
+    private Long diasEstimados;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)

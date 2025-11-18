@@ -16,5 +16,5 @@ public interface PedidoService {
     PedidoResponseDTO cambiarEstado(Long id, EstadoPedido estado);
     void delete(Long id);
 
-    List<PedidoResponseDTO> findByUsuarioId(long l);
+    List<PedidoResponseDTO> findByUsuarioId(Long idUsuario);
 }

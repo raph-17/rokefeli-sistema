@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface TarifaEnvioRepository extends JpaRepository<TarifaEnvio, Long> {
     List<TarifaEnvio> findByAgenciaEnvio_Id(Long agenciaEnvioId);
     Optional<TarifaEnvio> findByIdAndEstado(Long id, EstadoTarifa estado);
+    Optional<TarifaEnvio> findByAgencia_IdAndDistrito_Id(Long idAgencia, Long idDistrito);
 }

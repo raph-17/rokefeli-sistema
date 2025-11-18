@@ -3,25 +3,20 @@ package com.rokefeli.colmenares.api.service.impl;
 import com.rokefeli.colmenares.api.dto.create.PedidoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.PedidoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.PedidoUpdateDTO;
-import com.rokefeli.colmenares.api.entity.AgenciaEnvio;
-import com.rokefeli.colmenares.api.entity.Distrito;
-import com.rokefeli.colmenares.api.entity.Pedido;
-import com.rokefeli.colmenares.api.entity.Venta;
+import com.rokefeli.colmenares.api.entity.*;
 import com.rokefeli.colmenares.api.entity.enums.EstadoAgencia;
 import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
 import com.rokefeli.colmenares.api.entity.enums.EstadoPedido;
 import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.PedidoMapper;
-import com.rokefeli.colmenares.api.repository.AgenciaEnvioRepository;
-import com.rokefeli.colmenares.api.repository.DistritoRepository;
-import com.rokefeli.colmenares.api.repository.PedidoRepository;
-import com.rokefeli.colmenares.api.repository.VentaRepository;
+import com.rokefeli.colmenares.api.repository.*;
 import com.rokefeli.colmenares.api.service.interfaces.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -39,6 +34,9 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Autowired
     private AgenciaEnvioRepository agenciaRepository;
+
+    @Autowired
+    private TarifaEnvioRepository tarifaRepository;
 
     @Autowired
     private PedidoMapper pedidoMapper;
@@ -87,10 +85,18 @@ public class PedidoServiceImpl implements PedidoService {
             throw new IllegalStateException("Esta venta ya tiene un pedido generado.");
         }
 
+        TarifaEnvio tarifa = tarifaRepository.findByAgencia_IdAndDistrito_Id(agenciaEnvio.getId(), distrito.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Tarifa"));
+
+        venta.setEstado(EstadoVenta.PROCESADA);
+        ventaRepository.save(venta);
+
         Pedido pedido = pedidoMapper.toEntity(dto);
+
         pedido.setVenta(venta);
         pedido.setDistrito(distrito);
         pedido.setAgenciaEnvio(agenciaEnvio);
+        pedido.setFechaEstimada(LocalDateTime.now().plusDays(tarifa.getDiasEstimados()));
         pedido.setEstado(EstadoPedido.PENDIENTE);
 
         Pedido saved = pedidoRepository.save(pedido);
@@ -112,22 +118,39 @@ public class PedidoServiceImpl implements PedidoService {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", id));
 
-        pedido.setEstado(nuevoEstado);
+        if (pedido.getEstado() == EstadoPedido.ENTREGADO) {
+            throw new IllegalStateException("Un pedido entregado no puede cambiar de estado.");
+        }
 
+        pedido.setEstado(nuevoEstado);
+        if(nuevoEstado == EstadoPedido.ENTREGADO) {
+            pedido.setFechaEntrega(LocalDateTime.now());
+        }
         return pedidoMapper.toResponseDTO(pedidoRepository.save(pedido));
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
-        Pedido save = pedidoRepository.findById(id)
+        Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", id));
 
-        pedidoRepository.delete(save);
+        if (pedido.getEstado() != EstadoPedido.CANCELADO) {
+            throw new IllegalStateException("Solo se pueden eliminar pedidos CANCELADOS.");
+        }
+
+        pedidoRepository.delete(pedido);
     }
 
     @Override
-    public List<PedidoResponseDTO> findByUsuarioId(long l) {
-        return List.of();
+    public List<PedidoResponseDTO> findByUsuarioId(Long idUsuario) {
+
+        List<Venta> ventas = ventaRepository.findByUsuario_Id(idUsuario);
+
+        return pedidoRepository.findByVentaIn(ventas)
+                .stream()
+                .map(pedidoMapper::toResponseDTO)
+                .toList();
     }
 }
 
