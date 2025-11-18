@@ -1,6 +1,6 @@
 package com.rokefeli.colmenares.api.controller;
 
-import com.rokefeli.colmenares.api.dto.create.LoginRequestCreateDTO;
+import com.rokefeli.colmenares.api.dto.auth.LoginRequest;
 import com.rokefeli.colmenares.api.service.impl.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> authenticate(@RequestBody LoginRequestCreateDTO request) {
+    public ResponseEntity<LoginResponseDTO> authenticate(@RequestBody LoginRequest request) {
 
         // 1. Autenticar usando el gestor de autenticación (lanza excepción si falla)
         authenticationManager.authenticate(
