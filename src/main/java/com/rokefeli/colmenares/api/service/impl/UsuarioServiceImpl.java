@@ -68,31 +68,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioResponseDTO registrarCliente(UsuarioCreateDTO dto) {
-
-        validarEmailYdni(dto.getEmail(), dto.getDni());
-
-        Usuario usuario = usuarioMapper.toEntity(dto);
-        usuario.setRol(Rol.CLIENTE);
-        usuario.setEstado(EstadoUsuario.ACTIVO);
-        usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        return usuarioMapper.toResponseDTO(usuarioRepository.save(usuario));
-    }
-
-    @Override
-    public UsuarioResponseDTO registrarAdmin(AdminCreateDTO dto) {
-
-        validarEmailYdni(dto.getEmail(), dto.getDni());
-
-        Usuario usuario = usuarioMapper.toEntity(dto);
-        usuario.setEstado(EstadoUsuario.ACTIVO);
-        usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        return usuarioMapper.toResponseDTO(usuarioRepository.save(usuario));
-    }
-
-    @Override
     public UsuarioResponseDTO updateUsuario(Long id, UsuarioUpdateDTO dto) {
 
         Usuario existing = usuarioRepository.findById(id)
@@ -147,17 +122,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
         usuarioRepository.delete(usuario);
-    }
-
-    private void validarEmailYdni(String email, String dni) {
-
-        if (usuarioRepository.existsByEmailIgnoreCase(email)) {
-            throw new IllegalArgumentException("El email ya está registrado.");
-        }
-
-        if (usuarioRepository.existsByDni(dni)) {
-            throw new IllegalArgumentException("El DNI ya está registrado.");
-        }
     }
 }
 

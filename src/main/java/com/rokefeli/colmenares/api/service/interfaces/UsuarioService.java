@@ -15,8 +15,6 @@ public interface UsuarioService {
     UsuarioResponseDTO findById(Long id);
     List<UsuarioResponseDTO> findByEstado(EstadoUsuario estado);
     UsuarioResponseDTO findByDni(String dni);
-    UsuarioResponseDTO registrarCliente(UsuarioCreateDTO createDTO);
-    UsuarioResponseDTO registrarAdmin(AdminCreateDTO createDTO);
     UsuarioResponseDTO updateUsuario(Long id, UsuarioUpdateDTO updateDTO);
     UsuarioResponseDTO updateAdmin(Long id, AdminUpdateDTO updateDTO);
     void cambiarPassword(Long id, PasswordChangeDTO dto);

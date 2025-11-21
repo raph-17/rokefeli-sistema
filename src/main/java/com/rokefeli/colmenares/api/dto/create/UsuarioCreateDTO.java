@@ -11,8 +11,10 @@ public class UsuarioCreateDTO {
     private String nombres;
     @NotBlank
     private String apellidos;
+    @NotBlank
     @Pattern(regexp = "\\d{8}", message = "El DNI debe tener 8 dígitos")
     private String dni;
+    @NotBlank
     @Email
     private String email;
     @NotBlank

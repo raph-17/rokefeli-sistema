@@ -14,6 +14,7 @@ import com.rokefeli.colmenares.api.service.interfaces.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,10 +47,12 @@ public class AuthServiceImpl implements AuthService {
         u.setPassword(passwordEncoder.encode(dto.getPassword()));
         u.setRol(Rol.CLIENTE);
         u.setEstado(EstadoUsuario.ACTIVO);
-        usuarioRepository.save(u);
 
-        String token = jwtUtil.generateToken(u.getId(), u.getEmail(), u.getRol().name());
-        return new AuthResponse(token, u.getId(), u.getNombres(), u.getRol().name(), "Bearer");
+        Usuario saved = usuarioRepository.save(u);
+
+        String token = jwtUtil.generateToken(saved.getId(), saved.getEmail(), saved.getRol().name());
+        return new AuthResponse(token, saved.getId(), saved.getNombres(), saved.getRol().name(), "Bearer");
+
     }
 
     @Override
@@ -62,8 +65,11 @@ public class AuthServiceImpl implements AuthService {
         u.setPassword(passwordEncoder.encode(dto.getPassword()));
         u.setEstado(EstadoUsuario.ACTIVO);
 
-        String token = jwtUtil.generateToken((u.getId()), u.getEmail(), u.getRol().name());
-        return new AuthResponse(token, u.getId(), u.getNombres(), u.getRol().name(), "Bearer");
+        Usuario saved = usuarioRepository.save(u);
+
+        String token = jwtUtil.generateToken(saved.getId(), saved.getEmail(), saved.getRol().name());
+        return new AuthResponse(token, saved.getId(), saved.getNombres(), saved.getRol().name(), "Bearer");
+
     }
 
     @Override
@@ -71,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
         Authentication auth = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) auth.getPrincipal();
+        UserDetails principal = (UserDetails) auth.getPrincipal();
         // recupera usuario para id y rol
         Usuario u = usuarioRepository.findByEmail(principal.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", principal.getUsername()));

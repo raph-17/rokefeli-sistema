@@ -17,7 +17,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register/client")
-    public ResponseEntity<AuthResponse> registerCliente(@Valid @RequestBody UsuarioCreateDTO request) {
+    public ResponseEntity<AuthResponse> registrarCliente(@Valid @RequestBody UsuarioCreateDTO request) {
         AuthResponse response = authService.registrarCliente(request);
         return ResponseEntity.ok(response);
     }
