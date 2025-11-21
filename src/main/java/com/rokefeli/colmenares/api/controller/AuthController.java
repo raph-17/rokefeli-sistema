@@ -1,47 +1,36 @@
 package com.rokefeli.colmenares.api.controller;
 
-import com.rokefeli.colmenares.api.dto.auth.LoginRequest;
-import com.rokefeli.colmenares.api.service.impl.JwtService;
-import lombok.RequiredArgsConstructor;
+import com.rokefeli.colmenares.api.dto.auth.*;
+import com.rokefeli.colmenares.api.dto.create.AdminCreateDTO;
+import com.rokefeli.colmenares.api.dto.create.UsuarioCreateDTO;
+import com.rokefeli.colmenares.api.service.interfaces.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth")
-@RequiredArgsConstructor
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
+    @Autowired
+    private AuthService authService;
 
-    // DTO simple para devolver solo el token
-    record LoginResponseDTO(String token) {
+    @PostMapping("/register/client")
+    public ResponseEntity<AuthResponse> registerCliente(@Valid @RequestBody UsuarioCreateDTO request) {
+        AuthResponse response = authService.registrarCliente(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/register/admin")
+    public ResponseEntity<AuthResponse> registrarAdmin(@Valid @RequestBody AdminCreateDTO request) {
+        AuthResponse response = authService.registrarAdmin(request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> authenticate(@RequestBody LoginRequest request) {
-
-        // 1. Autenticar usando el gestor de autenticación (lanza excepción si falla)
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-
-        // 2. Si es exitoso, cargar los detalles y generar el token
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
-        final String jwt = jwtService.generateToken(userDetails);
-
-        // 3. Devolver el token
-        return ResponseEntity.ok(new LoginResponseDTO(jwt));
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
     }
 }

@@ -85,7 +85,7 @@ public class PedidoServiceImpl implements PedidoService {
             throw new IllegalStateException("Esta venta ya tiene un pedido generado.");
         }
 
-        TarifaEnvio tarifa = tarifaRepository.findByAgencia_IdAndDistrito_Id(agenciaEnvio.getId(), distrito.getId())
+        TarifaEnvio tarifa = tarifaRepository.findByAgenciaEnvio_IdAndDistrito_Id(agenciaEnvio.getId(), distrito.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tarifa"));
 
         venta.setEstado(EstadoVenta.PROCESADA);
