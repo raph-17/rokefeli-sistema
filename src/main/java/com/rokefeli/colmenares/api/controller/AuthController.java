@@ -7,6 +7,8 @@ import com.rokefeli.colmenares.api.service.interfaces.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/register/admin")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AuthResponse> registrarAdmin(@Valid @RequestBody AdminCreateDTO request) {
         AuthResponse response = authService.registrarAdmin(request);
         return ResponseEntity.ok(response);
@@ -32,5 +35,11 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/debug/auth")
+    public String debugAuth(Authentication auth) {
+        if (auth == null) return "auth NULL";
+        return "Authorities: " + auth.getAuthorities();
     }
 }

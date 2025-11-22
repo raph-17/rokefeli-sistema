@@ -61,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
         if (usuarioRepository.existsByEmailIgnoreCase(dto.getEmail())) {
             throw new IllegalArgumentException("El email ya está en uso");
         }
-        Usuario u = usuarioMapper.toEntity(dto);
+        Usuario u = usuarioMapper.toEntityFromAdminCreateDTO(dto);
         u.setPassword(passwordEncoder.encode(dto.getPassword()));
         u.setEstado(EstadoUsuario.ACTIVO);
 

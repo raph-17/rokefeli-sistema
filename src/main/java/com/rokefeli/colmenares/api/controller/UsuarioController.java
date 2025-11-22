@@ -1,49 +1,102 @@
 package com.rokefeli.colmenares.api.controller;
 
-
 import com.rokefeli.colmenares.api.dto.response.UsuarioResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.AdminUpdateDTO;
+import com.rokefeli.colmenares.api.dto.update.PasswordChangeDTO;
 import com.rokefeli.colmenares.api.dto.update.UsuarioUpdateDTO;
+import com.rokefeli.colmenares.api.entity.enums.EstadoUsuario;
 import com.rokefeli.colmenares.api.service.interfaces.UsuarioService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/usuarios")
-@RequiredArgsConstructor
+@RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    private final UsuarioService usuarioService;
+    @Autowired
+    private UsuarioService usuarioService;
 
-    /**
-     * Endpoint para que el usuario CLIENTE obtenga su propia información de perfil.
-     * Requiere token JWT.
-     */
-    @GetMapping("/perfil")
-    @Secured({"ROLE_CLIENTE", "ROLE_ADMIN", "ROLE_EMPLEADO"})
-    public UsuarioResponseDTO obtenerPerfilUsuarioActual() {
-        // La lógica para obtener el ID/Email del usuario actual está dentro del servicio (con SecurityContextHolder)
-        return usuarioService.findById(null);
+    // 🔒 Solo ADMIN puede obtener todos los usuarios
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UsuarioResponseDTO> findAll() {
+        return usuarioService.findAll();
     }
 
-    /**
-     * Endpoint para que el CLIENTE o ADMIN actualice su propia información.
-     * Requiere token JWT.
-     */
-    @PutMapping("/perfil")
-    @Secured({"ROLE_CLIENTE", "ROLE_ADMIN", "ROLE_EMPLEADO"})
-    public UsuarioResponseDTO actualizarPerfilUsuarioActual(@RequestBody UsuarioUpdateDTO dto) {
-        // El servicio obtendrá el ID del usuario actual para asegurar que solo edita su propio perfil.
-        return usuarioService.updateUsuario(null, dto);
+    // 🔒 Solo ADMIN obtiene por estado
+    @GetMapping("/estado")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UsuarioResponseDTO> findByEstado(
+            @RequestParam EstadoUsuario estado
+    ) {
+        return usuarioService.findByEstado(estado);
     }
 
-    /**
-     * Endpoint para que un ADMIN obtenga la información de CUALQUIER usuario por ID.
-     * Restringido solo a administradores.
-     */
+    // 🔒 Solo ADMIN obtiene por dni
+    @GetMapping("/dni")
+    @PreAuthorize("hasRole('ADMIN')")
+    public UsuarioResponseDTO findByDni(
+            @RequestParam String dni
+    ) {
+        return usuarioService.findByDni(dni);
+    }
+
+    // 🔒 ADMIN puede ver a cualquiera
+    // 🔒 CLIENTE solo puede ver su propio usuario
     @GetMapping("/{id}")
-    @Secured({"ROLE_ADMIN", "ROLE_EMPLEADO"})
-    public UsuarioResponseDTO obtenerUsuarioPorId(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isSelf(authentication, #id)")
+    public UsuarioResponseDTO findById(@PathVariable Long id) {
         return usuarioService.findById(id);
+    }
+
+    // 🔒 CLIENTE edita solo su perfil
+    // 🔒 ADMIN edita cualquier usuario (pero este endpoint es para clientes)
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isSelf(authentication, #id)")
+    public UsuarioResponseDTO updateUsuario(
+            @PathVariable Long id,
+            @RequestBody UsuarioUpdateDTO dto
+    ) {
+        return usuarioService.updateUsuario(id, dto);
+    }
+
+    // 🔒 ADMIN edita datos sensibles de cualquier usuario (como DNI)
+    @PutMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public UsuarioResponseDTO updateAdmin(
+            @PathVariable Long id,
+            @RequestBody AdminUpdateDTO dto
+    ) {
+        return usuarioService.updateAdmin(id, dto);
+    }
+
+    // 🔒 Solo el usuario puede cambiar su propia contraseña
+    @PutMapping("/{id}/password")
+    @PreAuthorize("@securityService.isSelf(authentication, #id)")
+    public void cambiarPassword(
+            @PathVariable Long id,
+            @RequestBody PasswordChangeDTO dto
+    ) {
+        usuarioService.cambiarPassword(id, dto);
+    }
+
+    // 🔒 Solo ADMIN cambia el estado (ACTIVO / INACTIVO)
+    @PutMapping("/{id}/estado")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void cambiarEstado(
+            @PathVariable Long id,
+            @RequestParam EstadoUsuario estado
+    ) {
+        usuarioService.cambiarEstado(id, estado);
+    }
+
+    // 🔒 Solo ADMIN elimina usuarios
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void delete(@PathVariable Long id) {
+        usuarioService.delete(id);
     }
 }

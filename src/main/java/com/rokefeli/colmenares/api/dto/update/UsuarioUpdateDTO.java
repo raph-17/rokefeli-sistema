@@ -1,5 +1,6 @@
 package com.rokefeli.colmenares.api.dto.update;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ public class UsuarioUpdateDTO {
     private String apellidos;
     @NotBlank
     private String telefono;
+    @Email
     @NotBlank
     private String email;
 }

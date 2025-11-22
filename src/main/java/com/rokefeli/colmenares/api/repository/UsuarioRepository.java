@@ -2,6 +2,7 @@ package com.rokefeli.colmenares.api.repository;
 
 import com.rokefeli.colmenares.api.entity.Usuario;
 import com.rokefeli.colmenares.api.entity.enums.EstadoUsuario;
+import com.rokefeli.colmenares.api.entity.enums.Rol;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,4 +14,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByDni(String dni);
     boolean existsByEmailIgnoreCase(String email);
     boolean existsByDni(String dni);
+    boolean existsByRol(Rol rol);
 }

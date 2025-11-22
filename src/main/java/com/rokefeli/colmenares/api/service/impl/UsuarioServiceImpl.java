@@ -83,7 +83,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario existing = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
 
-        usuarioMapper.updateEntityFromDTO(dto, existing);
+        usuarioMapper.updateEntityFromAdminUpdateDTO(dto, existing);
         return usuarioMapper.toResponseDTO(usuarioRepository.save(existing));
     }
 
@@ -93,13 +93,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
 
-        if(passwordEncoder.encode(dto.getActualPassword()).equals(usuario.getPassword())) {
-            usuario.setPassword(passwordEncoder.encode(dto.getNuevaPassword()));
-            usuarioRepository.save(usuario);
-        } else {
+        if (!passwordEncoder.matches(dto.getActualPassword(), usuario.getPassword())) {
             throw new IllegalArgumentException("La contraseña ingresada no es correcta");
         }
+
+        usuario.setPassword(passwordEncoder.encode(dto.getNuevaPassword()));
+        usuarioRepository.save(usuario);
     }
+
 
     @Override
     public void cambiarEstado(Long id, EstadoUsuario nuevoEstado) {

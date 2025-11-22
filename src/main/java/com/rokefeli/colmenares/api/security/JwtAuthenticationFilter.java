@@ -30,7 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // ⛔ 1. Saltar rutas públicas
         String path = request.getServletPath();
-        if (path.startsWith("/api/auth")) {
+        // permitir solo login y register-client sin token
+        if (path.equals("/api/auth/login") || path.equals("/api/auth/register/client")) {
             filterChain.doFilter(request, response);
             return;
         }
