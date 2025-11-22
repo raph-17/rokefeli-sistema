@@ -36,7 +36,7 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/register/client",        // <-- RUTAS PÚBLICAS
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
                                 
                                 "/api/v1/productos/**",     // Para listar productos sin login
                                 "/api/v1/categorias/**",    // Para listar categorías
