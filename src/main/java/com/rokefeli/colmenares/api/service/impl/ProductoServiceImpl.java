@@ -48,7 +48,15 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
-    public List<ProductoResponseDTO> buscar(String nombre, Long idCategoria, EstadoProducto estado) {
+    public List<ProductoResponseDTO> buscarCliente(String nombre, Long idCategoria, EstadoProducto estado) {
+        return productoRepository.buscarProductos(nombre, idCategoria, EstadoProducto.ACTIVO)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ProductoResponseDTO> buscarAdmin(String nombre, Long idCategoria, EstadoProducto estado) {
         return productoRepository.buscarProductos(nombre, idCategoria, estado)
                 .stream()
                 .map(mapper::toResponseDTO)

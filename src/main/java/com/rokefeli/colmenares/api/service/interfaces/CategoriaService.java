@@ -9,9 +9,12 @@ import com.rokefeli.colmenares.api.entity.enums.EstadoCategoria;
 
 public interface CategoriaService {
     List<CategoriaResponseDTO> findAll();
+    List<CategoriaResponseDTO> findAllActivos();
     List<CategoriaResponseDTO> findByEstado(EstadoCategoria estado);
     CategoriaResponseDTO findById(Long id);
-    List<CategoriaResponseDTO> findByNameContainingIgnoreCase(String name);
+    CategoriaResponseDTO findByIdCliente(Long id);
+    List<CategoriaResponseDTO> findByNameContainingIgnoreCaseAdmin(String name);
+    List<CategoriaResponseDTO> findByNameContainingIgnoreCaseCliente(String name);
     CategoriaResponseDTO create(CategoriaCreateDTO createDTO);
     CategoriaResponseDTO update(Long id, CategoriaUpdateDTO updateDTO);
     void desactivar(Long id);

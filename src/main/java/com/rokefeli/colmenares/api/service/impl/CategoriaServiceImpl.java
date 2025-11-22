@@ -40,11 +40,26 @@ public class CategoriaServiceImpl implements CategoriaService {
     }
 
     @Override
+    public List<CategoriaResponseDTO> findAllActivos() {
+        return categoriaRepository.findByEstado(EstadoCategoria.ACTIVO)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     public List<CategoriaResponseDTO> findByEstado(EstadoCategoria estado) {
         return categoriaRepository.findByEstado(estado)
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();
+    }
+
+    @Override
+    public CategoriaResponseDTO findByIdCliente(Long id) {
+        Categoria existing = categoriaRepository.findByIdAndEstado(id, EstadoCategoria.ACTIVO)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria", id));
+        return mapper.toResponseDTO(existing);
     }
 
     @Override
@@ -55,8 +70,16 @@ public class CategoriaServiceImpl implements CategoriaService {
     }
 
     @Override
-    public List<CategoriaResponseDTO> findByNameContainingIgnoreCase(String name) {
+    public List<CategoriaResponseDTO> findByNameContainingIgnoreCaseAdmin(String name) {
         return categoriaRepository.findByNombreContainingIgnoreCase(name)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<CategoriaResponseDTO> findByNameContainingIgnoreCaseCliente(String name) {
+        return categoriaRepository.findByNombreContainingIgnoreCaseAndEstado(name, EstadoCategoria.ACTIVO)
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();
@@ -93,13 +116,12 @@ public class CategoriaServiceImpl implements CategoriaService {
         categoria.setEstado(EstadoCategoria.INACTIVO);
         categoriaRepository.save(categoria);
 
-        List<Producto> productos = productoRepository.buscarProductos(null, id, null);
+        List<Producto> productos = productoRepository.buscarProductos("", id, EstadoProducto.ACTIVO);
 
         productos.forEach(p -> p.setEstado(EstadoProducto.DESCONTINUADO));
 
         productoRepository.saveAll(productos);
     }
-
 
     @Override
     @Transactional
@@ -115,6 +137,10 @@ public class CategoriaServiceImpl implements CategoriaService {
     public void delete(Long id) {
         categoriaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria", id));
+
+        if(productoRepository.existsByCategoria_Id(id)) {
+            throw new IllegalArgumentException("No es posible borrar una categoria con productos registrados.");
+        }
 
         categoriaRepository.deleteById(id);
     }

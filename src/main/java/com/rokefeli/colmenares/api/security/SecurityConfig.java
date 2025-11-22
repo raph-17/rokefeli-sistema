@@ -38,8 +38,10 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 
-                                "/api/v1/productos/**",     // Para listar productos sin login
-                                "/api/v1/categorias/**",    // Para listar categorías
+                                "/api/v1/productos/**", // Listar productos sin login
+                                "/api/categorias", // Listar categorías
+                                "/api/categorias/buscar", // Buscar categorías por nombre
+                                "/api/categorias/{id}",
                                 "/api/v1/departamentos/**", // Para ubicación
                                 "/api/v1/provincias/**",
                                 "/api/v1/distritos/**",
