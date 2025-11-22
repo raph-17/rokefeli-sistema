@@ -37,6 +37,14 @@ public class SecurityConfig {
                                 "/api/auth/register/client",        // <-- RUTAS PÚBLICAS
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
+                                
+                                "/api/v1/productos/**",     // Para listar productos sin login
+                                "/api/v1/categorias/**",    // Para listar categorías
+                                "/api/v1/departamentos/**", // Para ubicación
+                                "/api/v1/provincias/**",
+                                "/api/v1/distritos/**",
+                                "/api/v1/agencias/**",
+                                "/api/v1/tarifas/**"        // Para calcular costos
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
