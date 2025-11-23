@@ -4,12 +4,13 @@ import com.rokefeli.colmenares.api.dto.create.AgenciaEnvioCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.AgenciaEnvioResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.AgenciaEnvioUpdateDTO;
 import com.rokefeli.colmenares.api.entity.AgenciaEnvio;
+import com.rokefeli.colmenares.api.mapper.base.BaseMapper;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
-public interface AgenciaEnvioMapper {
+public interface AgenciaEnvioMapper extends BaseMapper {
 
     AgenciaEnvio toEntity(AgenciaEnvioCreateDTO dto);
 

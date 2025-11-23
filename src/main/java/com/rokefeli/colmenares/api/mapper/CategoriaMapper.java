@@ -4,12 +4,13 @@ import com.rokefeli.colmenares.api.dto.create.CategoriaCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.CategoriaResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.CategoriaUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Categoria;
+import com.rokefeli.colmenares.api.mapper.base.BaseMapper;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
-public interface CategoriaMapper {
+public interface CategoriaMapper extends BaseMapper {
 
     Categoria toEntity(CategoriaCreateDTO dto);
 

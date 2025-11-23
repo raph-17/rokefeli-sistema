@@ -4,13 +4,14 @@ import com.rokefeli.colmenares.api.dto.create.TarifaEnvioCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.TarifaEnvioResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.TarifaEnvioUpdateDTO;
 import com.rokefeli.colmenares.api.entity.TarifaEnvio;
+import com.rokefeli.colmenares.api.mapper.base.BaseMapper;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
-public interface TarifaEnvioMapper {
+public interface TarifaEnvioMapper extends BaseMapper {
     
     TarifaEnvio toEntity(TarifaEnvioCreateDTO dto);
 

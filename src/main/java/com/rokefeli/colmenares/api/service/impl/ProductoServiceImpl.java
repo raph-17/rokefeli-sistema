@@ -41,6 +41,14 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
+    public List<ProductoResponseDTO> findAllActivos() {
+        return productoRepository.findByEstado(EstadoProducto.ACTIVO)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     public ProductoResponseDTO findById(Long id) {
         Producto existing = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto", id));
@@ -48,7 +56,14 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
-    public List<ProductoResponseDTO> buscarCliente(String nombre, Long idCategoria, EstadoProducto estado) {
+    public ProductoResponseDTO findByIdCliente(Long id) {
+        Producto existing = productoRepository.findByIdAndEstado(id, EstadoProducto.ACTIVO)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto", id));
+        return mapper.toResponseDTO(existing);
+    }
+
+    @Override
+    public List<ProductoResponseDTO> buscarCliente(String nombre, Long idCategoria) {
         return productoRepository.buscarProductos(nombre, idCategoria, EstadoProducto.ACTIVO)
                 .stream()
                 .map(mapper::toResponseDTO)
@@ -70,6 +85,11 @@ public class ProductoServiceImpl implements ProductoService {
                         EstadoCategoria.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria",
                         createDTO.getIdCategoria())); // Busca la categoria asociada
+
+        if(productoRepository.existsByNombre(createDTO.getNombre().trim())) {
+            throw new IllegalArgumentException("No es posible crear dos productos con el mismo nombre.");
+        }
+
         Producto producto = mapper.toEntity(createDTO); // Crea el producto a partir del DTO
         producto.setCategoria(categoria); // Asocia la categoria al producto
         producto.setEstado(EstadoProducto.ACTIVO); // Inicializa el producto como ACTIVO
@@ -96,6 +116,15 @@ public class ProductoServiceImpl implements ProductoService {
         Producto existing = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto", id));
         existing.setEstado(EstadoProducto.DESCONTINUADO);
+        productoRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void reintegrar(Long id) {
+        Producto existing = productoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto", id));
+        existing.setEstado(EstadoProducto.ACTIVO);
         productoRepository.save(existing);
     }
 

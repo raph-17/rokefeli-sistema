@@ -7,13 +7,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
     @Query("""
     SELECT p FROM Producto p
-    WHERE (:nombre IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
-    AND (:idCategoria IS NULL OR p.categoria.id = :idCategoria)
+    WHERE (:idCategoria IS NULL OR p.categoria.id = :idCategoria)
     AND (:estado IS NULL OR p.estado = :estado)
+    AND (:nombre IS NULL OR :nombre = '' OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
     """)
     List<Producto> buscarProductos(
             @Param("nombre") String nombre,
@@ -21,5 +22,11 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
             @Param("estado") EstadoProducto estado
     );
 
+    List<Producto> findByEstado(EstadoProducto estado);
+
+    Optional<Producto> findByIdAndEstado(Long id, EstadoProducto estado);
+
     boolean existsByCategoria_Id(Long idCategoria);
+
+    boolean existsByNombre(String nombre);
 }

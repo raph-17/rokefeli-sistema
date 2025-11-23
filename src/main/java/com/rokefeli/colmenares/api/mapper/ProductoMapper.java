@@ -4,13 +4,14 @@ import com.rokefeli.colmenares.api.dto.create.ProductoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.ProductoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.ProductoUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Producto;
+import com.rokefeli.colmenares.api.mapper.base.BaseMapper;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
-public interface ProductoMapper {
+public interface ProductoMapper extends BaseMapper {
 
     Producto toEntity(ProductoCreateDTO dto);
 

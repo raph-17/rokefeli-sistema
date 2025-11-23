@@ -116,7 +116,7 @@ public class CategoriaServiceImpl implements CategoriaService {
         categoria.setEstado(EstadoCategoria.INACTIVO);
         categoriaRepository.save(categoria);
 
-        List<Producto> productos = productoRepository.buscarProductos("", id, EstadoProducto.ACTIVO);
+        List<Producto> productos = productoRepository.buscarProductos(null, id, EstadoProducto.ACTIVO);
 
         productos.forEach(p -> p.setEstado(EstadoProducto.DESCONTINUADO));
 
