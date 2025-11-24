@@ -44,4 +44,8 @@ public class Venta {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoVenta estado;
+
+    @ManyToOne
+    @JoinColumn(name = "id_empleado_registra")
+    private Usuario empleadoRegistra;
 }

@@ -1,0 +1,18 @@
+package com.rokefeli.colmenares.api.dto.create;
+
+import lombok.Data;
+
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
+
+@Data
+public class VentaInternoCreateDTO {
+
+    @NotNull
+    private Long idEmpleado;
+
+    private Long idClienteDistribuidor; // OPCIONAL
+
+    @NotNull(message = "Debe incluir al menos un producto en la venta")
+    private List<DetalleVentaCreateDTO> detalles;
+}

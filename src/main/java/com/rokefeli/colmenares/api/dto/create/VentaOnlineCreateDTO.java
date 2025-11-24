@@ -6,13 +6,10 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class VentaCreateDTO {
+public class VentaOnlineCreateDTO {
 
     @NotNull(message = "El ID del usuario es obligatorio")
     private Long idUsuario;
-
-    @NotNull(message = "Debe especificar el canal")
-    private CanalVenta canal;
 
     @NotNull(message = "Debe incluir al menos un producto en la venta")
     private List<DetalleVentaCreateDTO> detalles;

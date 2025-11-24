@@ -5,12 +5,9 @@ import com.rokefeli.colmenares.api.dto.response.DistritoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.DistritoUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Distrito;
 import com.rokefeli.colmenares.api.mapper.base.BaseMapper;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface DistritoMapper extends BaseMapper {
 
     Distrito toEntity(DistritoCreateDTO dto);

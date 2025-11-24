@@ -5,12 +5,9 @@ import com.rokefeli.colmenares.api.dto.response.ProvinciaResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.ProvinciaUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Provincia;
 import com.rokefeli.colmenares.api.mapper.base.BaseMapper;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProvinciaMapper extends BaseMapper {
 
     Provincia toEntity(ProvinciaCreateDTO dto);

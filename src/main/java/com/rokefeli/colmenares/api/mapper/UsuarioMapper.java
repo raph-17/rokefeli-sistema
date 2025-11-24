@@ -9,7 +9,7 @@ import com.rokefeli.colmenares.api.entity.Usuario;
 import com.rokefeli.colmenares.api.mapper.base.BaseMapper;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UsuarioMapper extends BaseMapper {
 
     Usuario toEntity(UsuarioCreateDTO dto);

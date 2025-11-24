@@ -5,12 +5,9 @@ import com.rokefeli.colmenares.api.dto.response.PagoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.PagoUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Pago;
 import com.rokefeli.colmenares.api.mapper.base.BaseMapper;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PagoMapper extends BaseMapper {
 
     Pago toEntity(PagoCreateDTO dto);
