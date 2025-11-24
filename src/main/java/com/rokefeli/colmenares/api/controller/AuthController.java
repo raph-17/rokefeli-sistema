@@ -18,12 +18,14 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @PostMapping("/register/client")
+    // Registrar usuario
+    @PostMapping("/register")
     public ResponseEntity<AuthResponse> registrarCliente(@Valid @RequestBody UsuarioCreateDTO request) {
         AuthResponse response = authService.registrarCliente(request);
         return ResponseEntity.ok(response);
     }
 
+    // ADMIN: Registrar usuario ADMIN o EMPLEADO
     @PostMapping("/register/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AuthResponse> registrarAdmin(@Valid @RequestBody AdminCreateDTO request) {
@@ -31,15 +33,10 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // Login
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/debug/auth")
-    public String debugAuth(Authentication auth) {
-        if (auth == null) return "auth NULL";
-        return "Authorities: " + auth.getAuthorities();
     }
 }

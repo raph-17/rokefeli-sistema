@@ -22,20 +22,35 @@ public class ProductoController {
     @Autowired
     private ProductoService productoService;
 
-    // LISTAR TODOS ACTIVOS
+    // Listar todos (ACTIVOS)
     @GetMapping
     public ResponseEntity<?> listarProductosActivos() {
         return ResponseEntity.ok(productoService.findAllActivos());
     }
 
-    // LISTAR TODOS LOS PRODUCTOS (ADMIN)
+    // Buscar
+    @GetMapping("/buscar")
+    public ResponseEntity<?> buscarCliente(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) Long idCategoria
+    ) {
+        return ResponseEntity.ok(productoService.buscarCliente(nombre, idCategoria));
+    }
+
+    // Obtener por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> obtenerPorIdCliente(@PathVariable Long id) {
+        return ResponseEntity.ok(productoService.findByIdCliente(id));
+    }
+
+    // ADMIN: Listar todos los productos
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> listarProductos() {
         return ResponseEntity.ok(productoService.findAll());
     }
 
-    // BUSCAR (ADMIN)
+    // ADMIN: Buscar
     @GetMapping("/admin/buscar")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> buscarAdmin(
@@ -48,29 +63,14 @@ public class ProductoController {
         );
     }
 
-    // BUSCAR (CLIENTE) – solo productos activos
-    @GetMapping("/buscar")
-    public ResponseEntity<?> buscarCliente(
-            @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) Long idCategoria
-    ) {
-        return ResponseEntity.ok(productoService.buscarCliente(nombre, idCategoria));
-    }
-
-    // OBTENER POR ID CLIENTE - solo productos activos
-    @GetMapping("/{id}")
-    public ResponseEntity<?> obtenerPorIdCliente(@PathVariable Long id) {
-        return ResponseEntity.ok(productoService.findByIdCliente(id));
-    }
-
-    // OBTENER POR ID ADMIN (INCLUYE INACTIVOS)
+    // ADMIN: Obtener por ID
     @GetMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> obtenerPorIdAdmin(@PathVariable Long id) {
         return ResponseEntity.ok(productoService.findById(id));
     }
 
-    // REGISTRAR
+    // ADMIN: Registrar
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> registrarProducto(
@@ -80,7 +80,7 @@ public class ProductoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // ACTUALIZAR
+    // ADMIN: Actualizar
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> actualizarProducto(
@@ -90,23 +90,23 @@ public class ProductoController {
         return ResponseEntity.ok(productoService.update(id, dto));
     }
 
-    // DESCONTINUAR PRODUCTO
-    @PutMapping("/{id}/descontinuar")
+    // ADMIN: Descontinuar producto
+    @PutMapping("/{id}/desactivar")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> descontinuarProducto(@PathVariable Long id) {
         productoService.descontinuar(id);
         return ResponseEntity.noContent().build();
     }
 
-    //REINTEGRAR PRODUCTO
-    @PutMapping("/{id}/reintegrar")
+    //ADMIN: Reintegrar producto
+    @PutMapping("/{id}/activar")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> reintegrarProducto(@PathVariable Long id) {
         productoService.reintegrar(id);
         return ResponseEntity.noContent().build();
     }
 
-    // AJUSTAR STOCK (+/-)
+    // ADMIN: Ajustar stock
     @PutMapping("/stock/ajustar")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> ajustarStock(@Valid @RequestBody StockAdjustmentDTO dto) {
@@ -114,7 +114,7 @@ public class ProductoController {
         return ResponseEntity.noContent().build();
     }
 
-    // ELIMINAR
+    // ADMIN: Eliminar
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> eliminarProducto(@PathVariable Long id) {

@@ -19,14 +19,14 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // 🔒 Solo ADMIN puede obtener todos los usuarios
+    // ADMIN: Obtener todos los usuarios
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<UsuarioResponseDTO> findAll() {
         return usuarioService.findAll();
     }
 
-    // 🔒 Solo ADMIN obtiene por estado
+    // ADMIN: Obtener por estado
     @GetMapping("/estado")
     @PreAuthorize("hasRole('ADMIN')")
     public List<UsuarioResponseDTO> findByEstado(
@@ -35,7 +35,7 @@ public class UsuarioController {
         return usuarioService.findByEstado(estado);
     }
 
-    // 🔒 Solo ADMIN obtiene por dni
+    // ADMIN: Obtener por DNI
     @GetMapping("/dni")
     @PreAuthorize("hasRole('ADMIN')")
     public UsuarioResponseDTO findByDni(
@@ -44,16 +44,16 @@ public class UsuarioController {
         return usuarioService.findByDni(dni);
     }
 
-    // 🔒 ADMIN puede ver a cualquiera
-    // 🔒 CLIENTE solo puede ver su propio usuario
+    // ADMIN: Puede ver a cualquiera
+    // CLIENTE: Solo puede ver su propio usuario
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isSelf(authentication, #id)")
     public UsuarioResponseDTO findById(@PathVariable Long id) {
         return usuarioService.findById(id);
     }
 
-    // 🔒 CLIENTE edita solo su perfil
-    // 🔒 ADMIN edita cualquier usuario (pero este endpoint es para clientes)
+    // ADMIN: Edita cualquier usuario
+    // CLIENTE: Edita solo su perfil
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isSelf(authentication, #id)")
     public UsuarioResponseDTO updateUsuario(
@@ -63,7 +63,7 @@ public class UsuarioController {
         return usuarioService.updateUsuario(id, dto);
     }
 
-    // 🔒 ADMIN edita datos sensibles de cualquier usuario (como DNI)
+    // ADMIN: Edita datos sensibles de cualquier usuario (DNI)
     @PutMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public UsuarioResponseDTO updateAdmin(
@@ -73,7 +73,7 @@ public class UsuarioController {
         return usuarioService.updateAdmin(id, dto);
     }
 
-    // 🔒 Solo el usuario puede cambiar su propia contraseña
+    // Solo el usuario puede cambiar su propia contraseña
     @PutMapping("/{id}/password")
     @PreAuthorize("@securityService.isSelf(authentication, #id)")
     public void cambiarPassword(
@@ -83,7 +83,7 @@ public class UsuarioController {
         usuarioService.cambiarPassword(id, dto);
     }
 
-    // 🔒 Solo ADMIN cambia el estado (ACTIVO / INACTIVO)
+    // ADMIN: Cambia el estado (ACTIVO / INACTIVO)
     @PutMapping("/{id}/estado")
     @PreAuthorize("hasRole('ADMIN')")
     public void cambiarEstado(
@@ -93,7 +93,7 @@ public class UsuarioController {
         usuarioService.cambiarEstado(id, estado);
     }
 
-    // 🔒 Solo ADMIN elimina usuarios
+    // ADMIN: Elimina usuarios
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Long id) {

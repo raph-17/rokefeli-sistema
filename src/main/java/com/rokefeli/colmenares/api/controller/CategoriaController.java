@@ -19,61 +19,61 @@ public class CategoriaController {
     @Autowired
     private CategoriaService categoriaService;
 
-    // 🔒 Listar todas las categorías (incluyendo INACTIVAS)
+    // Listar todas las categorías ACTIVAS (para clientes)
+    @GetMapping
+    public List<CategoriaResponseDTO> listarCategoriasActivas() {
+        return categoriaService.findAllActivos();
+    }
+
+    // Buscar por nombre
+    @GetMapping("/buscar")
+    public List<CategoriaResponseDTO> buscarPorNombreCliente(@RequestParam String nombre) {
+        return categoriaService.findByNameContainingIgnoreCaseCliente(nombre);
+    }
+
+    // Buscar por ID (solo ACTIVOS)
+    @GetMapping("/{id}")
+    public CategoriaResponseDTO obtenerPorIdCliente(@PathVariable Long id) {
+        return categoriaService.findByIdCliente(id);
+    }
+
+    // ADMIN: Listar todas las categorías (incluyendo INACTIVAS)
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public List<CategoriaResponseDTO> listarCategorias() {
         return categoriaService.findAll();
     }
 
-    // ✅ Listar todas las categorías ACTIVAS (para clientes)
-    @GetMapping
-    public List<CategoriaResponseDTO> listarCategoriasActivas() {
-        return categoriaService.findAllActivos();
-    }
-
-    // 🔒 Filtrar por estado (ACTIVO / INACTIVO)
-    @GetMapping("/estado")
+    // ADMIN: Filtrar por estado (ACTIVO / INACTIVO)
+    @GetMapping("/admin/estado")
     @PreAuthorize("hasRole('ADMIN')")
     public List<CategoriaResponseDTO> listarPorEstado(@RequestParam EstadoCategoria estado) {
         return categoriaService.findByEstado(estado);
     }
 
-    // ✅ Buscar por nombre (PÚBLICO)
-    @GetMapping("/buscar")
-    public List<CategoriaResponseDTO> buscarPorNombreCliente(@RequestParam String nombre) {
-        return categoriaService.findByNameContainingIgnoreCaseCliente(nombre);
-    }
-
-    // 🔒 Buscar por nombre (incluye INACTIVAS)
+    // ADMIN: Buscar por nombre (incluye INACTIVAS)
     @GetMapping("/admin/buscar")
     @PreAuthorize("hasRole('ADMIN')")
     public List<CategoriaResponseDTO> buscarPorNombreAdmin(@RequestParam String nombre) {
         return categoriaService.findByNameContainingIgnoreCaseAdmin(nombre);
     }
 
-    // ✅ Buscar por ID (solo ACTIVOS)
-    @GetMapping("/{id}")
-    public CategoriaResponseDTO obtenerPorIdCliente(@PathVariable Long id) {
-        return categoriaService.findByIdCliente(id);
-    }
-
-    // 🔒 Buscar por ID (incluye INACTIVAS)
+    // ADMIN: Buscar por ID (incluye INACTIVAS)
     @GetMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public CategoriaResponseDTO obtenerPorId(@PathVariable Long id) {
         return categoriaService.findById(id);
     }
 
-    // 🔒 Crear categoría (solo admin)
-    @PostMapping
+    // ADMIN: Crear categoría (solo admin)
+    @PostMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public CategoriaResponseDTO registrarCategoria(@RequestBody CategoriaCreateDTO dto) {
         return categoriaService.create(dto);
     }
 
-    // 🔒 Editar categoría (solo admin)
-    @PutMapping("/{id}")
+    // ADMIN: Editar categoría (solo admin)
+    @PutMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public CategoriaResponseDTO editarCategoria(
             @PathVariable Long id,
@@ -82,22 +82,22 @@ public class CategoriaController {
         return categoriaService.update(id, dto);
     }
 
-    // 🔒 Desactivar categoría (y descontinuar productos)
-    @PutMapping("/{id}/desactivar")
+    // ADMIN: Desactivar categoría (y descontinuar productos)
+    @PutMapping("/admin/{id}/desactivar")
     @PreAuthorize("hasRole('ADMIN')")
     public void desactivarCategoria(@PathVariable Long id) {
         categoriaService.desactivar(id);
     }
 
-    // 🔒 Activar categoría
-    @PutMapping("/{id}/activar")
+    // ADMIN: Activar categoría
+    @PutMapping("/admin/{id}/activar")
     @PreAuthorize("hasRole('ADMIN')")
     public void activarCategoria(@PathVariable Long id) {
         categoriaService.activar(id);
     }
 
-    // 🔒 Eliminar categoría (solo admin)
-    @DeleteMapping("/{id}")
+    // ADMIN: Eliminar categoría (solo admin)
+    @DeleteMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public void eliminarCategoria(@PathVariable Long id) {
         categoriaService.delete(id);

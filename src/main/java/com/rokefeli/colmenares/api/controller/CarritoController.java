@@ -14,14 +14,14 @@ public class CarritoController {
     @Autowired
     private CarritoService carritoService;
 
-    // ✔ Ver carrito del usuario autenticado
+    // Ver carrito del usuario autenticado
     @GetMapping("/{idUsuario}")
     @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
     public CarritoResponseDTO verCarrito(@PathVariable Long idUsuario) {
         return carritoService.verCarrito(idUsuario);
     }
 
-    // ✔ Agregar producto al carrito
+    // Agregar producto al carrito
     @PostMapping("/{idUsuario}/agregar")
     @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
     public CarritoResponseDTO agregarProducto(
@@ -31,7 +31,7 @@ public class CarritoController {
         return carritoService.agregarProducto(idUsuario, dto);
     }
 
-    // ✔ Actualizar cantidad
+    // Actualizar cantidad
     @PutMapping("/{idUsuario}/producto/{idProducto}")
     @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
     public CarritoResponseDTO actualizarCantidad(
@@ -42,7 +42,7 @@ public class CarritoController {
         return carritoService.actualizarCantidad(idUsuario, idProducto, cantidad);
     }
 
-    // ✔ Eliminar producto del carrito
+    // Eliminar producto del carrito
     @DeleteMapping("/{idUsuario}/producto/{idProducto}")
     @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
     public CarritoResponseDTO eliminarProducto(
@@ -52,14 +52,14 @@ public class CarritoController {
         return carritoService.eliminarProducto(idUsuario, idProducto);
     }
 
-    // ✔ Vaciar carrito
+    // Vaciar carrito
     @DeleteMapping("/{idUsuario}/vaciar")
     @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
     public void vaciarCarrito(@PathVariable Long idUsuario) {
         carritoService.vaciarCarrito(idUsuario);
     }
 
-    // ✔ Marcar como comprado
+    // Marcar como comprado
     @PutMapping("/{idUsuario}/comprar")
     @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
     public void marcarComoComprado(@PathVariable Long idUsuario) {
