@@ -46,6 +46,6 @@ public class Venta {
     private EstadoVenta estado;
 
     @ManyToOne
-    @JoinColumn(name = "id_empleado_registra")
-    private Usuario empleadoRegistra;
+    @JoinColumn(name = "id_distribuidor")
+    private Usuario distribuidor;
 }

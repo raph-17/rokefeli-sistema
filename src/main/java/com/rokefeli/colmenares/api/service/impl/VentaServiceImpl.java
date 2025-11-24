@@ -3,6 +3,7 @@ package com.rokefeli.colmenares.api.service.impl;
 import com.rokefeli.colmenares.api.dto.create.DetalleVentaCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaInternoCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaOnlineCreateDTO;
+import com.rokefeli.colmenares.api.dto.response.DetalleVentaResponseDTO;
 import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
 import com.rokefeli.colmenares.api.entity.DetalleVenta;
 import com.rokefeli.colmenares.api.entity.Producto;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -60,21 +61,25 @@ public class VentaServiceImpl implements VentaService {
 
         Venta saved = ventaRepository.save(venta);
 
-        return ventaMapper.toResponseDTO(saved);
+        return buildResponse(saved, saved.getDetalles());
     }
 
     @Override
     @Transactional
     public VentaResponseDTO registrarInterno(VentaInternoCreateDTO dto) {
-        Usuario distribuidor = usuarioRepository.findById(dto.getIdClienteDistribuidor())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", dto.getIdClienteDistribuidor()));
+        Usuario distribuidor = null;
+
+        if (dto.getIdDistribuidor() != null) {
+            distribuidor = usuarioRepository.findById(dto.getIdDistribuidor())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuario", dto.getIdDistribuidor()));
+        }
 
         Usuario empleado = usuarioRepository.findById(dto.getIdEmpleado())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario empleado", dto.getIdEmpleado()));
 
         Venta venta = new Venta();
-        venta.setUsuario(distribuidor);
-        venta.setEmpleadoRegistra(empleado);
+        venta.setUsuario(empleado);
+        venta.setDistribuidor(distribuidor);
         venta.setEstado(EstadoVenta.PROCESADA); // Se completa sin pago
         venta.setCanal(CanalVenta.INTERNO);
 
@@ -82,7 +87,7 @@ public class VentaServiceImpl implements VentaService {
 
         Venta saved = ventaRepository.save(venta);
 
-        return ventaMapper.toResponseDTO(saved);
+        return buildResponse(saved, saved.getDetalles());
     }
 
     @Override
@@ -126,6 +131,8 @@ public class VentaServiceImpl implements VentaService {
 
         BigDecimal total = BigDecimal.ZERO;
 
+        List<DetalleVenta> details = new ArrayList<>();
+
         for (DetalleVentaCreateDTO item : detalles) {
 
             Producto producto = productoRepository.findById(item.getIdProducto())
@@ -147,12 +154,14 @@ public class VentaServiceImpl implements VentaService {
             det.setProducto(producto);
             det.setCantidad(item.getCantidad());
             det.setPrecioUnitario(producto.getPrecio());
-            det.setSubtotal(producto.getPrecio().multiply(BigDecimal.valueOf(item.getCantidad())));
+            det.setSubtotal(det.calcularSubtotal());
 
-            venta.getDetalles().add(det);
+            details.add(det);
 
             total = total.add(det.getSubtotal());
         }
+
+        venta.setDetalles(details);
 
         venta.setMontoTotal(total);
     }
