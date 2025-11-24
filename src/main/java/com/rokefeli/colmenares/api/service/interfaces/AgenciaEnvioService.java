@@ -9,6 +9,7 @@ import com.rokefeli.colmenares.api.entity.enums.EstadoAgencia;
 
 public interface AgenciaEnvioService {
     List<AgenciaEnvioResponseDTO> findAll();
+    List<AgenciaEnvioResponseDTO> findAllActivos();
     List<AgenciaEnvioResponseDTO> findByEstado(EstadoAgencia estado);
     AgenciaEnvioResponseDTO findById(Long id);
     AgenciaEnvioResponseDTO create(AgenciaEnvioCreateDTO createDTO);

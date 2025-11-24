@@ -46,6 +46,8 @@ public class SecurityConfig {
                                 "/api/categorias/buscar", // Buscar categorías por nombre
                                 "/api/categorias/{id}", // Buscar categorías por ID
 
+                                "/api/agencias", // Listar agencias
+
                                 "/api/v1/departamentos/**", // Para ubicación
                                 "/api/v1/provincias/**",
                                 "/api/v1/distritos/**",

@@ -40,6 +40,14 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
     }
 
     @Override
+    public List<AgenciaEnvioResponseDTO> findAllActivos() {
+        return agenciaRepository.findByEstado(EstadoAgencia.ACTIVO)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     public List<AgenciaEnvioResponseDTO> findByEstado(EstadoAgencia estado) {
         return agenciaRepository.findByEstado(estado)
                 .stream()
