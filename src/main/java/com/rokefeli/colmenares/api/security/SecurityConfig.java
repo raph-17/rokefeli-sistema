@@ -48,11 +48,9 @@ public class SecurityConfig {
 
                                 "/api/agencias", // Listar agencias
 
-                                "/api/v1/departamentos/**", // Para ubicación
-                                "/api/v1/provincias/**",
-                                "/api/v1/distritos/**",
-                                "/api/v1/agencias/**",
-                                "/api/v1/tarifas/**"        // Para calcular costos
+                                "/api/ubicaciones/departamentos", // Para ubicación
+                                "/api/ubicaciones/provincias/departamento/{idDepartamento}",
+                                "/api/ubicaciones/distritos/provincia/{idProvincia}"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
