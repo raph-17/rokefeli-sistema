@@ -14,10 +14,15 @@ import com.rokefeli.colmenares.api.repository.TarifaEnvioRepository;
 import com.rokefeli.colmenares.api.repository.VentaRepository;
 import com.rokefeli.colmenares.api.service.interfaces.PagoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -37,6 +42,12 @@ public class PagoServiceImpl implements PagoService {
 
     @Autowired
     private PagoMapper pagoMapper;
+
+    @Value("${culqi.api.key}")
+    private String culqiKey;
+
+    @Value("${culqi.api.url}")
+    private String culqiUrl;
 
     @Override
     public PagoResponseDTO procesarPago(PagoCreateDTO dto) {
@@ -85,6 +96,47 @@ public class PagoServiceImpl implements PagoService {
     }
 
     private boolean procesarConPasarelaExterna(PagoCreateDTO dto) {
-        return true; // simular aprobado
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            // 1. Preparar Headers (Autorización)
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + culqiKey);
+
+            // 2. Preparar el Cuerpo de la Petición (El Cargo)
+            // Culqi pide el monto en CENTIMOS (S/ 100.00 -> 10000)
+            HttpEntity<Map<String, Object>> request = getMapHttpEntity(dto, headers);
+
+            // 3. Enviar Petición a Culqi
+            String urlCrearCargo = culqiUrl + "/charges";
+            ResponseEntity<Map> response = restTemplate.postForEntity(urlCrearCargo, request, Map.class);
+
+            // 4. Validar Respuesta
+            if (response.getStatusCode() == HttpStatus.CREATED) {
+                return true; // ¡Pago Exitoso!
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            // Manejo de errores (tarjeta rechazada, sin fondos, error de red)
+            System.err.println("Error al procesar pago con Culqi: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static HttpEntity<Map<String, Object>> getMapHttpEntity(PagoCreateDTO dto, HttpHeaders headers) {
+        long montoEnCentimos = dto.getMonto().multiply(new java.math.BigDecimal(100)).longValue();
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("amount", montoEnCentimos);
+        body.put("currency_code", "PEN"); // Moneda Soles
+        body.put("email", dto.getEmailCliente());
+        body.put("source_id", dto.getTokenCulqi()); // El token de la tarjeta
+        body.put("description", "Colmenares Rokefeli - Venta #" + dto.getIdVenta()); // Ej: "Venta #123"
+        body.put("capture", true); // Cobrar inmediatamente
+
+        return new HttpEntity<>(body, headers);
     }
 }
