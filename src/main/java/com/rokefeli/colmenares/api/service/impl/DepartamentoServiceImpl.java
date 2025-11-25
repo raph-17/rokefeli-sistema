@@ -6,14 +6,17 @@ import com.rokefeli.colmenares.api.dto.update.DepartamentoUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Departamento;
 import com.rokefeli.colmenares.api.entity.Distrito;
 import com.rokefeli.colmenares.api.entity.Provincia;
+import com.rokefeli.colmenares.api.entity.TarifaEnvio;
 import com.rokefeli.colmenares.api.entity.enums.EstadoDepartamento;
 import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
 import com.rokefeli.colmenares.api.entity.enums.EstadoProvincia;
+import com.rokefeli.colmenares.api.entity.enums.EstadoTarifa;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.DepartamentoMapper;
 import com.rokefeli.colmenares.api.repository.DepartamentoRepository;
 import com.rokefeli.colmenares.api.repository.DistritoRepository;
 import com.rokefeli.colmenares.api.repository.ProvinciaRepository;
+import com.rokefeli.colmenares.api.repository.TarifaEnvioRepository;
 import com.rokefeli.colmenares.api.service.interfaces.DepartamentoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,9 @@ public class DepartamentoServiceImpl implements DepartamentoService {
 
     @Autowired
     private DepartamentoMapper mapper;
+
+    @Autowired
+    private TarifaEnvioRepository tarifaEnvioRepository;
 
     @Override
     public List<DepartamentoResponseDTO> findAll() {
@@ -85,21 +91,22 @@ public class DepartamentoServiceImpl implements DepartamentoService {
     @Override
     @Transactional
     public void desactivar(Long id) {
+        // 1. Validar y desactivar el Departamento principal
         Departamento existing = departamentoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Departamento", id));
         existing.setEstado(EstadoDepartamento.INACTIVO);
         departamentoRepository.save(existing);
 
-        List<Provincia> provincias = provinciaRepository.findByDepartamento_Id(id);
+        // 2. Actualización Masiva en Cascada
 
-        provincias.forEach(p -> p.setEstado(EstadoProvincia.INACTIVO));
-        provinciaRepository.saveAll(provincias);
+        // Desactivar todas las provincias de este departamento
+        provinciaRepository.actualizarEstadoPorDepartamento(id, EstadoProvincia.INACTIVO);
 
-        for (Provincia p : provincias) {
-            List<Distrito> distritos = distritoRepository.findByProvincia_Id(p.getId());
-            distritos.forEach(d -> d.setEstado(EstadoDistrito.INACTIVO));
-            distritoRepository.saveAll(distritos);
-        }
+        // Desactivar todos los distritos de este departamento
+        distritoRepository.actualizarEstadoPorDepartamento(id, EstadoDistrito.INACTIVO);
+
+        // Desactivar todas las tarifas asociadas a este departamento
+        tarifaEnvioRepository.actualizarEstadoPorDepartamento(id, EstadoTarifa.INACTIVO);
     }
 
     @Override
@@ -109,17 +116,6 @@ public class DepartamentoServiceImpl implements DepartamentoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Departamento", id));
         existing.setEstado(EstadoDepartamento.ACTIVO);
         departamentoRepository.save(existing);
-
-        List<Provincia> provincias = provinciaRepository.findByDepartamento_Id(id);
-
-        provincias.forEach(p -> p.setEstado(EstadoProvincia.ACTIVO));
-        provinciaRepository.saveAll(provincias);
-
-        for (Provincia p : provincias) {
-            List<Distrito> distritos = distritoRepository.findByProvincia_Id(p.getId());
-            distritos.forEach(d -> d.setEstado(EstadoDistrito.ACTIVO));
-            distritoRepository.saveAll(distritos);
-        }
     }
 
     @Override

@@ -94,7 +94,7 @@ public class ProductoController {
     @PutMapping("/{id}/desactivar")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> descontinuarProducto(@PathVariable Long id) {
-        productoService.descontinuar(id);
+        productoService.desactivar(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -102,7 +102,7 @@ public class ProductoController {
     @PutMapping("/{id}/activar")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> reintegrarProducto(@PathVariable Long id) {
-        productoService.reintegrar(id);
+        productoService.activar(id);
         return ResponseEntity.noContent().build();
     }
 

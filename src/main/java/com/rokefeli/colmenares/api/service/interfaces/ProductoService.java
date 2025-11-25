@@ -18,7 +18,7 @@ public interface ProductoService {
     ProductoResponseDTO create(ProductoCreateDTO createDTO);
     ProductoResponseDTO update(Long id, ProductoUpdateDTO updateDTO);
     void ajustarStock(StockAdjustmentDTO adjustmentDTO);
-    void descontinuar(Long id);
-    void reintegrar(Long id);
+    void desactivar(Long id);
+    void activar(Long id);
     void delete(Long id);
 }

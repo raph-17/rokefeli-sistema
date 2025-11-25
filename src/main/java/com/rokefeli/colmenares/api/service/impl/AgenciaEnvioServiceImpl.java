@@ -88,16 +88,14 @@ public class AgenciaEnvioServiceImpl implements AgenciaEnvioService {
     @Override
     @Transactional
     public void desactivar(Long id) {
+        // 1. Desactivar Agencia
         AgenciaEnvio existing = agenciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", id));
         existing.setEstado(EstadoAgencia.INACTIVO);
         agenciaRepository.save(existing);
 
-        List<TarifaEnvio> tarifas = tarifaRepository.findByAgenciaEnvio_Id(id);
-
-        tarifas.forEach(t -> t.setEstado(EstadoTarifa.INACTIVO));
-
-        tarifaRepository.saveAll(tarifas);
+        // 2. Desactivar Tarifas Asociadas
+        tarifaRepository.actualizarEstadoPorAgencia(id, EstadoTarifa.INACTIVO);
     }
 
     @Override

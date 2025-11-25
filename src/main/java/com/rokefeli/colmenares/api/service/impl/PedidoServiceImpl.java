@@ -4,10 +4,7 @@ import com.rokefeli.colmenares.api.dto.create.PedidoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.PedidoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.PedidoUpdateDTO;
 import com.rokefeli.colmenares.api.entity.*;
-import com.rokefeli.colmenares.api.entity.enums.EstadoAgencia;
-import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
-import com.rokefeli.colmenares.api.entity.enums.EstadoPedido;
-import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
+import com.rokefeli.colmenares.api.entity.enums.*;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.PedidoMapper;
 import com.rokefeli.colmenares.api.repository.*;
@@ -85,7 +82,7 @@ public class PedidoServiceImpl implements PedidoService {
             throw new IllegalStateException("Esta venta ya tiene un pedido generado.");
         }
 
-        TarifaEnvio tarifa = tarifaRepository.findByAgenciaEnvio_IdAndDistrito_Id(agenciaEnvio.getId(), distrito.getId())
+        TarifaEnvio tarifa = tarifaRepository.findByAgenciaEnvio_IdAndDistrito_IdAndEstado(agenciaEnvio.getId(), distrito.getId(), EstadoTarifa.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Tarifa"));
 
         venta.setEstado(EstadoVenta.PROCESADA);

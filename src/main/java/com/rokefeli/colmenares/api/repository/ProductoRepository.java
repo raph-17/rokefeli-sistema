@@ -1,8 +1,10 @@
 package com.rokefeli.colmenares.api.repository;
 
 import com.rokefeli.colmenares.api.entity.Producto;
+import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
 import com.rokefeli.colmenares.api.entity.enums.EstadoProducto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -29,4 +31,8 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     boolean existsByCategoria_Id(Long idCategoria);
 
     boolean existsByNombre(String nombre);
+
+    @Modifying
+    @Query("UPDATE Producto p SET p.estado = :estado WHERE p.categoria.id = :idCat")
+    void actualizarEstadoPorCategoria(Long idCat, EstadoProducto estado);
 }

@@ -4,7 +4,6 @@ import com.rokefeli.colmenares.api.dto.create.CategoriaCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.CategoriaResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.CategoriaUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Categoria;
-import com.rokefeli.colmenares.api.entity.Producto;
 import com.rokefeli.colmenares.api.entity.enums.EstadoCategoria;
 import com.rokefeli.colmenares.api.entity.enums.EstadoProducto;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
@@ -116,11 +115,7 @@ public class CategoriaServiceImpl implements CategoriaService {
         categoria.setEstado(EstadoCategoria.INACTIVO);
         categoriaRepository.save(categoria);
 
-        List<Producto> productos = productoRepository.buscarProductos(null, id, EstadoProducto.ACTIVO);
-
-        productos.forEach(p -> p.setEstado(EstadoProducto.DESCONTINUADO));
-
-        productoRepository.saveAll(productos);
+        productoRepository.actualizarEstadoPorCategoria(id, EstadoProducto.DESCONTINUADO);
     }
 
     @Override

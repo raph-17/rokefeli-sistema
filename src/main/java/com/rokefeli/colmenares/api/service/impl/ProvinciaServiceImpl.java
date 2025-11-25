@@ -9,11 +9,13 @@ import com.rokefeli.colmenares.api.entity.Provincia;
 import com.rokefeli.colmenares.api.entity.enums.EstadoDepartamento;
 import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
 import com.rokefeli.colmenares.api.entity.enums.EstadoProvincia;
+import com.rokefeli.colmenares.api.entity.enums.EstadoTarifa;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.ProvinciaMapper;
 import com.rokefeli.colmenares.api.repository.DepartamentoRepository;
 import com.rokefeli.colmenares.api.repository.DistritoRepository;
 import com.rokefeli.colmenares.api.repository.ProvinciaRepository;
+import com.rokefeli.colmenares.api.repository.TarifaEnvioRepository;
 import com.rokefeli.colmenares.api.service.interfaces.ProvinciaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,9 @@ public class ProvinciaServiceImpl implements ProvinciaService {
 
     @Autowired
     private DistritoRepository distritoRepository;
+
+    @Autowired
+    private TarifaEnvioRepository tarifaEnvioRepository;
 
     @Autowired
     private ProvinciaMapper mapper;
@@ -89,27 +94,41 @@ public class ProvinciaServiceImpl implements ProvinciaService {
     @Override
     @Transactional
     public void desactivar(Long id) {
+        // 1. Desactivar la Provincia
         Provincia existing = provinciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
         existing.setEstado(EstadoProvincia.INACTIVO);
         provinciaRepository.save(existing);
 
-        List<Distrito> distritos = distritoRepository.findByProvincia_Id(id);
-        distritos.forEach(d -> d.setEstado(EstadoDistrito.INACTIVO));
-        distritoRepository.saveAll(distritos);
+        // 2. Desactivar Distritos en cascada
+        distritoRepository.actualizarEstadoPorProvincia(id, EstadoDistrito.INACTIVO);
+
+        // 3. Desactivar Tarifas en cascada
+        tarifaEnvioRepository.actualizarEstadoPorProvincia(id, EstadoTarifa.INACTIVO);
     }
 
     @Override
     @Transactional
     public void activar(Long id) {
+        // 1. Buscar provincia
         Provincia existing = provinciaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Provincia", id));
+
+        // 2. Obtener padre
+        Departamento padre = existing.getDepartamento();
+
+        // 3. Validaciones
+        if (padre == null) {
+            throw new IllegalStateException("La provincia no tiene un departamento asignado.");
+        }
+
+        if (padre.getEstado() == EstadoDepartamento.INACTIVO) {
+            throw new IllegalArgumentException("No es posible activar una provincia de un departamento inactivo. Active el departamento primero.");
+        }
+
+        // 4. Activar y Guardar
         existing.setEstado(EstadoProvincia.ACTIVO);
         provinciaRepository.save(existing);
-
-        List<Distrito> distritos = distritoRepository.findByProvincia_Id(id);
-        distritos.forEach(d -> d.setEstado(EstadoDistrito.ACTIVO));
-        distritoRepository.saveAll(distritos);
     }
 
     @Override

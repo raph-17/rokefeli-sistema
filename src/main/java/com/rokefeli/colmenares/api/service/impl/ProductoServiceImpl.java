@@ -5,9 +5,13 @@ import com.rokefeli.colmenares.api.dto.response.ProductoResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.ProductoUpdateDTO;
 import com.rokefeli.colmenares.api.dto.update.StockAdjustmentDTO;
 import com.rokefeli.colmenares.api.entity.Categoria;
+import com.rokefeli.colmenares.api.entity.Distrito;
 import com.rokefeli.colmenares.api.entity.Producto;
+import com.rokefeli.colmenares.api.entity.Provincia;
 import com.rokefeli.colmenares.api.entity.enums.EstadoCategoria;
+import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
 import com.rokefeli.colmenares.api.entity.enums.EstadoProducto;
+import com.rokefeli.colmenares.api.entity.enums.EstadoProvincia;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.ProductoMapper;
 import com.rokefeli.colmenares.api.repository.CategoriaRepository;
@@ -112,7 +116,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional
-    public void descontinuar(Long id) {
+    public void desactivar(Long id) {
         Producto existing = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto", id));
         existing.setEstado(EstadoProducto.DESCONTINUADO);
@@ -121,9 +125,24 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional
-    public void reintegrar(Long id) {
+    public void activar(Long id) {
+        // 1. Buscar producto
         Producto existing = productoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Distrito", id));
+
+        // 2. Obtener el padre
+        Categoria padre = existing.getCategoria();
+
+        // 3. Validaciones
+        if (padre == null) {
+            throw new IllegalStateException("El Producto no tiene una categoria asignada.");
+        }
+
+        if (padre.getEstado() == EstadoCategoria.INACTIVO) {
+            throw new IllegalArgumentException("No es posible activar un producto de una categoria inactiva. Active la categoria primero.");
+        }
+
+        // 4. Activar y Guardar
         existing.setEstado(EstadoProducto.ACTIVO);
         productoRepository.save(existing);
     }
