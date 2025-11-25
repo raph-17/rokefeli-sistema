@@ -2,9 +2,11 @@ package com.rokefeli.colmenares.api.controller;
 
 import com.rokefeli.colmenares.api.dto.create.DetalleCarritoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.CarritoResponseDTO;
+import com.rokefeli.colmenares.api.security.JwtUserDetails;
 import com.rokefeli.colmenares.api.service.interfaces.CarritoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,55 +16,48 @@ public class CarritoController {
     @Autowired
     private CarritoService carritoService;
 
-    // Ver carrito del usuario autenticado
-    @GetMapping("/{idUsuario}")
-    @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
-    public CarritoResponseDTO verCarrito(@PathVariable Long idUsuario) {
-        return carritoService.verCarrito(idUsuario);
+    // Helper para obtener ID del usuario logueado
+    private Long getUserId(UserDetails userDetails) {
+        return ((JwtUserDetails) userDetails).getId();
     }
 
-    // Agregar producto al carrito
-    @PostMapping("/{idUsuario}/agregar")
-    @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
+    // Ver MI carrito
+    @GetMapping
+    public CarritoResponseDTO verMiCarrito(@AuthenticationPrincipal UserDetails userDetails) {
+        return carritoService.verCarrito(getUserId(userDetails));
+    }
+
+    // Agregar a MI carrito
+    @PostMapping("/agregar")
     public CarritoResponseDTO agregarProducto(
-            @PathVariable Long idUsuario,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody DetalleCarritoCreateDTO dto
     ) {
-        return carritoService.agregarProducto(idUsuario, dto);
+        return carritoService.agregarProducto(getUserId(userDetails), dto);
     }
 
     // Actualizar cantidad
-    @PutMapping("/{idUsuario}/producto/{idProducto}")
-    @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
+    @PutMapping("/producto/{idProducto}")
     public CarritoResponseDTO actualizarCantidad(
-            @PathVariable Long idUsuario,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long idProducto,
             @RequestParam Integer cantidad
     ) {
-        return carritoService.actualizarCantidad(idUsuario, idProducto, cantidad);
+        return carritoService.actualizarCantidad(getUserId(userDetails), idProducto, cantidad);
     }
 
-    // Eliminar producto del carrito
-    @DeleteMapping("/{idUsuario}/producto/{idProducto}")
-    @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
+    // Eliminar producto
+    @DeleteMapping("/producto/{idProducto}")
     public CarritoResponseDTO eliminarProducto(
-            @PathVariable Long idUsuario,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long idProducto
     ) {
-        return carritoService.eliminarProducto(idUsuario, idProducto);
+        return carritoService.eliminarProducto(getUserId(userDetails), idProducto);
     }
 
     // Vaciar carrito
-    @DeleteMapping("/{idUsuario}/vaciar")
-    @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
-    public void vaciarCarrito(@PathVariable Long idUsuario) {
-        carritoService.vaciarCarrito(idUsuario);
-    }
-
-    // Marcar como comprado
-    @PutMapping("/{idUsuario}/comprar")
-    @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
-    public void marcarComoComprado(@PathVariable Long idUsuario) {
-        carritoService.marcarComoComprado(idUsuario);
+    @DeleteMapping("/vaciar")
+    public void vaciarCarrito(@AuthenticationPrincipal UserDetails userDetails) {
+        carritoService.vaciarCarrito(getUserId(userDetails));
     }
 }

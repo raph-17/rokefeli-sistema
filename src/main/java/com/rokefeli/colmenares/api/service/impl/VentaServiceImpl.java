@@ -16,6 +16,7 @@ import com.rokefeli.colmenares.api.mapper.VentaMapper;
 import com.rokefeli.colmenares.api.repository.ProductoRepository;
 import com.rokefeli.colmenares.api.repository.UsuarioRepository;
 import com.rokefeli.colmenares.api.repository.VentaRepository;
+import com.rokefeli.colmenares.api.service.interfaces.CarritoService;
 import com.rokefeli.colmenares.api.service.interfaces.VentaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,9 @@ public class VentaServiceImpl implements VentaService {
     @Autowired
     private DetalleVentaMapper detalleVentaMapper;
 
+    @Autowired
+    private CarritoService carritoService;
+
     @Override
     @Transactional
     public VentaResponseDTO registrarOnline(VentaOnlineCreateDTO dto) {
@@ -59,6 +63,8 @@ public class VentaServiceImpl implements VentaService {
         procesarDetallesYStock(venta, dto.getDetalles());
 
         Venta saved = ventaRepository.save(venta);
+
+        carritoService.marcarComoComprado(dto.getIdUsuario());
 
         return buildResponse(saved, saved.getDetalles());
     }
