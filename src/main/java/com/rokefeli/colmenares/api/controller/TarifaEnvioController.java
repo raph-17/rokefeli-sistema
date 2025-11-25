@@ -55,7 +55,7 @@ public class TarifaEnvioController {
     // ADMIN: Obtiene tarifa por distrito y agencia (incluye INACTIVAS)
     @GetMapping("/admin/distrito/{idDistrito}/agencia/{idAgencia}")
     public ResponseEntity<?> listarPorDistritoAndAgencia(@PathVariable Long idDistrito,
-                                                                @PathVariable Long idAgencia) {
+                                                         @PathVariable Long idAgencia) {
         return ResponseEntity.ok(tarifaEnvioService.findByAgenciaIdAndDistritoId(idDistrito, idAgencia));
     }
 

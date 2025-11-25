@@ -1,57 +1,91 @@
 package com.rokefeli.colmenares.api.controller;
 
-import com.rokefeli.colmenares.api.dto.create.PagoCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.PedidoCreateDTO;
-import com.rokefeli.colmenares.api.dto.response.PagoResponseDTO;
 import com.rokefeli.colmenares.api.dto.response.PedidoResponseDTO;
+import com.rokefeli.colmenares.api.dto.update.PedidoUpdateDTO;
 import com.rokefeli.colmenares.api.entity.enums.EstadoPedido;
-import com.rokefeli.colmenares.api.service.interfaces.PagoService;
+import com.rokefeli.colmenares.api.security.JwtUserDetails;
 import com.rokefeli.colmenares.api.service.interfaces.PedidoService;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-        import java.util.List;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/pedidos")
-@RequiredArgsConstructor
-@Secured({"ROLE_ADMIN", "ROLE_CLIENTE"})
+@RequestMapping("/api/pedidos")
 public class PedidoController {
 
-    private final PedidoService pedidoService;
-    private final PagoService pagoService;
+    @Autowired
+    private PedidoService pedidoService;
 
-    // --- PEDIDOS ---
+    // ==========================================
+    //  CLIENTE (Gestión Propia)
+    // ==========================================
 
-    // Crear un pedido (usualmente después de la compra desde el carrito)
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public PedidoResponseDTO crearPedido(@RequestBody PedidoCreateDTO dto) {
-        return pedidoService.create(dto);
+    @PreAuthorize("hasAnyRole('CLIENTE', 'ADMIN')")
+    public ResponseEntity<?> crear(@Valid @RequestBody PedidoCreateDTO createDTO) {
+        PedidoResponseDTO nuevoPedido = pedidoService.create(createDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
     }
 
-    // Listar historial de pedidos del usuario (CLIENTE)
-    @GetMapping("/historial")
-    public List<PedidoResponseDTO> listarHistorialPedidos() {
-        // Asumo un método que usa el contexto de seguridad para filtrar por usuario
-        return pedidoService.findByUsuarioId(1L); // Placeholder
+    @GetMapping("/mis-pedidos")
+    @PreAuthorize("hasRole('CLIENTE')")
+    public ResponseEntity<?> verMisPedidos(@AuthenticationPrincipal UserDetails userDetails) {
+        Long idUsuario = ((JwtUserDetails) userDetails).getId();
+        return ResponseEntity.ok(pedidoService.findByUsuarioId(idUsuario));
     }
 
-    // Cambiar estado del pedido (ADMIN/EMPLEADO)
-    @PutMapping("/{id}/estado/{nuevoEstado}")
-    @Secured({"ROLE_ADMIN", "ROLE_EMPLEADO"})
-    public PedidoResponseDTO cambiarEstadoPedido(@PathVariable Long id, @PathVariable String nuevoEstado) {
-        // Aquí nuevoEstado debe mapearse al Enum EstadoPedido
-        return pedidoService.cambiarEstado(id, EstadoPedido.valueOf(nuevoEstado));
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(pedidoService.findById(id));
     }
 
-    // --- PAGOS ---
+    // ==========================================
+    //  ADMIN / EMPLEADO (Logística)
+    // ==========================================
 
-    // Procesar el pago de un pedido (ejecución de la pasarela)
-    @PostMapping("/pago")
-    public PagoResponseDTO procesarPago(@RequestBody PagoCreateDTO pagoDto) {
-        return pagoService.procesarPago(pagoDto);
+    @GetMapping("/admin")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
+    public ResponseEntity<?> listarTodos() {
+        return ResponseEntity.ok(pedidoService.findAll());
+    }
+
+    @GetMapping("/admin/estado")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
+    public ResponseEntity<?> listarPorEstado(@RequestParam EstadoPedido estado) {
+        return ResponseEntity.ok(pedidoService.findByEstado(estado));
+    }
+
+    @PatchMapping("/admin/{id}/estado")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
+    public ResponseEntity<?> cambiarEstado(
+            @PathVariable Long id,
+            @RequestParam EstadoPedido nuevoEstado
+    ) {
+        return ResponseEntity.ok(pedidoService.cambiarEstado(id, nuevoEstado));
+    }
+
+    @PutMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody PedidoUpdateDTO updateDTO
+    ) {
+        return ResponseEntity.ok(pedidoService.update(id, updateDTO));
+    }
+
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        pedidoService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
