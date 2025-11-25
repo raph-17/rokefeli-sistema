@@ -4,7 +4,6 @@ import com.rokefeli.colmenares.api.dto.create.ProvinciaCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.ProvinciaResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.ProvinciaUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Departamento;
-import com.rokefeli.colmenares.api.entity.Distrito;
 import com.rokefeli.colmenares.api.entity.Provincia;
 import com.rokefeli.colmenares.api.entity.enums.EstadoDepartamento;
 import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
@@ -45,6 +44,22 @@ public class ProvinciaServiceImpl implements ProvinciaService {
     @Override
     public List<ProvinciaResponseDTO> findAll() {
         return provinciaRepository.findAll()
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ProvinciaResponseDTO> findByDepartamentoId(Long id) {
+        return provinciaRepository.findByDepartamento_Id(id)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ProvinciaResponseDTO> findByDepartamentoIdActivos(Long id) {
+        return provinciaRepository.findByDepartamento_IdAndEstado(id, EstadoProvincia.ACTIVO)
                 .stream()
                 .map(mapper::toResponseDTO)
                 .toList();

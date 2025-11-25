@@ -47,6 +47,22 @@ public class DistritoServiceImpl implements DistritoService {
     }
 
     @Override
+    public List<DistritoResponseDTO> findByProvinciaId(Long id) {
+        return distritoRepository.findByProvincia_Id(id)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<DistritoResponseDTO> findByProvinciaIdActivos(Long id) {
+        return distritoRepository.findByProvincia_IdAndEstado(id, EstadoDistrito.ACTIVO)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     public DistritoResponseDTO findById(Long id) {
         Distrito existing = distritoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Distrito", id));

@@ -11,6 +11,7 @@ import java.util.Optional;
 
 public interface DistritoRepository extends JpaRepository<Distrito, Long> {
     List<Distrito> findByProvincia_Id(Long provinciaId);
+    List<Distrito> findByProvincia_IdAndEstado(Long provinciaId, EstadoDistrito estado);
     List<Distrito> findByEstado(EstadoDistrito estado);
     Optional<Distrito> findByIdAndEstado(Long id, EstadoDistrito estado);
     boolean existsByNombreIgnoreCaseAndProvincia_Id(String nombre, Long provinciaId);

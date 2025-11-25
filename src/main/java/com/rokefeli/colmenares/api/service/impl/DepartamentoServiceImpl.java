@@ -52,6 +52,14 @@ public class DepartamentoServiceImpl implements DepartamentoService {
     }
 
     @Override
+    public List<DepartamentoResponseDTO> findAllActivos() {
+        return departamentoRepository.findByEstado(EstadoDepartamento.ACTIVO)
+                .stream()
+                .map(mapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
     public DepartamentoResponseDTO findById(Long id) {
         Departamento existing = departamentoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Departamento", id));

@@ -9,6 +9,8 @@ import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
 
 public interface DistritoService {
     List<DistritoResponseDTO> findAll();
+    List<DistritoResponseDTO> findByProvinciaId(Long id);
+    List<DistritoResponseDTO> findByProvinciaIdActivos(Long id);
     List<DistritoResponseDTO> findByEstado(EstadoDistrito estado);
     DistritoResponseDTO findById(Long id);
     DistritoResponseDTO create(DistritoCreateDTO createDTO);

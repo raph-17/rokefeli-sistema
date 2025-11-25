@@ -9,6 +9,7 @@ import com.rokefeli.colmenares.api.entity.enums.EstadoDepartamento;
 
 public interface DepartamentoService {
     List<DepartamentoResponseDTO> findAll();
+    List<DepartamentoResponseDTO> findAllActivos();
     DepartamentoResponseDTO findById(Long id);
     List<DepartamentoResponseDTO> findByEstado(EstadoDepartamento estado);
     DepartamentoResponseDTO create(DepartamentoCreateDTO createDTO);

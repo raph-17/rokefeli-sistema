@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface ProvinciaRepository extends JpaRepository<Provincia, Long> {
     List<Provincia> findByDepartamento_Id(Long departamentoId);
 
+    List<Provincia> findByDepartamento_IdAndEstado(Long departamentoId, EstadoProvincia estado);
+
     Optional<Provincia> findByIdAndEstado(Long id, EstadoProvincia estado);
 
     boolean existsByDepartamento_Id(Long departamentoId);
