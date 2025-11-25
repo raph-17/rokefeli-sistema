@@ -5,6 +5,7 @@ import java.util.List;
 import com.rokefeli.colmenares.api.dto.create.VentaInternoCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaOnlineCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
+import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 
 public interface VentaService {
     VentaResponseDTO registrarOnline(VentaOnlineCreateDTO dto);
@@ -12,6 +13,8 @@ public interface VentaService {
     VentaResponseDTO registrarInterno(VentaInternoCreateDTO dto);
 
     VentaResponseDTO findById(Long id);
+
+    List<VentaResponseDTO> findByEstadoCliente(Long id, EstadoVenta estado);
 
     List<VentaResponseDTO> findAll();
 

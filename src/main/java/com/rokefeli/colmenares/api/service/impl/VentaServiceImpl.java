@@ -3,7 +3,6 @@ package com.rokefeli.colmenares.api.service.impl;
 import com.rokefeli.colmenares.api.dto.create.DetalleVentaCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaInternoCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaOnlineCreateDTO;
-import com.rokefeli.colmenares.api.dto.response.DetalleVentaResponseDTO;
 import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
 import com.rokefeli.colmenares.api.entity.DetalleVenta;
 import com.rokefeli.colmenares.api.entity.Producto;
@@ -96,6 +95,14 @@ public class VentaServiceImpl implements VentaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Venta", id));
 
         return buildResponse(venta, venta.getDetalles());
+    }
+
+    @Override
+    public List<VentaResponseDTO> findByEstadoCliente(Long id, EstadoVenta estado) {
+        return ventaRepository.findByUsuario_IdAndEstado(id, estado)
+                .stream()
+                .map(v -> buildResponse(v, v.getDetalles()))
+                .toList();
     }
 
     @Override

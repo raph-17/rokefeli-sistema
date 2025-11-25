@@ -1,6 +1,7 @@
 package com.rokefeli.colmenares.api.dto.response;
 
 import com.rokefeli.colmenares.api.entity.enums.CanalVenta;
+import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ public class VentaResponseDTO {
     private String nombreUsuario;
     private CanalVenta canal;
     private BigDecimal montoTotal;
+    private EstadoVenta estado;
     private LocalDateTime fecha;
     private List<DetalleVentaResponseDTO> detalles;
 }

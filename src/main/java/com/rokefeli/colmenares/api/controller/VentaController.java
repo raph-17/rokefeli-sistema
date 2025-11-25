@@ -3,6 +3,7 @@ package com.rokefeli.colmenares.api.controller;
 import com.rokefeli.colmenares.api.dto.create.VentaInternoCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaOnlineCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
+import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import com.rokefeli.colmenares.api.service.interfaces.VentaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,14 @@ public class VentaController {
         return ResponseEntity.ok(ventaService.findByUsuario(idUsuario));
     }
 
+    // Ventas de usuario filtradas por estado
+    @GetMapping("/usuario/{idUsuario}/estado")
+    @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
+    public ResponseEntity<?> ventasUsuarioPorEstado(@PathVariable Long idUsuario,
+                                                    @RequestParam EstadoVenta estado) {
+        return ResponseEntity.ok(ventaService.findByEstadoCliente(idUsuario, estado));
+    }
+
     // ADMIN o EMPLEADO: Registrar venta interna
     @PostMapping("/interno")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
@@ -70,6 +79,14 @@ public class VentaController {
     @GetMapping("/admin/usuario/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> obtenerPorUsuario(@PathVariable Long id) {
-        return ResponseEntity.ok((ventaService.findByUsuario(id)));
+        return ResponseEntity.ok(ventaService.findByUsuario(id));
+    }
+
+    // ADMIN: Filtra ventas por usuario y estado
+    @GetMapping("/admin/usuario/{id}/estado")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> obtenerPorUsuario(@PathVariable Long id,
+                                               @RequestParam EstadoVenta estado) {
+        return ResponseEntity.ok(ventaService.findByEstadoCliente(id, estado));
     }
 }
