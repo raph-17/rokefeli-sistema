@@ -4,16 +4,18 @@
 
   <h2>Método de Pago</h2>
 
-  <form [formGroup]="formPago" (ngSubmit)="confirmarPedido()">
+  <div *ngIf="cargando" style="text-align:center; padding:20px;">
+    <p>Cargando resumen...</p>
+  </div>
 
-    <!-- Método de pago -->
+  <form [formGroup]="formPago" (ngSubmit)="confirmarPedido()" *ngIf="!cargando">
+
     <mat-radio-group formControlName="metodo" class="metodo-group">
       <mat-radio-button value="tarjeta">Tarjeta de Crédito/Débito</mat-radio-button>
     </mat-radio-group>
 
     <h3>Datos de la Tarjeta</h3>
 
-    <!-- Número de tarjeta -->
     <mat-form-field appearance="outline" class="campo">
       <mat-label>Número de tarjeta</mat-label>
       <input matInput formControlName="numeroTarjeta" placeholder="1234567812345678">
@@ -25,7 +27,6 @@
       </mat-error>
     </mat-form-field>
 
-    <!-- Titular -->
     <mat-form-field appearance="outline" class="campo">
       <mat-label>Nombre del titular</mat-label>
       <input matInput formControlName="titular" placeholder="JUAN PEREZ">
@@ -34,7 +35,6 @@
       </mat-error>
     </mat-form-field>
 
-    <!-- Fecha y CVV lado a lado -->
     <div class="fila">
       <mat-form-field appearance="outline" class="campo mitad">
         <mat-label>Expiración</mat-label>
@@ -61,18 +61,28 @@
 
     <h3>Resumen del Pedido</h3>
 
-    <mat-card *ngFor="let item of carrito" class="item-carrito">
-      <mat-card-content>
-        <p><strong>{{ item.nombre }}</strong></p>
-        <p>x{{ item.cantidad }}</p>
-        <p>S/ {{ item.precio }}</p>
-      </mat-card-content>
-    </mat-card>
+    <div *ngIf="carritoData?.detalles">
+      <mat-card *ngFor="let item of carritoData.detalles" class="item-carrito">
+        <mat-card-content style="display: flex; justify-content: space-between;">
+          <div>
+            <p><strong>{{ item.producto.nombre }}</strong></p>
+            <p class="cant">Cant: {{ item.cantidad }}</p>
+          </div>
+          <p>S/ {{ item.precioUnitario | number:'1.2-2' }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
 
-    <h3 class="total">Total: S/ {{ total }}</h3>
+    <div class="resumen-final">
+        <p>Subtotal: S/ {{ totalPagar | number:'1.2-2' }}</p>
+        <p>Envío: S/ 10.00</p>
+        <h2 class="total">Total a Pagar: S/ {{ (totalPagar + 10) | number:'1.2-2' }}</h2>
+    </div>
 
-    <button mat-flat-button color="primary" type="submit" [disabled]="formPago.invalid" class="btn-confirmar">
-      Confirmar Pedido
+    <button mat-flat-button color="primary" type="submit" 
+            [disabled]="formPago.invalid" 
+            class="btn-confirmar">
+      Pagar S/ {{ (totalPagar + 10) | number:'1.2-2' }}
     </button>
 
   </form>

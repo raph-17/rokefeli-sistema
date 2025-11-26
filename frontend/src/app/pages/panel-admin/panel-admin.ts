@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { HeaderAdmin } from "../../components/header-admin/header-admin";
 import { CommonModule } from '@angular/common';
-import { ProductoService } from '../../services/producto';
+import { ProductoService } from '../../services/producto.service';
 import { ProductoResponse } from '../../interfaces/producto-response';
 import { ProductoCreateDTO } from '../../interfaces/producto-create-dto';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { VentaService } from '../../services/venta.service';
 
 @Component({
   selector: 'app-panel-admin',
@@ -30,10 +31,11 @@ ingresosTotales: number = 0;
   // Umbral para inventario
   minStock = 10;
 
-  constructor(private productoService: ProductoService) {}
+  constructor(private productoService: ProductoService, private ventaService: VentaService) {}
 
   ngOnInit(): void {
     this.cargarProductos();
+    this.cargarVentas();
 
     this.formProducto = new FormGroup({
     nombre: new FormControl('', Validators.required),
@@ -70,6 +72,19 @@ cerrarModal() {
         console.error('Error listando productos:', err);
         this.cargando = false;
       }
+    });
+  }
+
+  cargarVentas() {
+    this.ventaService.listarAdmin().subscribe({ // Asume un método listarAdmin o findAll
+      next: (data: any[]) => {
+        this.ventas = data;
+        
+        // Calcular métricas automáticamente
+        this.ventasTotales = this.ventas.length;
+        this.ingresosTotales = this.ventas.reduce((acc, venta) => acc + venta.total, 0);
+      },
+      error: (err) => console.error('Error cargando ventas', err)
     });
   }
 

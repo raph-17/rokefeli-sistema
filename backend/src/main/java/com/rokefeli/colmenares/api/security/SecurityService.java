@@ -26,30 +26,30 @@ public class SecurityService {
     // Verifica que el usuario autenticado es dueño de la venta
     public boolean isVentaOwner(Authentication authentication, Long idVenta) {
 
-        // Si es admin, acceso completo
+        // 1. Si no está autenticado, rechazar
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        // 2. Si es ADMIN, pase VIP
+        // (Una forma más corta de verificar el rol)
         if (authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return true;
         }
 
-        // Buscar usuario autenticado por email
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElse(null);
-
-        if (usuario == null) {
-            return false;
+        // 3. OPTIMIZACIÓN: Obtener ID del usuario directamente del Token (Sin ir a la BD)
+        // Como tu filtro ya configuró el contexto con JwtUserDetails, hacemos un cast seguro
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof JwtUserDetails)) {
+            return false; // Por si acaso es un usuario anónimo
         }
+        Long userId = ((JwtUserDetails) principal).getId();
 
-        // Buscar venta
-        Venta venta = ventaRepository.findById(idVenta)
-                .orElse(null);
-
-        if (venta == null) {
-            return false;
-        }
-
-        // Comparar dueño de la venta con el usuario del token
-        return venta.getUsuario().getId().equals(usuario.getId());
+        // 4. Buscar solo la venta
+        // Usamos map/orElse para hacerlo más funcional y limpio
+        return ventaRepository.findById(idVenta)
+                .map(venta -> venta.getUsuario().getId().equals(userId))
+                .orElse(false); // Si no existe la venta, retorna false (403 Forbidden)
     }
 }

@@ -1,16 +1,23 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from './services/auth-interceptor';
 import { routes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
+
+// 1. Importamos 'withInterceptors'
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+
+// 2. Importamos la FUNCIÓN que creamos (asegúrate de la ruta correcta)
+import { authInterceptor } from './core/auth.interceptor'; 
 
 export const appConfig: ApplicationConfig = {
-  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true } , 
-    provideRouter(routes),
-    provideHttpClient(),
-    provideBrowserGlobalErrorListeners(),
+  providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes)
+    provideRouter(routes),
+
+    // 3. Configuración Moderna del Cliente HTTP con el Interceptor
+    provideHttpClient(
+      withInterceptors([authInterceptor])
+    ),
+    provideAnimations()
   ]
 };

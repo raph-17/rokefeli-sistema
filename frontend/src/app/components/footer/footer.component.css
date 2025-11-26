@@ -1,0 +1,8 @@
+footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 30px 0;
+  margin-top: auto; /* Empuja el footer al fondo si hay poco contenido */
+}
+.small { font-size: 12px; color: #aaa; margin-top: 5px; }

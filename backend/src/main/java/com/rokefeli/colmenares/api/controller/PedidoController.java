@@ -7,6 +7,7 @@ import com.rokefeli.colmenares.api.entity.enums.EstadoPedido;
 import com.rokefeli.colmenares.api.security.JwtUserDetails;
 import com.rokefeli.colmenares.api.service.interfaces.PedidoService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,7 @@ public class PedidoController {
     @GetMapping("/mis-pedidos")
     @PreAuthorize("hasRole('CLIENTE')")
     public ResponseEntity<?> verMisPedidos(@AuthenticationPrincipal UserDetails userDetails) {
+        // 2. Uso seguro del ID del token
         Long idUsuario = ((JwtUserDetails) userDetails).getId();
         return ResponseEntity.ok(pedidoService.findByUsuarioId(idUsuario));
     }
@@ -64,6 +66,7 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.findByEstado(estado));
     }
 
+    // Endpoint vital para el flujo logístico (Cambiar a EN_CAMINO, ENTREGADO, etc.)
     @PatchMapping("/admin/{id}/estado")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
     public ResponseEntity<?> cambiarEstado(

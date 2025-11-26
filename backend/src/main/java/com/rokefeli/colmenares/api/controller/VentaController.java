@@ -4,13 +4,17 @@ import com.rokefeli.colmenares.api.dto.create.VentaInternoCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaOnlineCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
 import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
+import com.rokefeli.colmenares.api.security.JwtUserDetails; // Asegúrate de importar tu clase
 import com.rokefeli.colmenares.api.service.interfaces.VentaService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/ventas")
@@ -19,74 +23,92 @@ public class VentaController {
     @Autowired
     private VentaService ventaService;
 
-    // Realizar Venta CLIENTE
+    // ==========================================
+    //  CLIENTE (Autogestión segura)
+    // ==========================================
+
+    /**
+     * Registrar compra Online.
+     * El ID del usuario se toma del Token para evitar suplantación.
+     */
     @PostMapping("/online")
-    @PreAuthorize("@securityService.isSelf(authentication, #dto.idUsuario)")
-    public ResponseEntity<?> registrarVentaOnline(
+    public ResponseEntity<VentaResponseDTO> registrarVentaOnline(
+            @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody VentaOnlineCreateDTO dto
     ) {
+        // Sobrescribimos el ID del DTO con el ID real del usuario logueado
+        Long userId = ((JwtUserDetails) userDetails).getId();
+        dto.setIdUsuario(userId);
+
         VentaResponseDTO venta = ventaService.registrarOnline(dto);
-        return ResponseEntity.ok(venta);
+        return ResponseEntity.status(HttpStatus.CREATED).body(venta);
     }
 
-    // Ver propia venta (o compra)
+    /**
+     * Ver historial de ventas propias.
+     * Reemplaza a: /usuario/{idUsuario}
+     */
+    @GetMapping("/mis-compras")
+    public ResponseEntity<?> verMisVentas(@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = ((JwtUserDetails) userDetails).getId();
+        return ResponseEntity.ok(ventaService.findByUsuario(userId));
+    }
+
+    /**
+     * Ver detalle de una venta específica.
+     * NOTA: Idealmente el servicio debería validar que la venta pertenezca al usuario
+     * si el rol es CLIENTE. Por ahora permitimos acceso autenticado.
+     */
     @GetMapping("/{id}")
-    @PreAuthorize("@securityService.isVentaOwner(authentication, #id)")
+    @PreAuthorize("isAuthenticated() && @securityService.isVentaOwner(authentication, #id)")
     public ResponseEntity<?> obtenerVenta(@PathVariable Long id) {
         return ResponseEntity.ok(ventaService.findById(id));
     }
 
-    // Ventas por usuario
-    @GetMapping("/usuario/{idUsuario}")
-    @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
-    public ResponseEntity<?> ventasPorUsuario(@PathVariable Long idUsuario) {
-        return ResponseEntity.ok(ventaService.findByUsuario(idUsuario));
-    }
+    // ==========================================
+    //  ADMIN / EMPLEADO (Gestión Interna)
+    // ==========================================
 
-    // Ventas de usuario filtradas por estado
-    @GetMapping("/usuario/{idUsuario}/estado")
-    @PreAuthorize("@securityService.isSelf(authentication, #idUsuario)")
-    public ResponseEntity<?> ventasUsuarioPorEstado(@PathVariable Long idUsuario,
-                                                    @RequestParam EstadoVenta estado) {
-        return ResponseEntity.ok(ventaService.findByEstadoCliente(idUsuario, estado));
-    }
-
-    // ADMIN o EMPLEADO: Registrar venta interna
     @PostMapping("/interno")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
-    public ResponseEntity<?> registrarVentaInterno(
+    public ResponseEntity<VentaResponseDTO> registrarVentaInterno(
             @Valid @RequestBody VentaInternoCreateDTO dto
     ) {
         VentaResponseDTO venta = ventaService.registrarInterno(dto);
-        return ResponseEntity.ok(venta);
+        return ResponseEntity.status(HttpStatus.CREATED).body(venta);
     }
 
-    // ADMIN: Lista TODAS las ventas
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> listarVentas() {
+    public ResponseEntity<?> listarTodasLasVentas() {
         return ResponseEntity.ok(ventaService.findAll());
     }
 
-    // ADMIN: Filtra ventas por ID
     @GetMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<?> obtenerPorIdAdmin(@PathVariable Long id) {
         return ResponseEntity.ok(ventaService.findById(id));
     }
 
-    // ADMIN: Filtra ventas por usuario
-    @GetMapping("/admin/usuario/{id}")
+    @GetMapping("/admin/usuario/{idUsuario}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> obtenerPorUsuario(@PathVariable Long id) {
-        return ResponseEntity.ok(ventaService.findByUsuario(id));
+    public ResponseEntity<?> obtenerPorUsuarioAdmin(@PathVariable Long idUsuario) {
+        return ResponseEntity.ok(ventaService.findByUsuario(idUsuario));
     }
 
-    // ADMIN: Filtra ventas por usuario y estado
-    @GetMapping("/admin/usuario/{id}/estado")
+    // Filtro combinado para el panel admin
+    @GetMapping("/admin/buscar")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> obtenerPorUsuario(@PathVariable Long id,
-                                               @RequestParam EstadoVenta estado) {
-        return ResponseEntity.ok(ventaService.findByEstadoCliente(id, estado));
+    public ResponseEntity<?> buscarVentas(
+            @RequestParam(required = false) Long idUsuario,
+            @RequestParam(required = false) EstadoVenta estado
+    ) {
+        if (idUsuario != null && estado != null) {
+            return ResponseEntity.ok(ventaService.findByEstadoCliente(idUsuario, estado));
+        } else if (idUsuario != null) {
+            return ResponseEntity.ok(ventaService.findByUsuario(idUsuario));
+        } else {
+            return ResponseEntity.ok(ventaService.findAll());
+        }
     }
 }

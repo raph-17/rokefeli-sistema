@@ -1,0 +1,60 @@
+<app-header></app-header> <div class="cart-container">
+  <h1>Tu Carrito de Compras 🛒</h1>
+
+  <div *ngIf="cargando" class="loading">Cargando carrito...</div>
+
+  <div *ngIf="!cargando && (!carrito?.detalles || carrito?.detalles.length === 0)" class="empty-cart">
+    <p>Tu carrito está vacío.</p>
+    <button routerLink="/paquetes" class="btn-continue">Ver Productos</button>
+  </div>
+
+  <div *ngIf="carrito?.detalles?.length > 0" class="cart-content">
+    
+    <div class="cart-items">
+      <div *ngFor="let item of carrito.detalles" class="item-card">
+        <img [src]="item.producto.imagenUrl || '/assets/placeholder.png'" alt="img" class="item-img">
+        
+        <div class="item-info">
+          <h3>{{ item.producto.nombre }}</h3>
+          <p class="price">S/ {{ item.precioUnitario | number:'1.2-2' }}</p>
+        </div>
+
+        <div class="item-actions">
+          <div class="qty-control">
+            <button (click)="actualizarCantidad(item.producto.id, item.cantidad, -1)">-</button>
+            <span>{{ item.cantidad }}</span>
+            <button (click)="actualizarCantidad(item.producto.id, item.cantidad, 1)">+</button>
+          </div>
+          
+          <p class="subtotal">Sub: S/ {{ item.subtotal | number:'1.2-2' }}</p>
+          
+          <button class="btn-delete" (click)="eliminarItem(item.producto.id)">🗑️</button>
+        </div>
+      </div>
+
+      <button class="btn-empty" (click)="vaciarCarrito()">Vaciar Carrito</button>
+    </div>
+
+    <div class="cart-summary">
+      <h2>Resumen</h2>
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span>S/ {{ carrito.montoTotal | number:'1.2-2' }}</span>
+      </div>
+      <div class="summary-row">
+        <span>Envío</span>
+        <span class="text-muted">(Se calcula en el checkout)</span>
+      </div>
+      <hr>
+      <div class="summary-row total">
+        <span>Total Estimado</span>
+        <span>S/ {{ carrito.montoTotal | number:'1.2-2' }}</span>
+      </div>
+
+      <button class="btn-checkout" (click)="irAlCheckout()">Proceder al Pago</button>
+    </div>
+
+  </div>
+</div>
+
+<app-footer></app-footer>

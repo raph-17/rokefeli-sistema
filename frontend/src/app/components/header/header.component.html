@@ -1,0 +1,21 @@
+<header>
+  <div class="container">
+    <a routerLink="/paquetes" class="logo">
+      🐝 Colmenares Rokefeli
+    </a>
+
+    <nav>
+      <a routerLink="/paquetes" routerLinkActive="active">Catálogo</a>
+
+      <a routerLink="/carrito" routerLinkActive="active" class="cart-link">
+        🛒 Carrito
+        <span class="badge" *ngIf="(cantidadItems$ | async) as cantidad">
+          {{ cantidad }}
+        </span>
+      </a>
+
+      <button *ngIf="estoyLogueado()" (click)="logout()" class="btn-logout">Salir</button>
+      <a *ngIf="!estoyLogueado()" routerLink="/login" class="btn-login">Ingresar</a>
+    </nav>
+  </div>
+</header>

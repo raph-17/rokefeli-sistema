@@ -10,7 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { AuthService } from '../../services/auth-service'; 
+import { AuthService } from '../../services/auth.service'; 
 
 @Component({
   selector: 'app-register',
