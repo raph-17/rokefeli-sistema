@@ -11,6 +11,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.*;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -30,6 +35,7 @@ public class SecurityConfig {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtUtil, userDetailsService);
 
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -37,7 +43,7 @@ public class SecurityConfig {
                                 "/api/auth/register/client",        // <-- RUTAS PÚBLICAS
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                
+
                                 "/api/productos", // Listar productos sin login
                                 "/api/productos/buscar", // Buscar producto por nombre
                                 "/api/productos/{id}", // Buscar productos por ID
@@ -60,6 +66,29 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    // 2. AGREGAR ESTE BEAN (La "Lista Blanca")
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // A. ¿Quién puede entrar? (Frontend de Angular suele ser puerto 4200)
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        // Si quieres permitir TODO (solo desarrollo): configuration.setAllowedOrigins(List.of("*"));
+
+        // B. ¿Qué métodos pueden usar?
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+        // C. ¿Qué cabeceras permitimos? (Authorization es clave para el JWT)
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+
+        // D. ¿Permitir credenciales/cookies?
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
