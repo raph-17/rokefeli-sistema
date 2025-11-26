@@ -1,0 +1,109 @@
+<app-header-admin></app-header-admin>
+
+<main>
+  <div class="users-container">
+
+    <div class="header-row">
+      <h2>Lista de Usuarios</h2>
+      <button class="btn-add" (click)="openModal()">+ Nuevo Usuario</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button 
+        class="tab" 
+        [class.active]="activeTab === 'clientes'"
+        (click)="activeTab = 'clientes'">
+        Clientes
+      </button>
+
+      <button 
+        class="tab" 
+        [class.active]="activeTab === 'empleados'"
+        (click)="activeTab = 'empleados'">
+        Empleados
+      </button>
+
+      <button 
+        class="tab" 
+        [class.active]="activeTab === 'administradores'"
+        (click)="activeTab = 'administradores'">
+        Administradores
+      </button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-card">
+
+      <!-- Mostrar vacío si no hay usuarios en la pestaña -->
+<div class="empty-state" *ngIf="filteredUsers.length === 0">
+  ...
+</div>
+
+<!-- Tabla cuando sí hay usuarios -->
+<table class="styled-table" *ngIf="filteredUsers.length > 0">
+  <tbody>
+    <tr *ngFor="let u of filteredUsers">
+      <td>{{ u.id }}</td>
+      <td>{{ u.nombre }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.tipo }}</td>
+      ...
+    </tr>
+  </tbody>
+</table>
+</div>
+    <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()"></div>
+
+<div class="modal large" *ngIf="showModal">
+  <h3>Crear Nuevo Usuario</h3>
+
+  <form [formGroup]="formRegistro" (ngSubmit)="registrarUsuario()">
+
+    <!-- Nombre -->
+    <div class="input-group">
+      <label>Nombres*</label>
+      <input type="text" formControlName="nombre" required>
+    </div>
+
+    <!-- Apellidos -->
+    <div class="input-group">
+      <label>Apellidos*</label>
+      <input type="text" formControlName="apellido" required>
+    </div>
+
+    <!-- Correo -->
+    <div class="input-group">
+      <label>Correo Electrónico*</label>
+      <input type="email" formControlName="email" required>
+    </div>
+
+    <!-- Contraseña -->
+    <div class="input-group">
+      <label>Contraseña*</label>
+      <input [type]="mostrarPassword ? 'text' : 'password'" formControlName="password" required>
+    </div>
+
+    <!-- Switch para seleccionar tipo -->
+    <div class="switch-row">
+      <span>Empleado</span>
+
+      <label class="switch">
+        <input type="checkbox" formControlName="tipo">
+        <span class="slider"></span>
+      </label>
+
+      <span>Administrador</span>
+    </div>
+
+    <!-- Botón -->
+    <button class="btn-submit" type="submit" [disabled]="formRegistro.invalid">
+      Crear Usuario
+    </button>
+
+  </form>
+
+  <button class="close" (click)="closeModal()">Cerrar</button>
+</div>
+  </div>
+</main>

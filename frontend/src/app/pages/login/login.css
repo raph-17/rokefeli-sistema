@@ -1,0 +1,48 @@
+/* Contenedor principal: imagen + formulario */
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;               /* separación entre imagen y formulario */
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Imagen */
+.imgContainer img {
+  width: 420px;            /* ajusta según tu diseño */
+  height: auto;
+  border-radius: 20px;
+}
+
+/* Contenedor del formulario */
+.Formulario {
+  display: flex;
+  flex-direction: column;
+  width: 350px;            /* tamaño del formulario */
+}
+
+/* Para que cada mat-form-field use el 100% */
+.Formulario form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* RESPONSIVO para pantallas pequeñas: imagen arriba, form abajo */
+@media (max-width: 768px) {
+  .loginContainer {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .imgContainer img {
+    width: 80%;
+  }
+
+  .Formulario {
+    width: 100%;
+  }
+}

@@ -1,0 +1,34 @@
+<nav>
+  <a routerLink="/" class="ContenedorImagen">
+    <img src="/img/ColmenaresRokefeli.jpg" class="viajaFacilLogo1">
+  </a>
+
+  <a routerLink="/paquetes">
+    <img src="/img/productosIcono.png">
+    <span>Productos</span>
+  </a>
+
+  <a routerLink="/wa3">
+    <img src="/img/soporteIcon.png">
+    <span>Ayuda</span>
+  </a>
+
+  <a routerLink="/wa">
+    <img src="/img/descuentoIcon.png">
+    <span>Soporte</span>
+  </a>
+
+  <!-- SI NO está logueado -->
+  <ng-container *ngIf="!usuario; else loggedIn">
+    <button mat-flat-button routerLink="/login">Iniciar Sesión</button>
+    <button mat-flat-button routerLink="/register">Registrarse</button>
+  </ng-container>
+
+  <!-- SI ESTÁ LOGUEADO -->
+  <ng-template #loggedIn>
+    <span class="usuario-nombre">
+      {{ usuario?.nombre || usuario?.sub }}
+    </span>
+    <button (click)="logout()">Cerrar Sesión</button>
+  </ng-template>
+</nav>

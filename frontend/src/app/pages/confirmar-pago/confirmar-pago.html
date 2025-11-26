@@ -1,0 +1,81 @@
+<app-header></app-header>
+
+<div class="checkout-container">
+
+  <h2>Método de Pago</h2>
+
+  <form [formGroup]="formPago" (ngSubmit)="confirmarPedido()">
+
+    <!-- Método de pago -->
+    <mat-radio-group formControlName="metodo" class="metodo-group">
+      <mat-radio-button value="tarjeta">Tarjeta de Crédito/Débito</mat-radio-button>
+    </mat-radio-group>
+
+    <h3>Datos de la Tarjeta</h3>
+
+    <!-- Número de tarjeta -->
+    <mat-form-field appearance="outline" class="campo">
+      <mat-label>Número de tarjeta</mat-label>
+      <input matInput formControlName="numeroTarjeta" placeholder="1234567812345678">
+      <mat-error *ngIf="formPago.get('numeroTarjeta')?.hasError('required')">
+        Este campo es obligatorio
+      </mat-error>
+      <mat-error *ngIf="formPago.get('numeroTarjeta')?.hasError('pattern')">
+        Deben ser 16 dígitos.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Titular -->
+    <mat-form-field appearance="outline" class="campo">
+      <mat-label>Nombre del titular</mat-label>
+      <input matInput formControlName="titular" placeholder="JUAN PEREZ">
+      <mat-error *ngIf="formPago.get('titular')?.hasError('required')">
+        Este campo es obligatorio
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Fecha y CVV lado a lado -->
+    <div class="fila">
+      <mat-form-field appearance="outline" class="campo mitad">
+        <mat-label>Expiración</mat-label>
+        <input matInput formControlName="expiracion" placeholder="MM/AA">
+        <mat-error *ngIf="formPago.get('expiracion')?.hasError('required')">
+          Obligatorio
+        </mat-error>
+        <mat-error *ngIf="formPago.get('expiracion')?.hasError('pattern')">
+          Formato válido: MM/AA
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="campo mitad">
+        <mat-label>CVV</mat-label>
+        <input matInput formControlName="cvv" placeholder="123" type="password">
+        <mat-error *ngIf="formPago.get('cvv')?.hasError('required')">
+          Obligatorio
+        </mat-error>
+        <mat-error *ngIf="formPago.get('cvv')?.hasError('pattern')">
+          Deben ser 3 dígitos
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <h3>Resumen del Pedido</h3>
+
+    <mat-card *ngFor="let item of carrito" class="item-carrito">
+      <mat-card-content>
+        <p><strong>{{ item.nombre }}</strong></p>
+        <p>x{{ item.cantidad }}</p>
+        <p>S/ {{ item.precio }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <h3 class="total">Total: S/ {{ total }}</h3>
+
+    <button mat-flat-button color="primary" type="submit" [disabled]="formPago.invalid" class="btn-confirmar">
+      Confirmar Pedido
+    </button>
+
+  </form>
+</div>
+
+<app-footer></app-footer>

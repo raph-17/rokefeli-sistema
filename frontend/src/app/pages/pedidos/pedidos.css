@@ -1,0 +1,77 @@
+.sales-container {
+  padding: 20px 50px;
+  background: #fdf7e6;
+  min-height: 100vh;
+}
+
+.title {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: 600;
+}
+
+.content-card {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  min-height: 350px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Estado vacío */
+.empty-state {
+  text-align: center;
+  color: #555;
+}
+
+.empty-state .icon {
+  font-size: 45px;
+  margin-bottom: 10px;
+  color: #bbb;
+}
+
+/* Tabla */
+.table-wrapper {
+  width: 100%;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.styled-table th {
+  background: #faf4e0;
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+}
+
+.styled-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Estados */
+.status {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status.pending {
+  background: #fff1d6;
+  color: #a06600;
+}
+
+.status.delivered {
+  background: #e0f8e6;
+  color: #0d7a32;
+}

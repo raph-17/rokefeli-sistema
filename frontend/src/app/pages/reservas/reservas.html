@@ -1,0 +1,37 @@
+<app-header></app-header>
+
+<main class="reservas-container">
+
+  <!-- Calendario -->
+  <div class="calendario-wrapper">
+    <full-calendar [options]="calendarOptions"></full-calendar>
+  </div>
+
+  <!-- Panel lateral -->
+  <div class="panel-reservas">
+
+    <h2>Reservas</h2>
+
+    <div *ngFor="let r of reservas" class="reserva-item">
+      <div class="reserva-header">
+        <span class="color-dot" [style.background]="r.color"></span>
+        <span class="titulo">{{ r.title }}</span>
+      </div>
+
+      <div class="paquetes">
+        <p><strong>Paquetes incluidos:</strong></p>
+        <ul>
+          <li *ngFor="let p of r.paquetes">- {{ p }}</li>
+        </ul>
+      </div>
+
+      <button mat-flat-button class="btn-detalles">
+        Más detalles
+      </button>
+    </div>
+
+  </div>
+
+</main>
+
+<app-footer></app-footer>

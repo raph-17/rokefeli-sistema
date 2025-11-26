@@ -1,0 +1,53 @@
+<app-header-admin></app-header-admin>
+<main>
+  <div class="sales-container">
+
+    <h2 class="title">Historial de Ventas</h2>
+
+    <div class="content-card">
+
+      <!-- Si NO hay pedidos -->
+      <div *ngIf="pedidos.length === 0" class="empty-state">
+        <div class="icon">📦</div>
+        <h3>No hay pedidos</h3>
+        <p>Aún no se han registrado ventas</p>
+      </div>
+
+      <!-- Si hay pedidos -->
+      <div *ngIf="pedidos.length > 0" class="table-wrapper">
+
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Total</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let p of pedidos">
+              <td>{{ p.id }}</td>
+              <td>{{ p.cliente }}</td>
+              <td>{{ p.producto }}</td>
+              <td>{{ p.cantidad }}</td>
+              <td>S/ {{ p.total }}</td>
+              <td>{{ p.fecha }}</td>
+              <td>
+                <span class="status pending" *ngIf="p.estado === 'Pendiente'">Pendiente</span>
+                <span class="status delivered" *ngIf="p.estado === 'Entregado'">Entregado</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+</main>

@@ -1,0 +1,72 @@
+<app-header></app-header>
+<main>
+    <div class="loginContainer">
+        <div class="imgContainer"><img src="/img/imagenLogin.png"></div>
+        <div class="Formulario">
+            <form [formGroup]="registerForm" (ngSubmit)="handleSubmit()">
+
+    <mat-form-field>
+        <mat-label>Nombres</mat-label>
+        <input matInput formControlName="Nombres">
+        <mat-error *ngIf="registerForm.get('Nombres')?.hasError('required')">
+            Los nombres son obligatorios
+        </mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Apellidos</mat-label>
+        <input matInput formControlName="Apellidos">
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Correo Electrónico</mat-label>
+        <input matInput formControlName="CorreoElectronico">
+        <mat-error *ngIf="registerForm.get('CorreoElectronico')?.hasError('required')">
+            El correo es obligatorio
+        </mat-error>
+        <mat-error *ngIf="registerForm.get('CorreoElectronico')?.hasError('email')">
+            El correo no es válido
+        </mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Contraseña</mat-label>
+        <input 
+            matInput
+            formControlName="password"
+            [type]="hide() ? 'password' : 'text'"
+        >
+        <button type="button"
+            mat-icon-button
+            matSuffix
+            (click)="clickEvent($event)">
+            <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+
+        <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
+            La contraseña es obligatoria
+        </mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>DNI</mat-label>
+        <input matInput formControlName="DNI">
+        <mat-error *ngIf="registerForm.get('DNI')?.hasError('required')">
+            El DNI es obligatorio.
+        </mat-error>
+        <mat-error *ngIf="registerForm.get('DNI')?.hasError('minlength')">
+            El DNI debe tener 8 digitos.
+        </mat-error>
+        <mat-error *ngIf="registerForm.get('DNI')?.hasError('maxlength')">
+            El DNI debe tener 8 digitos.
+        </mat-error>
+    </mat-form-field>
+
+
+    <button mat-flat-button type="submit" [disabled]="registerForm.invalid">Crear usuario</button>
+
+</form>
+        </div>
+    </div>
+</main>
+<app-footer></app-footer>
