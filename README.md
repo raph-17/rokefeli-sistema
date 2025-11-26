@@ -54,8 +54,8 @@ Módulo	                    Estado
 Base del proyecto	          ✅ Completo  
 Modelado BD	                ✅ Completo  
 Entidades JPA               ✅ Completo  
-Servicios y Controladores	  ✅ Completo
-Seguridad JWT	              ✅ Siguiente Paso
+Servicios y Controladores	  ✅ Completo  
+Seguridad JWT	              ✅ Siguiente Paso  
 Frontend (Angular)	        Pendiente  
 
 
