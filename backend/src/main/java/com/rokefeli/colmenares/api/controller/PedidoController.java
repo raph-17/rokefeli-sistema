@@ -66,7 +66,7 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.findByEstado(estado));
     }
 
-    // Endpoint vital para el flujo logístico (Cambiar a EN_CAMINO, ENTREGADO, etc.)
+    // Cambiar de estado un pedido
     @PatchMapping("/admin/{id}/estado")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
     public ResponseEntity<?> cambiarEstado(

@@ -27,10 +27,7 @@ public class VentaController {
     //  CLIENTE (Autogestión segura)
     // ==========================================
 
-    /**
-     * Registrar compra Online.
-     * El ID del usuario se toma del Token para evitar suplantación.
-     */
+    // Registrar compra Online.
     @PostMapping("/online")
     public ResponseEntity<VentaResponseDTO> registrarVentaOnline(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -44,21 +41,14 @@ public class VentaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(venta);
     }
 
-    /**
-     * Ver historial de ventas propias.
-     * Reemplaza a: /usuario/{idUsuario}
-     */
+    // Ver historial de ventas propias.
     @GetMapping("/mis-compras")
     public ResponseEntity<?> verMisVentas(@AuthenticationPrincipal UserDetails userDetails) {
         Long userId = ((JwtUserDetails) userDetails).getId();
         return ResponseEntity.ok(ventaService.findByUsuario(userId));
     }
 
-    /**
-     * Ver detalle de una venta específica.
-     * NOTA: Idealmente el servicio debería validar que la venta pertenezca al usuario
-     * si el rol es CLIENTE. Por ahora permitimos acceso autenticado.
-     */
+    // Ver detalle de una venta específica.
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated() && @securityService.isVentaOwner(authentication, #id)")
     public ResponseEntity<?> obtenerVenta(@PathVariable Long id) {
