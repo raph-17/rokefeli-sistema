@@ -53,9 +53,9 @@ mvnw spring-boot:run
 Módulo	                    Estado  
 Base del proyecto	          ✅ Completo  
 Modelado BD	                ✅ Completo  
-Entidades JPA               ✅ Siguiente paso  
-Servicios y Controladores	  ⏳  
-Seguridad JWT	              ⏳  
+Entidades JPA               ✅ Completo  
+Servicios y Controladores	  ✅ Completo  
+Seguridad JWT	              ✅ Siguiente Paso  
 Frontend (Angular)	        Pendiente  
 
 
