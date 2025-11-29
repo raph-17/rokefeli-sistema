@@ -1,59 +1,54 @@
-<app-header></app-header>
-
 <div class="paquetes-header">
-  <h1>Productos Disponibles</h1> <div class="acciones">
-    <button class="btn-avanzada" (click)="toggleBusquedaAvanzada()">
-      {{ busquedaAvanzadaActiva ? 'Ocultar Filtros' : 'Búsqueda avanzada' }}
-    </button>
+  <h1>Productos Disponibles</h1>
+  
+  <div class="search-bar">
+    <input type="text" 
+           placeholder="¿Qué estás buscando? (ej. Miel, Polen...)" 
+           [(ngModel)]="filtroNombre" 
+           (keyup.enter)="buscar()">
+    <button (click)="buscar()">🔍</button>
   </div>
-</div>
+  
+  </div>
 
 <main class="paquetes-container">
 
-  <aside class="sidebar" *ngIf="busquedaAvanzadaActiva || true"> <h3>Precios:</h3>
-    <div class="precio-slider">
-      <input type="number" [(ngModel)]="precioMin" placeholder="Min">
-      <input type="number" [(ngModel)]="precioMax" placeholder="Max">
-    </div>
-
-    <input type="range" min="0" max="200" [(ngModel)]="precioMin">
-    <input type="range" min="0" max="200" [(ngModel)]="precioMax">
-    <p>S/. {{precioMin}} — S/. {{precioMax}}</p>
-
-    <h3>Reseñas:</h3>
-    <div class="stars-filter">
-      <div 
-        *ngFor="let s of [5,4,3,2,1]" 
-        class="stars-row"
-        (click)="setResena(s)"
-        [class.selected]="resenaSeleccionada === s"
-      >
-        <span *ngFor="let star of [].constructor(s)">⭐</span>
-        <span *ngFor="let empty of [].constructor(5 - s)">☆</span>
+  <aside class="sidebar">
+    <h3>Categorías:</h3>
+    <div class="categorias-list">
+      
+      <div class="cat-item" 
+           [class.active]="filtroCategoria === null" 
+           (click)="filtrarPorCategoria(null)">
+        Todas
       </div>
-      <div class="stars-row" (click)="setResena(0)" *ngIf="resenaSeleccionada > 0">
-        <small>Ver todos</small>
+
+      <div class="cat-item" 
+           *ngFor="let cat of categorias"
+           [class.active]="filtroCategoria === cat.id"
+           (click)="filtrarPorCategoria(cat.id)">
+        {{ cat.nombre }}
       </div>
     </div>
   </aside>
 
   <section class="lista-paquetes">
 
-    <div *ngIf="cargando" style="width:100%; text-align:center; padding: 40px;">
+    <div *ngIf="cargando" style="width:100%; text-align:center; padding: 40px; grid-column: 1 / -1;">
       <p>Cargando productos...</p>
     </div>
 
     <div class="paquete-card" *ngFor="let p of paquetesFiltrados">
+      
       <img [src]="p.img" [alt]="p.nombre" onerror="this.onerror=null; this.src='/img/placeholder.png'">
       
       <div class="card-body">
         <h4>{{ p.nombre }}</h4>
         <p class="precio">S/ {{ p.precio | number:'1.2-2' }}</p>
         
-        <div class="rating">
-          <span *ngFor="let _ of [].constructor(p.stars)">⭐</span>
-          <span *ngFor="let _ of [].constructor(5 - p.stars)" style="color:#ccc;">☆</span>
-        </div>
+        <p *ngIf="p.descripcion" style="font-size: 13px; color: #666; margin-bottom: 15px;">
+            {{ p.descripcion.substring(0, 50) }}...
+        </p>
 
         <button mat-flat-button class="btn-carrito" 
                 (click)="agregarAlCarrito(p)" 
@@ -64,24 +59,20 @@
       </div>
     </div>
 
-    <div *ngIf="!cargando && paquetesFiltrados.length === 0" style="width:100%; text-align:center;">
-      <p>No se encontraron productos con estos filtros 🐝</p>
+    <div *ngIf="!cargando && paquetes.length === 0" style="width:100%; text-align:center; grid-column: 1 / -1;">
+      <p>No se encontraron productos 🐝</p>
     </div>
 
     <div class="pagination" *ngIf="paginas.length > 1">
       <span (click)="prevPage()" [class.disabled]="paginaActual === 1">←</span>
-      
       <span *ngFor="let n of paginas" 
             [class.active]="n === paginaActual"
             (click)="setPagina(n)">
         {{ n }}
       </span>
-      
       <span (click)="nextPage()" [class.disabled]="paginaActual === paginas.length">→</span>
     </div>
 
   </section>
 
 </main>
-
-<app-footer></app-footer>

@@ -7,7 +7,7 @@
     <div class="metrics">
       <div class="card">
         <h3>Productos</h3>
-        <span class="value">{{ products?.length || 0 }}</span>
+        <span class="value">{{ products.length || 0 }}</span>
       </div>
 
       <div class="card">
@@ -77,7 +77,7 @@
             </td>
 
             <td>{{ p.nombre }}</td>
-            <td>{{ p.categoria?.nombre }}</td>
+            <td>{{ p.categoria.nombre }}</td>
 
             <td>S/ {{ p.precio }}</td>
             <td>{{ p.stockActual }}</td>

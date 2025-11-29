@@ -2,27 +2,31 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-// Si tienes interfaces definidas, úsalas. Si no, puedes cambiar a <any>
-// import { ProductoResponse } from '../interfaces/producto-response';
-// import { ProductoCreateDTO } from '../interfaces/producto-create-dto';
-
 @Injectable({
   providedIn: 'root'
 })
 export class ProductoService {
 
   private apiUrl = 'http://localhost:8080/api/productos';
-  
   private http = inject(HttpClient);
 
-  /* ===========================
-     PÚBLICO (Catálogo)
-     =========================== */
+  // MODIFICADO: Lógica de parámetros limpia
+  listarActivos(nombre?: string, idCategoria?: number): Observable<any[]> {
+    let params = new HttpParams();
 
-  // Lista solo los productos que el cliente puede comprar
-  // Llama a /api/productos/buscar?estado=ACTIVO
-  listarActivos(): Observable<any[]> {
-    const params = new HttpParams().set('estado', 'ACTIVO');
+    // Backend ya filtra por estado ACTIVO internamente, no lo enviamos.
+
+    // Solo agregamos si hay valor real (no null, no undefined, no vacío)
+    if (nombre && nombre.trim() !== '') {
+      params = params.set('nombre', nombre);
+    }
+    
+    // Solo agregamos si es un número válido
+    if (idCategoria !== null && idCategoria !== undefined && idCategoria > 0) {
+      params = params.set('idCategoria', idCategoria.toString());
+    }
+
+    // Si no hay params, el backend devolverá todos los activos
     return this.http.get<any[]>(`${this.apiUrl}/buscar`, { params });
   }
 

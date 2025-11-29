@@ -1,4 +1,18 @@
-/* You can add global styles to this file, and also import other style files */
+/* Aseguramos que html y body ocupen toda la altura */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* Forzamos que el contenedor de la app ocupe al menos el 100% de la altura */
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* 100% del Viewport Height */
+}
+
+/* Hacemos que el contenido principal empuje el footer hacia abajo */
+main {
+  flex: 1; /* Esto hace que el main crezca para ocupar todo el espacio libre */
+}

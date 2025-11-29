@@ -11,7 +11,7 @@
 /* --- SIDEBAR (Filtros) --- */
 .sidebar {
   width: 280px;
-  flex-shrink: 0; /* No encoger */
+  flex-shrink: 0;
   background: #fff;
   padding: 25px;
   border-radius: 16px;
@@ -35,25 +35,12 @@
   border-radius: 6px;
 }
 
-/* Estrellas */
-.stars-filter { margin-top: 20px; }
-
-.stars-row {
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: background 0.2s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.stars-row:hover { background: #f9f9f9; }
-.stars-row.selected { background: #fff3cd; border: 1px solid #ffeeba; } /* Highlight seleccionado */
-
 /* --- LISTADO (Grid System) --- */
 .lista-paquetes {
   flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 25px;
 }
 
 /* Header del título */
@@ -80,14 +67,7 @@
 }
 .btn-avanzada:hover { background: #D48300; color: white; }
 
-/* --- CARDS (Diseño Grid Moderno) --- */
-.lista-paquetes {
-  display: grid;
-  /* Esto hace que sea responsivo automáticamente: mínimo 250px por tarjeta */
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 25px;
-}
-
+/* --- CARDS --- */
 .paquete-card {
   background: white;
   border-radius: 12px;
@@ -129,16 +109,14 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  margin-top: auto; /* Empuja el botón al fondo */
+  margin-top: auto;
 }
 .btn-carrito:hover { background: #000; }
 .btn-carrito:disabled { background: #ccc; cursor: wait; }
 
-.rating { text-align: center; margin-top: 10px; font-size: 14px; color: #ffc107; }
-
 /* --- PAGINACIÓN --- */
 .pagination {
-  grid-column: 1 / -1; /* Ocupa todo el ancho del grid */
+  grid-column: 1 / -1;
   text-align: center;
   margin-top: 40px;
   display: flex;
@@ -167,4 +145,64 @@
 @media (max-width: 768px) {
   .paquetes-container { flex-direction: column; }
   .sidebar { width: 100%; }
+}
+
+/* --- BARRA DE BÚSQUEDA --- */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  flex: 1; /* Ocupa el espacio disponible */
+  max-width: 500px;
+  margin: 0 20px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 25px;
+  border: 1px solid #D48300;
+  outline: none;
+  font-size: 14px;
+}
+
+.search-bar button {
+  background: #D48300;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-bar button:hover {
+  background: #b06d00;
+}
+
+/* --- LISTA DE CATEGORÍAS (Sidebar) --- */
+.categorias-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cat-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  color: #555;
+  font-weight: 500;
+}
+
+.cat-item:hover {
+  background-color: #fff8e1; /* Fondo amarillito suave al pasar mouse */
+  color: #D48300;
+}
+
+.cat-item.active {
+  background-color: #D48300;
+  color: white;
+  font-weight: bold;
 }
