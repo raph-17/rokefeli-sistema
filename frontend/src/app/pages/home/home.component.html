@@ -1,0 +1,43 @@
+<main>
+  <section class="hero">
+    <div class="hero-content">
+      <h1>La dulzura de la naturaleza en tu mesa 🐝</h1>
+      <p>Miel 100% pura, polen y derivados apícolas producidos en los valles de Ica.</p>
+      <button routerLink="/catalogo" class="btn-hero">Ver Catálogo</button>
+    </div>
+    <div class="hero-overlay"></div>
+  </section>
+
+  <section class="features">
+    <div class="feature-card">
+      <span class="icon">🌿</span>
+      <h3>100% Natural</h3>
+      <p>Sin aditivos ni conservantes. Del panal a tu frasco.</p>
+    </div>
+    <div class="feature-card">
+      <span class="icon">🚛</span>
+      <h3>Envíos a Todo Perú</h3>
+      <p>Llevamos salud a la puerta de tu casa.</p>
+    </div>
+    <div class="feature-card">
+      <span class="icon">🧡</span>
+      <h3>Tradición Familiar</h3>
+      <p>Más de 20 años cuidando abejas en Colmenares Rokefeli.</p>
+    </div>
+  </section>
+
+  <section class="featured">
+    <h2>Nuestros Favoritos</h2>
+    
+    <div class="grid-productos">
+      <div class="card" *ngFor="let p of destacados">
+        <img [src]="p.imagenUrl" onerror="this.src='/img/placeholder.png'">
+        <div class="card-info">
+          <h4>{{ p.nombre }}</h4>
+          <p class="price">S/ {{ p.precio | number:'1.2-2' }}</p>
+          <button routerLink="/catalogo">Ver detalle</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

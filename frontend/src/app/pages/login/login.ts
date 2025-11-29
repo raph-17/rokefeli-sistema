@@ -1,6 +1,4 @@
 import { Component, signal } from '@angular/core';
-import { Header } from "../../header/header";
-import { Footer } from "../../footer/footer";
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -17,8 +15,6 @@ import { jwtDecode } from "jwt-decode";
 @Component({
   selector: 'app-login',
   imports: [
-    Header,
-    Footer,
     CommonModule,
     FormsModule,
     MatButtonModule,

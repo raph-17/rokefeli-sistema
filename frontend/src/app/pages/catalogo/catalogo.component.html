@@ -1,11 +1,11 @@
 <div class="paquetes-header">
-  <h1>Productos Disponibles</h1>
+  <h1>Nuestros Productos</h1>
   
   <div class="search-bar">
     <input type="text" 
-           placeholder="¿Qué estás buscando? (ej. Miel, Polen...)" 
-           [(ngModel)]="filtroNombre" 
-           (keyup.enter)="buscar()">
+          placeholder="¿Qué estás buscando? (ej. Miel, Polen...)" 
+          [(ngModel)]="filtroNombre" 
+          (keyup.enter)="buscar()">
     <button (click)="buscar()">🔍</button>
   </div>
   
@@ -18,15 +18,15 @@
     <div class="categorias-list">
       
       <div class="cat-item" 
-           [class.active]="filtroCategoria === null" 
-           (click)="filtrarPorCategoria(null)">
+          [class.active]="filtroCategoria === null" 
+          (click)="filtrarPorCategoria(null)">
         Todas
       </div>
 
       <div class="cat-item" 
-           *ngFor="let cat of categorias"
-           [class.active]="filtroCategoria === cat.id"
-           (click)="filtrarPorCategoria(cat.id)">
+          *ngFor="let cat of categorias"
+          [class.active]="filtroCategoria === cat.id"
+          (click)="filtrarPorCategoria(cat.id)">
         {{ cat.nombre }}
       </div>
     </div>

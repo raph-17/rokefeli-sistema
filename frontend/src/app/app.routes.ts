@@ -2,8 +2,7 @@ import { Routes } from '@angular/router';
 import { Home } from './pages/home/home';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
-import { Reservas } from './pages/reservas/reservas';
-import { Paquetes } from './pages/paquetes/paquetes'; // Catálogo
+import { Catalogo } from './pages/catalogo/catalogo';
 import { ConfirmarPagoComponent } from './pages/confirmar-pago/confirmar-pago';
 import { PanelAdmin } from './pages/panel-admin/panel-admin';
 import { Pedidos } from './pages/pedidos/pedidos';
@@ -17,7 +16,7 @@ export const routes: Routes = [
     { path: 'register', component: Register },
     
     // Catálogo y Carrito
-    { path: 'paquetes', component: Paquetes },
+    { path: 'catalogo', component: Catalogo },
     { path: 'carrito', component: CartComponent }, // <--- ¡AGREGADO!
     { path: 'confirmar-pago', component: ConfirmarPagoComponent }, // Sugiero usar guion
 

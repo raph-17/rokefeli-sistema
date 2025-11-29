@@ -1,15 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Header } from '../../components/header/header.component';
-import { Footer } from '../../components/footer/footer.component';
 import { CarritoService } from '../../services/carrito.service';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 import { ProductoService } from '../../services/producto.service';
 import { CategoriaService } from '../../services/categoria.service';
 
-interface PaqueteUI {
+interface CatalogoUI {
   id: number;
   nombre: string;
   precio: number;
@@ -18,20 +16,18 @@ interface PaqueteUI {
 }
 
 @Component({
-  selector: 'app-paquetes',
+  selector: 'app-catalogo',
   standalone: true,
   imports: [
     FormsModule,
     CommonModule,
-    Header,
-    Footer,
     MatButtonModule,
     RouterModule
   ],
-  templateUrl: './paquetes.component.html',
-  styleUrls: ['./paquetes.component.css'],
+  templateUrl: './catalogo.component.html',
+  styleUrls: ['./catalogo.component.css'],
 })
-export class Paquetes implements OnInit {
+export class Catalogo implements OnInit {
 
   // --- FILTROS (Solo backend) ---
   filtroNombre: string = '';
@@ -43,7 +39,7 @@ export class Paquetes implements OnInit {
   elementosPorPagina = 6;
 
   // --- ESTADO UI ---
-  paquetes: PaqueteUI[] = [];
+  paquetes: CatalogoUI[] = [];
   cargando = true;
   agregandoId: number | null = null;
 
@@ -74,7 +70,7 @@ export class Paquetes implements OnInit {
             id: p.id,
             nombre: p.nombre,
             precio: Number(p.precio || p.price || 0), 
-            img: p.imagenUrl || '/assets/img/placeholder.png',
+            img: p.imagenUrl || '/img/placeholder.png',
             descripcion: p.descripcion
           }));
           this.cargando = false;
@@ -97,7 +93,7 @@ export class Paquetes implements OnInit {
     this.cargarProductos();
   }
 
-  agregarAlCarrito(producto: PaqueteUI) {
+  agregarAlCarrito(producto: CatalogoUI) {
     if (this.agregandoId === producto.id) return;
 
     this.agregandoId = producto.id;
@@ -116,8 +112,8 @@ export class Paquetes implements OnInit {
   }
 
   /* ===========================
-     PAGINACIÓN (Ya no filtramos precios aquí)
-     =========================== */
+    PAGINACIÓN (Ya no filtramos precios aquí)
+  =========================== */
 
   get paquetesFiltrados() {
     // Solo paginación, el filtro lo hizo el backend

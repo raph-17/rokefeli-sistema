@@ -25,8 +25,6 @@ import { Footer } from '../../components/footer/footer.component';
   imports: [
     CommonModule, 
     ReactiveFormsModule,
-    Header,
-    Footer,
     MatButtonModule, 
     MatFormFieldModule, 
     MatInputModule, 

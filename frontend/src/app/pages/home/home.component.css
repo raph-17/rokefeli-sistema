@@ -1,0 +1,128 @@
+/* HERO SECTION */
+.hero {
+  background-image: url('/img/hero-bg.jpg'); /* Busca una imagen bonita de abejas/campo */
+  background-size: cover;
+  background-position: center;
+  height: 80vh; /* Casi toda la pantalla */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  color: white;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* Oscurecer para leer texto */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  line-height: 1.2; 
+  text-align: center;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+}
+
+.btn-hero {
+  background-color: #D48300;
+  color: white;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-hero:hover {
+  background-color: #b36e00;
+  transform: scale(1.05);
+}
+
+/* FEATURES */
+.features {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  padding: 60px 20px;
+  background-color: #fffcf5;
+}
+
+.feature-card {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  width: 250px;
+}
+
+.feature-card .icon { font-size: 3rem; display: block; margin-bottom: 15px; }
+.feature-card h3 { color: #D48300; margin-bottom: 10px; }
+
+/* DESTACADOS */
+.featured {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.featured h2 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 40px;
+}
+
+.grid-productos {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  width: 280px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.card:hover { transform: translateY(-5px); }
+
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-info { padding: 15px; }
+.card-info h4 { margin: 0 0 10px; }
+.card-info .price { color: #D48300; font-weight: bold; font-size: 1.2rem; }
+.card-info button {
+  background: #333; color: white; border: none; padding: 8px 16px; 
+  border-radius: 6px; cursor: pointer; margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.5rem; }
+  .features { flex-direction: column; align-items: center; }
+}
