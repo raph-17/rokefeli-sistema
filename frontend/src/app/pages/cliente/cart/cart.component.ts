@@ -1,14 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { CarritoService } from '../../services/carrito.service'; // Ajusta la ruta
-import { Header } from '../../components/header/header.component'; // Ajusta si tienes header
-import { Footer } from '../../components/footer/footer.component'; // Ajusta si tienes footer
+import { CarritoService } from '../../../services/carrito.service';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, RouterModule, Header, Footer], // Importa Header/Footer si los usas
+  imports: [CommonModule, RouterModule], // Importa Header/Footer si los usas
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css',
 })

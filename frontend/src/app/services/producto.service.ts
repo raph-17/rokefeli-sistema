@@ -1,125 +1,87 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs'; // <--- Importante: 'of'
+import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProductoService {
-
   private apiUrl = 'http://localhost:8080/api/productos';
   private http = inject(HttpClient);
 
-  // --- DATOS FALSOS PARA DISEÑO (MOCKS) ---
-  private mockProductos = [
-    { 
-      id: 1, 
-      nombre: 'Miel de Abeja 500g', 
-      precio: 22.00, 
-      stockActual: 50,
-      imagenUrl: 'img/miel.jpg', // Asegúrate de tener alguna imagen o usará el placeholder
-      descripcion: 'Miel pura multifloral cosechada en Ica.',
-      categoria: { id: 1, nombre: 'Miel' },
-      estado: 'ACTIVO'
-    },
-    { 
-      id: 2, 
-      nombre: 'Polen 100g', 
-      precio: 15.00, 
-      stockActual: 20,
-      imagenUrl: 'img/polen.jpg', 
-      descripcion: 'Energizante natural.',
-      categoria: { id: 2, nombre: 'Polen' },
-      estado: 'ACTIVO'
-    },
-    { 
-      id: 3, 
-      nombre: 'Jalea Real', 
-      precio: 60.00, 
-      stockActual: 5,
-      imagenUrl: 'img/jalea.jpg', 
-      descripcion: 'Alimento real puro.',
-      categoria: { id: 3, nombre: 'Jalea' },
-      estado: 'ACTIVO'
-    },
-    { 
-      id: 4, 
-      nombre: 'Propóleo en Gotas', 
-      precio: 25.00, 
-      stockActual: 30,
-      imagenUrl: 'img/propoleo.jpg', 
-      descripcion: 'Antibiótico natural.',
-      categoria: { id: 4, nombre: 'Propóleo' },
-      estado: 'ACTIVO'
-    }
-  ];
+  /* ===========================
+    MÉTODOS DE LECTURA (GET)
+  =========================== */
 
-    /* ===========================
-    MÉTODOS (Modo Mock Activado)
-     =========================== */
-
+  // Lista productos activos para el cliente (Catálogo)
   listarActivos(nombre?: string, idCategoria?: number): Observable<any[]> {
-    // --- MODO REAL (Comentado por hoy) ---
-    /*
     let params = new HttpParams();
+
     if (nombre) params = params.set('nombre', nombre);
     if (idCategoria) params = params.set('idCategoria', idCategoria.toString());
+
     return this.http.get<any[]>(`${this.apiUrl}/buscar`, { params });
-    */
-
-    // --- MODO MOCK (Activado) ---
-    // Simulamos un filtro simple para que la barra de búsqueda funcione en el frontend
-    let resultados = this.mockProductos;
-
-    if (nombre) {
-      resultados = resultados.filter(p => 
-        p.nombre.toLowerCase().includes(nombre.toLowerCase())
-      );
-    }
-    
-    if (idCategoria) {
-      resultados = resultados.filter(p => p.categoria.id === idCategoria);
-    }
-
-    return of(resultados); // 'of' convierte el array en un Observable
   }
 
-  // Para el Admin
-  listarAdmin(): Observable<any[]> {
-    // return this.http.get<any[]>(this.apiUrl);
-    return of(this.mockProductos);
-  }
-
+  // Obtener detalle por ID
   obtenerPorId(id: number): Observable<any> {
-    // return this.http.get<any>(`${this.apiUrl}/${id}`);
-    const producto = this.mockProductos.find(p => p.id === id);
-    return of(producto);
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  // Estos métodos no harán nada real en la BD, pero evitan errores en consola
+  // Lista TODOS los productos para el Admin (Activos y Descontinuados)
+  listarAdmin(): Observable<any[]> {
+    // Llama al endpoint que devuelve todo sin filtrar estado
+    return this.http.get<any[]>(`${this.apiUrl}/admin`);
+  }
+
+  // Filtrar para admin
+  buscarAdmin(nombre?: string, idCategoria?: number, estado?: string): Observable<any[]> {
+    let params = new HttpParams();
+
+    if (nombre) params = params.set('nombre', nombre);
+    // Convertimos a string solo si existe
+    if (idCategoria) params = params.set('idCategoria', idCategoria.toString());
+    if (estado) params = params.set('estado', estado);
+
+    return this.http.get<any[]>(`${this.apiUrl}/admin/buscar`, { params });
+  }
+
+  // Obtener detalle por ID para ADMIN
+  obtenerPorIdAdmin(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/admin/${id}`);
+  }
+
+  /* ===========================
+    MÉTODOS DE ESCRITURA (ADMIN)
+  =========================== */
+
+  // Crear nuevo producto
   crearProducto(dto: any): Observable<any> {
-    console.log('MOCK: Producto creado', dto);
-    this.mockProductos.push({ ...dto, id: Math.random(), estado: 'ACTIVO' });
-    return of(dto);
+    return this.http.post<any>(this.apiUrl, dto);
   }
 
+  // Actualizar producto existente
   actualizarProducto(id: number, dto: any): Observable<any> {
-    console.log('MOCK: Producto actualizado', id, dto);
-    return of(dto);
+    return this.http.put<any>(`${this.apiUrl}/${id}`, dto);
   }
 
+  // Desactivar producto
   desactivarProducto(id: number): Observable<void> {
-    console.log('MOCK: Producto desactivado', id);
-    return of(undefined);
+    return this.http.put<void>(`${this.apiUrl}/${id}/desactivar`, {});
   }
 
+  // Reactivar producto
   activarProducto(id: number): Observable<void> {
-    console.log('MOCK: Producto activado', id);
-    return of(undefined);
+    return this.http.put<void>(`${this.apiUrl}/${id}/activar`, {});
   }
-  
+
+  // Ajustar stock
+  ajustarStock(dto: any): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/stock/ajustar`, dto);
+  }
+
+  // Eliminar (Hard Delete)
   eliminarProducto(id: number): Observable<void> {
-    console.log('MOCK: Producto eliminado', id);
-    return of(undefined);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

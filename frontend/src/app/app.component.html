@@ -1,0 +1,7 @@
+<app-header *ngIf="!esRutaAdmin()"></app-header>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
+
+<app-footer *ngIf="!esRutaAdmin()"></app-footer>

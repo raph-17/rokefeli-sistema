@@ -1,14 +1,14 @@
 import { Routes } from '@angular/router';
-import { Home } from './pages/home/home';
+import { Home } from './pages/cliente/home/home';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
-import { Catalogo } from './pages/catalogo/catalogo';
-import { ConfirmarPagoComponent } from './pages/confirmar-pago/confirmar-pago';
-import { PanelAdmin } from './pages/panel-admin/panel-admin';
-import { Pedidos } from './pages/pedidos/pedidos';
+import { Catalogo } from './pages/cliente/catalogo/catalogo'; // Catálogo
+import { ConfirmarPagoComponent } from './pages/cliente/confirmar-pago/confirmar-pago';
+import { PanelAdmin } from './pages/admin/panel-admin/panel-admin';
+import { Pedidos } from './pages/cliente/pedidos/pedidos';
 import { Users } from './pages/users/users';
 // Importa el Carrito
-import { CartComponent } from './pages/cart/cart.component'; 
+import { CartComponent } from './pages/cliente/cart/cart.component'; 
 
 export const routes: Routes = [
     { path: '', component: Home },

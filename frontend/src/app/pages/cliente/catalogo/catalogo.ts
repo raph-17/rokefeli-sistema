@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { CarritoService } from '../../services/carrito.service';
+import { CarritoService } from '../../../services/carrito.service';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
-import { ProductoService } from '../../services/producto.service';
-import { CategoriaService } from '../../services/categoria.service';
+import { ProductoService } from '../../../services/producto.service';
+import { CategoriaService } from '../../../services/categoria.service';
 
 interface CatalogoUI {
   id: number;

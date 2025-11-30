@@ -48,6 +48,7 @@ export class AuthService {
   // Cerrar sesión
   logout() {
     localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
     this.usuarioActualSubject.next(null);
   }
 

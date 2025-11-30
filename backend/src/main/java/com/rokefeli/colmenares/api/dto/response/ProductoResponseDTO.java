@@ -16,4 +16,5 @@ public class ProductoResponseDTO {
     private Integer stockActual;
     private Integer stockMinimo;
     private BigDecimal precio;
+    private BigDecimal precioInterno;
 }

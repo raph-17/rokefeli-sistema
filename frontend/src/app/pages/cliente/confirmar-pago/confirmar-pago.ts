@@ -4,9 +4,9 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 // Servicios
-import { CarritoService } from '../../services/carrito.service';
-import { VentaService } from '../../services/venta.service';
-import { PagoService } from '../../services/pago.service'; // <--- Asegúrate de tener este servicio creado (ver abajo si no)
+import { CarritoService } from '../../../services/carrito.service';
+import { VentaService } from '../../../services/venta.service';
+import { PagoService } from '../../../services/pago.service'; // <--- Asegúrate de tener este servicio creado (ver abajo si no)
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -14,10 +14,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
-
-// IMPORTAR LOS COMPONENTES DE UI
-import { Header } from '../../components/header/header.component'; 
-import { Footer } from '../../components/footer/footer.component';
 
 @Component({
   selector: 'app-confirmar-pago',

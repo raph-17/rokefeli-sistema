@@ -1,0 +1,97 @@
+.admin-header {
+  background-color: #1a1a1a;
+  color: white;
+  padding: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Logo */
+.logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tag {
+  background-color: #d48300; /* Naranja de la marca */
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+
+/* Navegación */
+nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-link {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.separator {
+  width: 1px;
+  height: 20px;
+  background-color: #444;
+}
+
+.user-info {
+  font-size: 14px;
+  font-weight: 500;
+  color: #eee;
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid #555;
+  color: #ddd;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  background: #d32f2f; /* Rojo al pasar el mouse */
+  border-color: #d32f2f;
+  color: white;
+}
+
+/* Ajuste Responsive: En pantallas chicas reducimos el margen para no perder espacio */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 20px;
+  }
+}

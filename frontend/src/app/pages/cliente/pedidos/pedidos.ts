@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { HeaderAdmin } from "../../components/header-admin/header-admin";
-import { Pedido } from '../../interfaces/pedido';
+import { HeaderAdmin } from "../../../components/header-admin/header-admin.component";
+import { Pedido } from '../../../interfaces/pedido';
 import { CommonModule } from '@angular/common';
 
 @Component({

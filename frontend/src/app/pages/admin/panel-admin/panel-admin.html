@@ -1,0 +1,315 @@
+<app-header-admin></app-header-admin>
+
+<main>
+  <div class="dashboard-container">
+    <div class="metrics">
+      <div class="card">
+        <h3>Productos</h3>
+        <span class="value">{{ products.length }}</span>
+      </div>
+
+      <div class="card">
+        <h3>Stock Bajo</h3>
+        <span class="value alert">{{ stockBajo }}</span>
+      </div>
+
+      <div class="card">
+        <h3>Ventas Totales</h3>
+        <span class="value">{{ ventasTotales }}</span>
+      </div>
+
+      <div class="card">
+        <h3>Ingresos</h3>
+        <span class="value">{{ ingresosTotales | currency : 'S/. ' : 'symbol' : '1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="cargando" class="loading">Cargando datos...</div>
+
+    <div class="tabs">
+      <button
+        class="tab"
+        [class.active]="activeTab === 'productos'"
+        (click)="cambiarTab('productos')"
+      >
+        📦 Productos
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="activeTab === 'inventario'"
+        (click)="cambiarTab('inventario')"
+      >
+        📊 Inventario
+      </button>
+
+      <button class="tab" [class.active]="activeTab === 'ventas'" (click)="cambiarTab('ventas')">
+        💰 Ventas
+      </button>
+    </div>
+
+    <div *ngIf="activeTab === 'productos'" class="table-section">
+      <div class="table-header">
+        <h3>Listado de Productos</h3>
+        <button class="btn add" (click)="abrirModalAgregarProducto()">+ Nuevo Producto</button>
+      </div>
+
+      <div class="filters-bar">
+        <div class="filter-group">
+          <input
+            type="text"
+            placeholder="Buscar por nombre..."
+            [(ngModel)]="filtroNombre"
+            (keyup.enter)="filtrarProductos()"
+          />
+        </div>
+
+        <div class="filter-group">
+          <select [(ngModel)]="filtroCategoria">
+            <option [ngValue]="null">Todas las Categorías</option>
+            <option *ngFor="let cat of categorias" [ngValue]="cat.id">
+              {{ cat.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <select [(ngModel)]="filtroEstado">
+            <option value="">Todos los Estados</option>
+            <option value="ACTIVO">Activo</option>
+            <option value="DESCONTINUADO">Descontinuado</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-filter search" (click)="filtrarProductos()">🔍 Buscar</button>
+          <button class="btn-filter clear" (click)="limpiarFiltros()">✕ Limpiar</button>
+        </div>
+      </div>
+
+      <div *ngIf="cargando" class="loading">Cargando datos...</div>
+
+      <table class="products-table" *ngIf="!cargando">
+        <thead>
+          <tr>
+            <th>Img</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of products">
+            <td>
+              <img
+                [src]="p.imagenUrl"
+                onerror="this.src='/img/placeholder.png'"
+                class="table-img"
+              />
+            </td>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.categoriaNombre || 'Sin Cat.' }}</td>
+            <td>{{ p.precio | currency : 'S/. ' : 'symbol' : '1.2-2' }}</td>
+            <td>
+              <span [class.text-danger]="p.stockActual < p.stockMinimo">
+                {{ p.stockActual }}
+              </span>
+            </td>
+            <td>
+              <span class="status" [ngClass]="p.estado === 'ACTIVO' ? 'normal' : 'low'">
+                {{ p.estado }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="btn-icon edit" (click)="abrirModalEditarProducto(p)" title="Editar">
+                ✏️
+              </button>
+
+              <button
+                class="btn-icon"
+                *ngIf="p.estado === 'ACTIVO'"
+                (click)="desactivarProducto(p.id)"
+                title="Desactivar"
+              >
+                🔒
+              </button>
+
+              <button
+                class="btn-icon"
+                *ngIf="p.estado !== 'ACTIVO'"
+                (click)="activarProducto(p.id)"
+                title="Reactivar"
+              >
+                🔓
+              </button>
+
+              <button class="btn-icon delete" (click)="eliminarProducto(p.id)" title="Eliminar">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="activeTab === 'inventario'" class="table-section">
+      <div class="table-header">
+        <h3>Control de Stock</h3>
+
+        <label class="toggle-filter" [class.active]="mostrarSoloBajoStock">
+          <input type="checkbox" [(ngModel)]="mostrarSoloBajoStock" />
+          ⚠️ Ver solo Stock Bajo
+        </label>
+      </div>
+
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Stock Actual</th>
+            <th>Mínimo Req.</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of inventarioFiltrado">
+            <td>{{ p.nombre }}</td>
+            <td style="font-weight: bold; font-size: 1.1em">
+              <span [class.text-danger]="p.stockActual < p.stockMinimo">
+                {{ p.stockActual }}
+              </span>
+            </td>
+            <td>{{ p.stockMinimo }}</td>
+            <td>
+              <span class="status" [ngClass]="p.stockActual < p.stockMinimo ? 'low' : 'normal'">
+                {{ p.stockActual < p.stockMinimo ? 'REPONER' : 'OK' }}
+              </span>
+            </td>
+          </tr>
+
+          <tr *ngIf="inventarioFiltrado.length === 0 && mostrarSoloBajoStock">
+            <td colspan="4" style="text-align: center; padding: 20px; color: #1e8e3e">
+              ✅ ¡Todo está en orden! No hay productos con stock bajo.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="activeTab === 'ventas'" class="table-section">
+      <div class="table-header">
+        <h3>Historial de Transacciones</h3>
+      </div>
+
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>ID Venta</th>
+            <th>Cliente</th>
+            <th>Canal</th>
+            <th>Total</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of ventas">
+            <td>#{{ v.id }}</td>
+            <td>
+              <div style="display: flex; flex-direction: column">
+                <span style="font-weight: 500">{{ v.usuario?.nombre || 'Cliente' }}</span>
+                <small style="color: #666">{{ v.usuario?.email }}</small>
+              </div>
+            </td>
+            <td>{{ v.canal }}</td>
+            <td style="font-weight: bold">
+              {{ v.montoTotal | currency : 'S/. ' : 'symbol' : '1.2-2' }}
+            </td>
+            <td>{{ v.fecha | date : 'short' }}</td>
+            <td>
+              <span
+                class="status"
+                [ngClass]="v.estado === 'PAGADA' || v.estado === 'PROCESADA' ? 'normal' : 'low'"
+              >
+                {{ v.estado }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="ventas.length === 0">
+            <td colspan="6" style="text-align: center; padding: 20px">
+              No hay ventas registradas aún.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" *ngIf="mostrarModal">
+  <div class="modal-container">
+    <h2 class="modal-title">
+      {{ idEdicion ? 'Editar Producto' : 'Registrar Nuevo Producto' }}
+    </h2>
+
+    <form [formGroup]="formProducto" class="modal-form">
+      <div class="form-group">
+        <label>Nombre del Producto</label>
+        <input formControlName="nombre" type="text" placeholder="Ej. Miel de Eucalipto" />
+      </div>
+
+      <div class="form-group">
+        <label>Categoría</label>
+        <select formControlName="idCategoria">
+          <option [ngValue]="''" disabled>-- Seleccione --</option>
+
+          <option *ngFor="let cat of categorias" [ngValue]="cat.id">
+            {{ cat.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea formControlName="descripcion" rows="3"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group small">
+          <label>Precio (S/)</label>
+          <input formControlName="precio" type="number" min="0" />
+        </div>
+        <div class="form-group small">
+          <label>Precio Interno (S/)</label>
+          <input formControlName="precioInterno" type="number" min="0" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group small">
+          <label>Stock Inicial</label>
+          <input formControlName="stockActual" type="number" min="0" />
+        </div>
+        <div class="form-group small">
+          <label>Stock Mínimo (Alerta)</label>
+          <input formControlName="stockMinimo" type="number" min="0" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>URL de Imagen</label>
+        <input formControlName="imagenUrl" type="text" placeholder="https://..." />
+      </div>
+    </form>
+
+    <div class="modal-actions">
+      <button class="btn cancel" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn save" (click)="guardarProducto()" [disabled]="formProducto.invalid">
+        {{ idEdicion ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>

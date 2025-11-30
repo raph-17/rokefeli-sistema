@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Usuario } from '../../interfaces/usuario';
 import { CommonModule } from '@angular/common';
-import { HeaderAdmin } from '../../components/header-admin/header-admin';
+import { HeaderAdmin } from '../../components/header-admin/header-admin.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
