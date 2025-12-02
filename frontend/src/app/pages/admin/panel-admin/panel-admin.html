@@ -256,6 +256,8 @@
     <div *ngIf="activeTab === 'ventas'" class="table-section">
       <div class="table-header">
         <h3>Historial de Transacciones</h3>
+
+        <button class="btn add" (click)="abrirModalVenta()">+ Nueva Venta Interna</button>
       </div>
 
       <div class="filters-bar">
@@ -472,6 +474,98 @@
       >
         ➕ Agregar
       </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalVenta">
+  <div class="modal-container" style="width: 700px">
+    <h2 class="modal-title">Registrar Venta Local / Interna</h2>
+
+    <div class="modal-form">
+      <div class="form-group">
+        <label>ID Cliente / Distribuidor:</label>
+        <input
+          [formControl]="idClienteInterno"
+          type="number"
+          placeholder="ID del usuario comprador"
+        />
+      </div>
+
+      <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee" />
+
+      <div class="form-row" style="align-items: flex-end">
+        <div class="form-group" style="flex: 2">
+          <label>Producto:</label>
+          <select [(ngModel)]="productoSeleccionadoId">
+            <option [ngValue]="null">-- Seleccione --</option>
+            <option *ngFor="let p of products" [ngValue]="p.id">
+              {{ p.nombre }} (Stock: {{ p.stockActual }}) - S/ {{ p.precioInterno || p.precio }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group" style="flex: 1">
+          <label>Cant:</label>
+          <input type="number" [(ngModel)]="cantidadSeleccionada" min="1" />
+        </div>
+
+        <div class="form-group">
+          <button
+            class="btn save"
+            (click)="agregarItemVenta()"
+            [disabled]="!productoSeleccionadoId"
+          >
+            + Agregar
+          </button>
+        </div>
+      </div>
+
+      <div
+        style="
+          margin-top: 20px;
+          max-height: 200px;
+          overflow-y: auto;
+          border: 1px solid #eee;
+          border-radius: 8px;
+        "
+      >
+        <table class="products-table" style="min-width: 100%">
+          <thead style="background: #f9f9f9">
+            <tr>
+              <th>Producto</th>
+              <th>Cant.</th>
+              <th>Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of itemsVenta; let i = index">
+              <td style="text-align: left; padding: 10px">{{ item.nombre }}</td>
+              <td>{{ item.cantidad }}</td>
+              <td>S/ {{ item.subtotal | number : '1.2-2' }}</td>
+              <td>
+                <button class="btn-icon delete" (click)="eliminarItemVenta(i)">✕</button>
+              </td>
+            </tr>
+            <tr *ngIf="itemsVenta.length === 0">
+              <td colspan="4" style="text-align: center; padding: 15px; color: #999">
+                Ningún producto agregado aún.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="text-align: right; margin-top: 15px; font-size: 1.2em">
+        Total a Pagar:
+        <strong>{{ totalVentaInterna | currency : 'S/. ' : 'symbol' : '1.2-2' }}</strong>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn cancel" (click)="cerrarModalVenta()">Cancelar</button>
+      <button class="btn save" (click)="guardarVentaInterna()">Registrar Venta</button>
     </div>
   </div>
 </div>

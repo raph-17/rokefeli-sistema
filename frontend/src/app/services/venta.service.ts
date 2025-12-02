@@ -45,4 +45,9 @@ export class VentaService {
   listarAdmin(): Observable<any[]> {
     return this.buscarAdmin();
   }
+
+  // Registrar Venta Interna
+  registrarVentaInterno(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/interno`, data);
+  }
 }

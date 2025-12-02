@@ -8,6 +8,7 @@ import { HeaderAdmin } from '../../../components/header-admin/header-admin.compo
 import { ProductoService } from '../../../services/producto.service';
 import { VentaService } from '../../../services/venta.service';
 import { CategoriaService } from '../../../services/categoria.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-panel-admin',
@@ -55,10 +56,22 @@ export class PanelAdmin implements OnInit {
     Validators.min(1),
   ]);
 
-  // --- VARIABLES PARA FILTROS DE VENTAS ---
+  // Filtro de ventas
   filtroVentaDni: string = '';
   filtroVentaEstado: string = ''; // '' = Todos
   filtroVentaCanal: string = ''; // '' = Todos
+
+  // Lógica Venta Interna
+  mostrarModalVenta = false;
+  itemsVenta: any[] = []; // El "carrito" de la venta interna
+  totalVentaInterna: number = 0;
+
+  // Controles para agregar item
+  productoSeleccionadoId: number | null = null;
+  cantidadSeleccionada: number = 1;
+  
+  // Control para el cliente (ID del distribuidor o comprador local)
+  idClienteInterno = new FormControl('', Validators.required);
 
   get inventarioFiltrado() {
     // Si el checkbox está marcado, filtramos
@@ -73,7 +86,8 @@ export class PanelAdmin implements OnInit {
   constructor(
     private productoService: ProductoService,
     private ventaService: VentaService,
-    private categoriaService: CategoriaService
+    private categoriaService: CategoriaService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -336,6 +350,99 @@ export class PanelAdmin implements OnInit {
     this.filtroVentaEstado = '';
     this.filtroVentaCanal = '';
     this.filtrarVentas(); // Recarga todo
+  }
+
+  // --- VENTA INTERNA ---
+
+  // 1. Abrir/Cerrar Modal
+  abrirModalVenta() {
+    this.itemsVenta = [];
+    this.totalVentaInterna = 0;
+    this.productoSeleccionadoId = null;
+    this.cantidadSeleccionada = 1;
+    this.idClienteInterno.setValue(''); // O pon un ID por defecto si quieres
+    this.mostrarModalVenta = true;
+  }
+
+  cerrarModalVenta() {
+    this.mostrarModalVenta = false;
+  }
+
+  // 2. Agregar producto a la lista temporal
+  agregarItemVenta() {
+    if (!this.productoSeleccionadoId || this.cantidadSeleccionada < 1) return;
+
+    // Buscar producto real en la lista cargada
+    const producto = this.products.find(p => p.id == this.productoSeleccionadoId);
+
+    if (!producto) return;
+
+    // Validar Stock
+    if (producto.stockActual < this.cantidadSeleccionada) {
+      alert(`Solo quedan ${producto.stockActual} unidades de ${producto.nombre}`);
+      return;
+    }
+
+    // Verificar si ya está en la lista para sumar cantidad
+    const itemExistente = this.itemsVenta.find(i => i.idProducto === producto.id);
+
+    if (itemExistente) {
+      itemExistente.cantidad += this.cantidadSeleccionada;
+      itemExistente.subtotal = itemExistente.cantidad * itemExistente.precioUnitario;
+    } else {
+      // Nuevo item
+      this.itemsVenta.push({
+        idProducto: producto.id,
+        nombre: producto.nombre,
+        precioUnitario: producto.precioInterno || producto.precio, // Usa precio interno si existe
+        cantidad: this.cantidadSeleccionada,
+        subtotal: (producto.precioInterno || producto.precio) * this.cantidadSeleccionada
+      });
+    }
+
+    this.calcularTotalInterno();
+    this.productoSeleccionadoId = null; // Resetear select
+    this.cantidadSeleccionada = 1;      // Resetear cantidad
+  }
+
+  eliminarItemVenta(index: number) {
+    this.itemsVenta.splice(index, 1);
+    this.calcularTotalInterno();
+  }
+
+  calcularTotalInterno() {
+    this.totalVentaInterna = this.itemsVenta.reduce((acc, item) => acc + item.subtotal, 0);
+  }
+
+  // 3. Guardar Venta en Backend
+  guardarVentaInterna() {
+    if (this.itemsVenta.length === 0) {
+      alert('Debe agregar al menos un producto');
+      return;
+    }
+    if (this.idClienteInterno.invalid) {
+      alert('Debe ingresar el ID del cliente/distribuidor');
+      return;
+    }
+
+    // Armar el DTO como lo pide Java (VentaInternoCreateDTO)
+    const dto = {
+      idEmpleado: this.authService.getUserId(), // TODO: Sacar del Token del usuario logueado (ADMIN)
+      idDistribuidor: this.idClienteInterno.value, // ID del usuario comprador
+      detalles: this.itemsVenta.map(i => ({
+        idProducto: i.idProducto,
+        cantidad: i.cantidad
+      }))
+    };
+
+    this.ventaService.registrarVentaInterno(dto).subscribe({ // Asegúrate de tener este método en el service
+      next: () => {
+        alert('Venta interna registrada con éxito 💰');
+        this.cargarDatosDashboard(); // Recargar stock y tabla
+        this.cerrarModalVenta();
+      },
+      error: (err) => alert('Error al registrar: ' + err.message)
+    });
   }
 
   // --- OTRAS ACCIONES ---
