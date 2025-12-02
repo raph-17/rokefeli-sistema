@@ -11,7 +11,9 @@ import java.util.List;
 public class VentaResponseDTO {
     private Long id;
     private Long idUsuario;
-    private String nombreUsuario;
+    private String nombresUsuario;
+    private String apellidosUsuario;
+    private String dniUsuario;
     private CanalVenta canal;
     private BigDecimal montoTotal;
     private EstadoVenta estado;

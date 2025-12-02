@@ -5,6 +5,7 @@ import java.util.List;
 import com.rokefeli.colmenares.api.dto.create.VentaInternoCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaOnlineCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
+import com.rokefeli.colmenares.api.entity.enums.CanalVenta;
 import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 
 public interface VentaService {
@@ -19,5 +20,7 @@ public interface VentaService {
     List<VentaResponseDTO> findAll();
 
     List<VentaResponseDTO> findByUsuario(Long idUsuario);
+
+    List<VentaResponseDTO> buscarAdmin(EstadoVenta estado, CanalVenta canal, String dni);
 }
 

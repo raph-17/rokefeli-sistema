@@ -2,25 +2,64 @@
 
 <main>
   <div class="dashboard-container">
-    <div class="metrics">
+    <div class="metrics" *ngIf="activeTab === 'productos'">
       <div class="card">
-        <h3>Productos</h3>
+        <h3>Total Catálogo</h3>
         <span class="value">{{ products.length }}</span>
       </div>
-
       <div class="card">
-        <h3>Stock Bajo</h3>
-        <span class="value alert">{{ stockBajo }}</span>
+        <h3>Activos (Venta)</h3>
+        <span class="value" style="color: #28a745">{{ productosActivos }}</span>
       </div>
-
       <div class="card">
-        <h3>Ventas Totales</h3>
+        <h3>Descontinuados</h3>
+        <span class="value" style="color: #6c757d">{{ productosInactivos }}</span>
+      </div>
+      <div class="card">
+        <h3>Categorías</h3>
+        <span class="value">{{ categorias.length }}</span>
+      </div>
+    </div>
+
+    <div class="metrics" *ngIf="activeTab === 'inventario'">
+      <div class="card">
+        <h3>Total Productos</h3>
+        <span class="value">{{ products.length }}</span>
+      </div>
+      <div class="card">
+        <h3>Stock Crítico</h3>
+        <span class="value" [class.alert]="stockBajo > 0">{{ stockBajo }}</span>
+      </div>
+      <div class="card">
+        <h3>Stock Saludable</h3>
+        <span class="value" style="color: #1e8e3e">{{ products.length - stockBajo }}</span>
+      </div>
+      <div class="card">
+        <h3>Estado Almacén</h3>
+        <span class="value" style="font-size: 20px">{{
+          stockBajo > 0 ? '⚠️ Atención' : '✅ Óptimo'
+        }}</span>
+      </div>
+    </div>
+
+    <div class="metrics" *ngIf="activeTab === 'ventas'">
+      <div class="card">
+        <h3>Ingresos Totales</h3>
+        <span class="value">{{ ingresosTotales | currency : 'S/. ' : 'symbol' : '1.2-2' }}</span>
+      </div>
+      <div class="card">
+        <h3>Total Transacciones</h3>
         <span class="value">{{ ventasTotales }}</span>
       </div>
-
       <div class="card">
-        <h3>Ingresos</h3>
-        <span class="value">{{ ingresosTotales | currency : 'S/. ' : 'symbol' : '1.2-2' }}</span>
+        <h3>Ventas Procesadas</h3>
+        <span class="value" [style.color]="ventasProcesadas > 0 ? '#28a745' : '#666'">
+          {{ ventasProcesadas }}
+        </span>
+      </div>
+      <div class="card">
+        <h3>Promedio por Venta</h3>
+        <span class="value">{{ ticketPromedio | currency : 'S/. ' : 'symbol' : '1.0-0' }}</span>
       </div>
     </div>
 
@@ -58,14 +97,14 @@
         <div class="filter-group">
           <input
             type="text"
-            placeholder="Buscar por nombre..."
+            placeholder="Buscar producto por nombre..."
             [(ngModel)]="filtroNombre"
             (keyup.enter)="filtrarProductos()"
           />
         </div>
 
         <div class="filter-group">
-          <select [(ngModel)]="filtroCategoria">
+          <select [(ngModel)]="filtroCategoria" (change)="filtrarProductos()">
             <option [ngValue]="null">Todas las Categorías</option>
             <option *ngFor="let cat of categorias" [ngValue]="cat.id">
               {{ cat.nombre }}
@@ -74,7 +113,7 @@
         </div>
 
         <div class="filter-group">
-          <select [(ngModel)]="filtroEstado">
+          <select [(ngModel)]="filtroEstado" (change)="filtrarProductos()">
             <option value="">Todos los Estados</option>
             <option value="ACTIVO">Activo</option>
             <option value="DESCONTINUADO">Descontinuado</option>
@@ -82,8 +121,9 @@
         </div>
 
         <div class="filter-actions">
-          <button class="btn-filter search" (click)="filtrarProductos()">🔍 Buscar</button>
-          <button class="btn-filter clear" (click)="limpiarFiltros()">✕ Limpiar</button>
+          <button class="btn-filter clear" (click)="limpiarFiltros()" title="Limpiar filtros">
+            ✕
+          </button>
         </div>
       </div>
 
@@ -123,32 +163,46 @@
                 {{ p.estado }}
               </span>
             </td>
-            <td class="actions">
-              <button class="btn-icon edit" (click)="abrirModalEditarProducto(p)" title="Editar">
-                ✏️
-              </button>
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button
+                  class="btn-icon btn-blue"
+                  (click)="abrirModalStock(p)"
+                  title="Ajustar Stock"
+                >
+                  📦
+                </button>
 
-              <button
-                class="btn-icon"
-                *ngIf="p.estado === 'ACTIVO'"
-                (click)="desactivarProducto(p.id)"
-                title="Desactivar"
-              >
-                🔒
-              </button>
+                <button
+                  class="btn-icon btn-yellow"
+                  (click)="abrirModalEditarProducto(p)"
+                  title="Editar"
+                >
+                  ✏️
+                </button>
 
-              <button
-                class="btn-icon"
-                *ngIf="p.estado !== 'ACTIVO'"
-                (click)="activarProducto(p.id)"
-                title="Reactivar"
-              >
-                🔓
-              </button>
+                <button
+                  class="btn-icon btn-gray"
+                  *ngIf="p.estado === 'ACTIVO'"
+                  (click)="desactivarProducto(p.id)"
+                  title="Desactivar"
+                >
+                  🔒
+                </button>
 
-              <button class="btn-icon delete" (click)="eliminarProducto(p.id)" title="Eliminar">
-                🗑️
-              </button>
+                <button
+                  class="btn-icon btn-green"
+                  *ngIf="p.estado !== 'ACTIVO'"
+                  (click)="activarProducto(p.id)"
+                  title="Activar"
+                >
+                  🔓
+                </button>
+
+                <button class="btn-icon btn-red" (click)="eliminarProducto(p.id)" title="Eliminar">
+                  🗑️
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -204,11 +258,43 @@
         <h3>Historial de Transacciones</h3>
       </div>
 
+      <div class="filters-bar">
+        <div class="filter-group">
+          <input
+            type="text"
+            placeholder="Buscar por DNI Cliente..."
+            [(ngModel)]="filtroVentaDni"
+            (keyup.enter)="filtrarVentas()"
+          />
+        </div>
+
+        <div class="filter-group">
+          <select [(ngModel)]="filtroVentaCanal" (change)="filtrarVentas()">
+            <option value="">Todos los Canales</option>
+            <option value="ONLINE">Online (Web)</option>
+            <option value="INTERNO">Interno (Local/Distribuidor)</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <select [(ngModel)]="filtroVentaEstado" (change)="filtrarVentas()">
+            <option value="">Todos los Estados</option>
+            <option value="PAGADA">Pagada</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="PROCESADA">Procesada</option>
+            <option value="CANCELADA">Cancelada</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-filter clear" (click)="limpiarFiltrosVentas()">✕</button>
+        </div>
+      </div>
       <table class="products-table">
         <thead>
           <tr>
-            <th>ID Venta</th>
-            <th>Cliente</th>
+            <th>ID</th>
+            <th>Cliente (DNI)</th>
             <th>Canal</th>
             <th>Total</th>
             <th>Fecha</th>
@@ -216,15 +302,26 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let v of ventas">
+          <tr *ngFor="let v of ventasFiltradas">
             <td>#{{ v.id }}</td>
+
             <td>
               <div style="display: flex; flex-direction: column">
-                <span style="font-weight: 500">{{ v.usuario?.nombre || 'Cliente' }}</span>
-                <small style="color: #666">{{ v.usuario?.email }}</small>
+                <span style="font-weight: 500">{{
+                  v.nombresUsuario + ' ' + v.apellidosUsuario || 'Cliente'
+                }}</span>
+                <small style="color: #d48300; font-weight: bold">
+                  {{ v.dniUsuario || 'S/N' }}
+                </small>
               </div>
             </td>
-            <td>{{ v.canal }}</td>
+
+            <td>
+              <span style="font-size: 11px; padding: 2px 6px; background: #eee; border-radius: 4px">
+                {{ v.canal }}
+              </span>
+            </td>
+
             <td style="font-weight: bold">
               {{ v.montoTotal | currency : 'S/. ' : 'symbol' : '1.2-2' }}
             </td>
@@ -238,9 +335,9 @@
               </span>
             </td>
           </tr>
-          <tr *ngIf="ventas.length === 0">
-            <td colspan="6" style="text-align: center; padding: 20px">
-              No hay ventas registradas aún.
+          <tr *ngIf="ventasFiltradas.length === 0">
+            <td colspan="6" style="text-align: center; padding: 20px; color: #666">
+              No se encontraron ventas con estos filtros.
             </td>
           </tr>
         </tbody>
@@ -309,6 +406,71 @@
       <button class="btn cancel" (click)="cerrarModal()">Cancelar</button>
       <button class="btn save" (click)="guardarProducto()" [disabled]="formProducto.invalid">
         {{ idEdicion ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalStock">
+  <div class="modal-container" style="width: 400px">
+    <h2 class="modal-title">Gestión de Stock</h2>
+
+    <div
+      style="
+        text-align: center;
+        margin-bottom: 20px;
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 8px;
+      "
+    >
+      <p style="margin: 0; color: #666; font-size: 0.9em">Producto</p>
+      <strong style="font-size: 1.1em">{{ productoSeleccionado?.nombre }}</strong>
+      <div style="margin-top: 8px; font-size: 0.9em">
+        Stock Actual: <strong>{{ productoSeleccionado?.stockActual }}</strong>
+      </div>
+    </div>
+
+    <div class="modal-form">
+      <div class="form-group">
+        <label>Cantidad:</label>
+        <input
+          [formControl]="cantidadStockControl"
+          type="number"
+          placeholder="Ej. 10"
+          min="1"
+          autofocus
+          style="text-align: center; font-size: 1.2em; padding: 12px"
+        />
+
+        <small
+          *ngIf="cantidadStockControl.invalid && cantidadStockControl.touched"
+          style="color: red; text-align: center; display: block; margin-top: 5px"
+        >
+          Ingrese una cantidad válida mayor a 0
+        </small>
+      </div>
+    </div>
+
+    <div class="modal-actions" style="justify-content: space-between; gap: 10px">
+      <button class="btn cancel" (click)="cerrarModalStock()" style="flex: 1">Cancelar</button>
+
+      <button
+        class="btn btn-danger"
+        (click)="guardarAjusteStock('RESTAR')"
+        [disabled]="cantidadStockControl.invalid"
+        style="flex: 1"
+      >
+        ➖ Retirar
+      </button>
+
+      <button
+        class="btn btn-success"
+        (click)="guardarAjusteStock('SUMAR')"
+        [disabled]="cantidadStockControl.invalid"
+        style="flex: 1"
+      >
+        ➕ Agregar
       </button>
     </div>
   </div>

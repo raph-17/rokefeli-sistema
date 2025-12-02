@@ -3,11 +3,11 @@ package com.rokefeli.colmenares.api.controller;
 import com.rokefeli.colmenares.api.dto.create.VentaInternoCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaOnlineCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
+import com.rokefeli.colmenares.api.entity.enums.CanalVenta;
 import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
-import com.rokefeli.colmenares.api.security.JwtUserDetails; // Asegúrate de importar tu clase
+import com.rokefeli.colmenares.api.security.JwtUserDetails;
 import com.rokefeli.colmenares.api.service.interfaces.VentaService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +59,7 @@ public class VentaController {
     //  ADMIN / EMPLEADO (Gestión Interna)
     // ==========================================
 
+    // ADMIN: Registrar venta interna
     @PostMapping("/interno")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
     public ResponseEntity<VentaResponseDTO> registrarVentaInterno(
@@ -68,37 +69,35 @@ public class VentaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(venta);
     }
 
+    // ADMIN: Listar todas las ventas
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> listarTodasLasVentas() {
         return ResponseEntity.ok(ventaService.findAll());
     }
 
+    // ADMIN: Filtrar por id
     @GetMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> obtenerPorIdAdmin(@PathVariable Long id) {
         return ResponseEntity.ok(ventaService.findById(id));
     }
 
+    // ADMIN: Filtrar por usuario
     @GetMapping("/admin/usuario/{idUsuario}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> obtenerPorUsuarioAdmin(@PathVariable Long idUsuario) {
         return ResponseEntity.ok(ventaService.findByUsuario(idUsuario));
     }
 
-    // Filtro combinado para el panel admin
+    // ADMIN: Búsqueda avanzada de ventas
     @GetMapping("/admin/buscar")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> buscarVentas(
-            @RequestParam(required = false) Long idUsuario,
-            @RequestParam(required = false) EstadoVenta estado
+    public ResponseEntity<?> buscarVentasAdmin(
+            @RequestParam(required = false) EstadoVenta estado,
+            @RequestParam(required = false) CanalVenta canal,
+            @RequestParam(required = false) String dni
     ) {
-        if (idUsuario != null && estado != null) {
-            return ResponseEntity.ok(ventaService.findByEstadoCliente(idUsuario, estado));
-        } else if (idUsuario != null) {
-            return ResponseEntity.ok(ventaService.findByUsuario(idUsuario));
-        } else {
-            return ResponseEntity.ok(ventaService.findAll());
-        }
+        return ResponseEntity.ok(ventaService.buscarAdmin(estado, canal, dni));
     }
 }

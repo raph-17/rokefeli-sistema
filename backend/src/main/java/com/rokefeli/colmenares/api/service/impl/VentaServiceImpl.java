@@ -127,6 +127,14 @@ public class VentaServiceImpl implements VentaService {
                 .toList();
     }
 
+    @Override
+    public List<VentaResponseDTO> buscarAdmin(EstadoVenta estado, CanalVenta canal, String dni) {
+        return ventaRepository.buscarVentasAdmin(estado, canal, dni)
+                .stream()
+                .map(v -> buildResponse(v, v.getDetalles()))
+                .toList();
+    }
+
     private VentaResponseDTO buildResponse(Venta venta, List<DetalleVenta> detalles) {
 
         VentaResponseDTO response = ventaMapper.toResponseDTO(venta);

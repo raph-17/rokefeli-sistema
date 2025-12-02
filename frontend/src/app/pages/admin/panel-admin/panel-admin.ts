@@ -25,12 +25,17 @@ export class PanelAdmin implements OnInit {
 
   // Datos
   products: any[] = [];
-  ventas: any[] = [];
+  allVentas: any[] = [];
+  ventasFiltradas: any[] = [];
   categorias: any[] = [];
 
   // Métricas
   ventasTotales: number = 0;
   ingresosTotales: number = 0;
+  productosActivos: number = 0;
+  productosInactivos: number = 0;
+  ventasProcesadas: number = 0;
+  ticketPromedio: number = 0;
 
   // Pestañas
   activeTab: 'productos' | 'inventario' | 'ventas' = 'productos';
@@ -41,6 +46,19 @@ export class PanelAdmin implements OnInit {
   filtroCategoria: number | null = null; // O string vacío ''
   filtroEstado: string = '';
   mostrarSoloBajoStock: boolean = false;
+
+  // Modal de stock
+  mostrarModalStock = false;
+  productoSeleccionado: any = null;
+  cantidadStockControl = new FormControl<number | null>(null, [
+    Validators.required,
+    Validators.min(1),
+  ]);
+
+  // --- VARIABLES PARA FILTROS DE VENTAS ---
+  filtroVentaDni: string = '';
+  filtroVentaEstado: string = ''; // '' = Todos
+  filtroVentaCanal: string = ''; // '' = Todos
 
   get inventarioFiltrado() {
     // Si el checkbox está marcado, filtramos
@@ -82,14 +100,15 @@ export class PanelAdmin implements OnInit {
     // 1. Productos
     this.productoService.listarAdmin().subscribe({
       next: (data) => {
-        this.products = data;
-        this.products.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        this.products = data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        
+        // Calculamos métricas de productos una sola vez
+        this.productosActivos = this.products.filter(p => p.estado === 'ACTIVO').length;
+        this.productosInactivos = this.products.length - this.productosActivos;
+        
         this.cargando = false;
       },
-      error: (err) => {
-        console.error('Error productos:', err);
-        this.cargando = false;
-      },
+      error: (err) => { console.error(err); this.cargando = false; }
     });
 
     // 2. Categorías
@@ -100,16 +119,42 @@ export class PanelAdmin implements OnInit {
     // 3. Ventas
     this.ventaService.listarAdmin().subscribe({
       next: (data) => {
-        this.ventas = data;
-        this.calcularMetricas();
+        this.allVentas = data;      // Guardamos el TOTAL REAL
+        this.ventasFiltradas = data; // Inicialmente mostramos todo
+        
+        this.calcularMetricasGlobales(); // Calculamos con allVentas
       },
-      error: (err) => console.error('Error ventas:', err),
+      error: (err) => console.error(err)
     });
+
+    this.filtrarVentas();
   }
 
   calcularMetricas() {
-    this.ventasTotales = this.ventas.length;
-    this.ingresosTotales = this.ventas.reduce((acc, v) => acc + (v.montoTotal || 0), 0);
+    // 1. Ventas Totales: Solo contamos las exitosas (PAGADA o PROCESADA)
+
+    const ventasExitosas = this.ventasFiltradas.filter(
+      (v) => v.estado === 'PAGADA' || v.estado === 'PROCESADA'
+    );
+
+    this.ventasTotales = this.ventasFiltradas.length; // Muestra total de intentos (o usa ventasExitosas.length si prefieres)
+
+    // 2. Ingresos: Sumar solo las exitosas
+    this.ingresosTotales = ventasExitosas.reduce((acc, v) => acc + (v.montoTotal || 0), 0);
+  }
+
+  calcularMetricasGlobales() {
+    // Ventas Totales (Solo las pagadas/procesadas cuentan para dinero)
+    const ventasReales = this.allVentas.filter(v => v.estado === 'PAGADA' || v.estado === 'PROCESADA');
+    
+    this.ventasTotales = this.allVentas.length; // Total histórico
+    this.ingresosTotales = ventasReales.reduce((acc, v) => acc + (v.montoTotal || 0), 0);
+    
+    // Ventas Pendientes (Para alertar al admin)
+    this.ventasProcesadas = this.allVentas.filter(v => v.estado === 'PROCESADA').length;
+
+    // Ticket Promedio (Cuánto gasta un cliente promedio)
+    this.ticketPromedio = ventasReales.length > 0 ? this.ingresosTotales / ventasReales.length : 0;
   }
 
   // --- MODAL: CREAR Y EDITAR ---
@@ -117,9 +162,9 @@ export class PanelAdmin implements OnInit {
   abrirModalAgregarProducto() {
     this.idEdicion = null; // Modo Crear
     this.formProducto.reset({
-      stockMinimo: 5,
-      precio: 0,
-      stockActual: 0,
+      stockMinimo: null,
+      precio: null,
+      stockActual: null,
       idCategoria: '', // Reset select
     });
     this.mostrarModal = true;
@@ -225,6 +270,72 @@ export class PanelAdmin implements OnInit {
     this.filtroCategoria = null;
     this.filtroEstado = '';
     this.cargarDatosDashboard(); // Vuelve a cargar la lista completa original
+  }
+
+  // Modal stock
+  abrirModalStock(producto: any) {
+    this.productoSeleccionado = producto;
+    this.cantidadStockControl.reset();
+    this.mostrarModalStock = true;
+  }
+
+  cerrarModalStock() {
+    this.mostrarModalStock = false;
+    this.productoSeleccionado = null;
+    this.cantidadStockControl.reset();
+  }
+
+  guardarAjusteStock(accion: 'SUMAR' | 'RESTAR') {
+    if (!this.productoSeleccionado || this.cantidadStockControl.invalid) {
+      this.cantidadStockControl.markAsTouched(); // Para mostrar error si está vacío
+      return;
+    }
+
+    const valorIngresado = this.cantidadStockControl.value || 0;
+
+    // Lógica matemática: Si es RESTAR, lo volvemos negativo
+    const cantidadFinal =
+      accion === 'RESTAR'
+        ? -Math.abs(valorIngresado) // Asegura negativo
+        : Math.abs(valorIngresado); // Asegura positivo
+
+    const dto = {
+      productoId: this.productoSeleccionado.id,
+      cantidadCambio: cantidadFinal,
+    };
+
+    this.productoService.ajustarStock(dto).subscribe({
+      next: () => {
+        const verbo = accion === 'SUMAR' ? 'agregado' : 'retirado';
+        alert(`Stock ${verbo} correctamente 📦`);
+        this.cargarDatosDashboard();
+        this.cerrarModalStock();
+      },
+      error: (err) => alert('Error ajustando stock: ' + err.message),
+    });
+  }
+
+  // --- FILTRADO DE VENTAS ---
+  filtrarVentas() {
+    // Aquí llamamos al servicio como antes, PERO actualizamos 'ventasFiltradas'
+    this.ventaService.buscarAdmin(
+      this.filtroVentaEstado || undefined,
+      this.filtroVentaCanal || undefined,
+      this.filtroVentaDni || undefined
+    ).subscribe({
+      next: (data) => {
+        this.ventasFiltradas = data; // Solo cambiamos la tabla
+        // NO llamamos a calcularMetricasGlobales() aquí, así que los Ingresos se mantienen fijos.
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
+  limpiarFiltrosVentas() {
+    this.filtroVentaDni = '';
+    this.filtroVentaEstado = '';
+    this.filtroVentaCanal = '';
+    this.filtrarVentas(); // Recarga todo
   }
 
   // --- OTRAS ACCIONES ---

@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class VentaService {
-
   // Recomiendo usar la URL completa para evitar problemas de proxy al inicio
-  private apiUrl = 'http://localhost:8080/api/ventas'; 
+  private apiUrl = 'http://localhost:8080/api/ventas';
 
   constructor(private http: HttpClient) {}
 
@@ -23,8 +22,6 @@ export class VentaService {
 
   // Ver historial de compras del cliente logueado
   listarMisCompras(): Observable<any[]> {
-    // Asumiendo que tienes un endpoint como /api/ventas/mis-compras 
-    // o que filtras por usuario en el backend
     return this.http.get<any[]>(`${this.apiUrl}/mis-compras`);
   }
 
@@ -32,10 +29,20 @@ export class VentaService {
      ADMIN
      =========================== */
 
-  // Este es el método que necesita tu PanelAdmin
+  // Acepta filtros opcionales. Si son null/undefined, no se envían.
+  buscarAdmin(estado?: string, canal?: string, dni?: string): Observable<any[]> {
+    let params = new HttpParams();
+
+    if (estado && estado !== '') params = params.set('estado', estado);
+    if (canal && canal !== '') params = params.set('canal', canal);
+    if (dni && dni !== '') params = params.set('dni', dni);
+
+    // Llama al endpoint
+    return this.http.get<any[]>(`${this.apiUrl}/admin/buscar`, { params });
+  }
+
+  // Listar todas las ventas sin filtro (para admin)
   listarAdmin(): Observable<any[]> {
-    // Llama al endpoint que devuelve TODAS las ventas
-    // Tu backend debe tener un @GetMapping en VentaController para esto
-    return this.http.get<any[]>(`${this.apiUrl}/admin`); 
+    return this.buscarAdmin();
   }
 }

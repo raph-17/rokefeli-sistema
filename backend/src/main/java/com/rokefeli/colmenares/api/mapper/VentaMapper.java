@@ -15,7 +15,9 @@ public interface VentaMapper extends BaseMapper {
     Venta toEntity(VentaOnlineCreateDTO dto);
 
     @Mapping(source = "usuario.id", target = "idUsuario")
-    @Mapping(source = "usuario.nombres", target = "nombreUsuario")
+    @Mapping(source = "usuario.nombres", target = "nombresUsuario")
+    @Mapping(source = "usuario.apellidos", target = "apellidosUsuario")
+    @Mapping(source = "usuario.dni", target = "dniUsuario")
     VentaResponseDTO toResponseDTO(Venta entity);
 
 }
