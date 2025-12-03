@@ -58,13 +58,20 @@
 .tab {
   padding: 10px 20px;
   background: transparent;
-  border: none;
+
+  /* TRUCO 1: Reserva el espacio del borde desde el principio (transparente) 
+     para que si el activo tiene borde, no "empuje" el contenido */
+  border: 1px solid transparent;
+
   font-size: 16px;
   font-weight: 600;
   color: #666;
   cursor: pointer;
   border-radius: 8px;
-  transition: all 0.2s;
+
+  /* TRUCO 2: Solo animamos colores y sombras. 
+     Quitamos 'all' para que no anime cambios de tamaño/fuente */
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .tab:hover {
@@ -72,10 +79,11 @@
   color: #333;
 }
 
+/* Estado activo del tab (Asegúrate de tener esto para que se vea bien) */
 .tab.active {
-  background: #d48300;
+  background-color: var(--primary-color); /* O el color naranja que usas */
   color: white;
-  box-shadow: 0 4px 10px rgba(212, 131, 0, 0.3);
+  /* Al tener ya el borde transparente arriba, esto solo lo pinta, no cambia el tamaño */
 }
 
 /* --- TABLAS Y SECCIONES --- */
@@ -116,26 +124,61 @@
   background: #218838;
 }
 
+/* =========================================
+   TABLA DE TARIFAS (CORREGIDA)
+   ========================================= */
 .products-table {
   width: 100%;
-  min-width: 900px;
-  border-collapse: collapse;
+  border-collapse: separate; /* Permite bordes redondeados si quisieras */
+  border-spacing: 0; /* Elimina espacio entre bordes */
+  font-size: 0.9rem;
 }
 
-.products-table th {
-  text-align: center;
-  padding: 15px;
-  background: #f8f9fa;
-  color: #555;
-  font-weight: 600;
-  border-bottom: 2px solid #eee;
-}
-
+/* Reglas comunes para Títulos (th) y Celdas (td) */
+.products-table th,
 .products-table td {
-  padding: 12px;
-  border-bottom: 1px solid #f0f0f0;
-  vertical-align: middle;
+  padding: 16px 20px; /* Aumenté el padding lateral para que no se vea pegado */
+  text-align: left; /* FUERZA ALINEACIÓN IZQUIERDA EN TODO */
+  vertical-align: middle; /* Centrado verticalmente */
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Estilos específicos del Encabezado */
+.products-table th {
+  background-color: #f8fafc;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-top: 1px solid var(--border-color); /* Borde arriba también */
+}
+
+/* === ALINEACIONES ESPECÍFICAS POR COLUMNA === */
+
+/* 1. Columna Precio (La 4ta columna) -> Alinear a la izquierda para leer bien el monto */
+.products-table td:nth-child(4),
+.products-table th:nth-child(4) {
+  /* Opcional: Si prefieres números a la derecha, cambia esto a 'right' en ambos */
+  text-align: left;
+}
+
+/* 2. Columna Estado (La 6ta columna) -> Centrado */
+.products-table td:nth-child(6),
+.products-table th:nth-child(6) {
   text-align: center;
+}
+
+/* 3. Columna Acciones (La última) -> A la derecha */
+.products-table td:last-child,
+.products-table th:last-child {
+  text-align: right;
+  padding-right: 24px; /* Un poco más de aire al final */
+}
+
+/* Hover en filas */
+.products-table tbody tr:hover td {
+  background-color: #fff7ed; /* Naranja muy suave al pasar el mouse */
 }
 
 .actions {
@@ -149,9 +192,32 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
+
+  /* Mismo truco del borde */
   border: 1px solid transparent;
+
   cursor: pointer;
-  transition: all 0.2s;
+
+  /* Solo animamos lo visual, no lo estructural */
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+
+  color: white;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+
+  /* Mismo truco del borde */
+  border: 1px solid transparent;
+
+  cursor: pointer;
+
+  /* Solo animamos lo visual, no lo estructural */
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+
   color: white;
 }
 
@@ -405,13 +471,13 @@
   border-radius: 6px;
   font-size: 14px;
   outline: none;
-  box-sizing: border-box; 
+  box-sizing: border-box;
   height: 40px;
 }
 
 .filter-group input:focus,
 .filter-group select:focus {
-  border-color: #D48300;
+  border-color: #d48300;
   box-shadow: 0 0 0 2px rgba(212, 131, 0, 0.1);
 }
 
@@ -642,20 +708,933 @@
   color: white;
 }
 
+/* Layout Maestro-Detalle */
+.logistica-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr; /* Columna fija izq, flexible der */
+  gap: 25px;
+  min-height: 500px;
+}
+
+/* Lista de Agencias */
+.agencia-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.agencia-card:hover {
+  border-color: #d48300;
+  background: #fffcf5;
+}
+
+.agencia-card.active {
+  background: #d48300;
+  color: white;
+  border-color: #d48300;
+  box-shadow: 0 5px 15px rgba(212, 131, 0, 0.3);
+}
+
+.agencia-card.active .btn-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Estado de la Agencia (Puntito) */
+.dot {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+.dot.active {
+  background-color: #28a745;
+  box-shadow: 0 0 5px #28a745;
+}
+.dot.inactive {
+  background-color: #dc3545;
+}
+
+/* Mensaje vacío */
+.empty-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: white;
+  border-radius: 16px;
+  color: #999;
+  border: 2px dashed #eee;
+}
+
+@media (max-width: 900px) {
+  .logistica-grid {
+    grid-template-columns: 1fr;
+  } /* Apilar en móvil */
+}
+
 @media (max-width: 900px) {
   .filters-bar {
     /* En pantallas chicas, pasamos a una sola columna */
-    grid-template-columns: 1fr; 
+    grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .filter-actions {
     /* En móvil el botón de limpiar se ve mejor ancho completo */
     width: 100%;
   }
-  
+
   .btn-filter.clear {
     width: 100%;
   }
 }
 
+/* =========================================
+   VARIABLES Y BASE
+   ========================================= */
+:host {
+  /* Paleta de colores basada en tu logo */
+  --primary-color: #f97316; /* Naranja */
+  --primary-light: #ffedd5;
+  --bg-page: #f8fafc; /* Gris azulado muy claro */
+  --bg-card: #ffffff;
+  --text-main: #334155;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+  --danger-bg: #fee2e2;
+  --danger-text: #991b1b;
+  --radius: 12px;
+}
+
+/* =========================================
+   LAYOUT PRINCIPAL (GRID)
+   ========================================= */
+.logistica-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr; /* Lateral fijo | Contenido flexible */
+  gap: 24px;
+  padding: 24px;
+  background-color: var(--bg-page);
+  min-height: calc(100vh - 80px); /* Ajuste aproximado para el header */
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--text-main);
+}
+
+/* Tarjetas (Contenedores Blancos) */
+.panel-col {
+  background-color: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  border: 1px solid var(--border-color);
+  padding: 24px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================
+   HEADERS Y TÍTULOS
+   ========================================= */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* =========================================
+   LISTA DE AGENCIAS (SIDEBAR)
+   ========================================= */
+.agencia-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.agencia-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+/* Hover normal */
+.agencia-list li:hover {
+  background-color: #f1f5f9;
+}
+
+/* Elemento Seleccionado */
+.agencia-list li.selected {
+  background-color: var(--primary-light);
+  border-color: #fed7aa;
+  color: #c2410c;
+  font-weight: 600;
+}
+
+/* Indicador de estado (punto verde/gris) */
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot.active {
+  background-color: #22c55e;
+  box-shadow: 0 0 0 2px #dcfce7;
+}
+.dot.inactive {
+  background-color: #cbd5e1;
+}
+
+/* =========================================
+   TABLA DE TARIFAS
+   ========================================= */
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.products-table th {
+  text-align: left;
+  padding: 12px 16px;
+  background-color: #f8fafc;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.products-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.products-table tr:hover td {
+  background-color: #f8fafc; /* Hover en fila */
+}
+
+/* =========================================
+   BADGES (ESTADOS)
+   ========================================= */
+.status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status.normal {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+}
+.status.low {
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+/* =========================================
+   BOTONES
+   ========================================= */
+/* Botón Principal (Nueva Tarifa) */
+button.btn.add {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 2px 5px rgba(249, 115, 22, 0.3);
+}
+
+button.btn.add:hover:not([disabled]) {
+  background-color: #ea580c;
+  transform: translateY(-1px);
+}
+
+button.btn.add:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Botones Icono (Pequeños) */
+.btn-icon {
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+  color: var(--text-muted);
+}
+
+.btn-icon:hover {
+  background-color: #f1f5f9;
+  color: var(--text-main);
+}
+.btn-icon.small {
+  padding: 4px;
+  font-size: 0.9rem;
+}
+
+/* Variantes de color en hover */
+.btn-icon.btn-green:hover {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+}
+.btn-icon.btn-red:hover {
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+/* Botón flotante header agencias */
+.table-header .btn-icon.btn-green {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+  font-weight: bold;
+}
+
+/* =========================================
+   EXTRAS
+   ========================================= */
+/* Estado vacío */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 2px dashed var(--border-color);
+  margin-top: 20px;
+}
+
+/* Contenedor acciones tabla */
+.actions-cell {
+  text-align: right;
+}
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* =========================================
+   LAYOUT & UTILS
+   ========================================= */
+.full-width-layout {
+  display: block;
+  padding: 24px;
+  background-color: var(--bg-page);
+  min-height: calc(100vh - 80px);
+}
+
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.fw-bold {
+  font-weight: 700;
+}
+.text-danger {
+  color: var(--danger-text);
+}
+.text-success {
+  color: var(--success-text);
+}
+
+/* Tab Button (Estilo base) */
+.tab-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.tab-btn:hover {
+  background-color: #e2e8f0;
+}
+.tab-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================
+   HEADER DE PEDIDOS & TOOLBAR
+   ========================================= */
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* Para móviles */
+  gap: 15px;
+}
+
+.header-title p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.orders-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-left: auto; /* Empuja a la derecha */
+}
+
+/* Inputs Formulario */
+.form-control {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+}
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.search-wrapper {
+  position: relative;
+}
+.search-input {
+  width: 200px;
+}
+.filter-select {
+  background-color: white;
+  cursor: pointer;
+}
+
+/* =========================================
+   TABLA ESPECÍFICA PEDIDOS
+   ========================================= */
+.col-id {
+  width: 80px;
+}
+.col-status {
+  text-align: center;
+  width: 160px;
+}
+.col-actions {
+  text-align: right;
+}
+
+.client-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+.client-email {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Selector de Estado (Colores) */
+.status-select {
+  border: 1px solid transparent;
+  background-color: transparent;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+}
+.status-select:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.status-select.pending {
+  color: #d97706;
+  background: #ffedd5;
+}
+.status-select.paid {
+  color: #166534;
+  background: #dcfce7;
+}
+.status-select.shipped {
+  color: #0369a1;
+  background: #e0f2fe;
+}
+.status-select.canceled {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+/* =========================================
+   MODAL (LIMPIO)
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 650px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0;
+  line-height: 1;
+}
+
+.modal-body {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  background-color: #f8fafc;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Cards dentro del modal */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-card {
+  background-color: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.info-card label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.info-value {
+  font-weight: 600;
+  color: var(--text-main);
+}
+.info-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.total-row {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.modal-section-title {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+/* Tabla Modal */
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.modal-table th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.modal-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Botones Modal */
+.btn-secondary {
+  border: 1px solid var(--border-color);
+  background: white;
+  color: var(--text-main);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn-secondary:hover {
+  background-color: #f1f5f9;
+}
+
+.btn-primary {
+  border: none;
+  background: var(--success-bg);
+  color: var(--success-text);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+/* =========================================
+   ESTILOS ESPECÍFICOS: ENVÍOS / AGENCIAS
+   ========================================= */
+
+/* Utilidades de Texto */
+.text-success {
+  color: var(--success-text);
+}
+.text-action {
+  font-size: 1rem;
+  color: #c2410c;
+  font-weight: 600;
+}
+.text-agency-name {
+  font-size: 1.3rem;
+  color: var(--primary-color);
+  font-weight: 700;
+}
+.text-price {
+  color: #d97706;
+  font-weight: bold;
+}
+.fw-bold {
+  font-weight: 600;
+}
+.text-right {
+  text-align: right;
+}
+.text-center {
+  text-align: center;
+}
+
+/* Botón Volver (Flecha atrás) */
+.btn-back {
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: var(--text-muted);
+  margin-right: 12px;
+  transition: all 0.2s;
+}
+.btn-back:hover {
+  background-color: #e2e8f0;
+  color: var(--text-main);
+  border-color: #94a3b8;
+}
+
+/* Agrupador Título + Botón Volver */
+.header-left-group {
+  display: flex;
+  align-items: center;
+}
+
+/* Card Especial "Acción" (Borde Naranja) */
+.card-action {
+  border-left: 4px solid var(--primary-color);
+  background-color: #fff7ed; /* Naranja muy pálido */
+}
+
+/* Card Agencia Seleccionada */
+.card-agency {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Botón "X" dentro de la card de Agencia */
+.btn-close-card {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #94a3b8;
+  padding: 4px;
+  line-height: 1;
+  border-radius: 4px;
+}
+.btn-close-card:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--danger-text);
+}
+
+/* Ajustes Lista Agencias */
+.agencia-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.agencia-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Tabla Vacía */
+.empty-row {
+  padding: 40px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Evita que el contenedor de métricas colapse si tarda en cargar */
+.metrics {
+  min-height: 110px; /* Altura aproximada de tus cards */
+}
+
+/* Evita que la sección de la tabla colapse mientras carga */
+.table-container {
+  min-height: 400px; /* Mantiene el espacio ocupado */
+  transition: opacity 0.2s ease; /* Suaviza la aparición en lugar de salto */
+}
+
+/* =========================================
+   ESTABILIDAD DEL LAYOUT (EVITAR SALTOS)
+   ========================================= */
+
+/* 1. Definimos una altura mínima para todas las vistas principales.
+   Esto obliga al navegador a dibujar una caja grande AUNQUE esté vacía o cargando. */
+.table-section,
+.logistica-grid,
+.full-width-layout {
+  min-height: 600px; /* Ajusta este valor según tu pantalla, 600px suele ser bueno */
+  position: relative; /* Necesario para centrar el loader */
+}
+
+/* 2. También estabilizamos las columnas internas (como en envíos/agencias) */
+.panel-col {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Opcional: Agregar una animación suave al aparecer el contenido */
+.products-table tbody {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Contenedor relativo para que el loader se posicione encima */
+.relative-container {
+  position: relative;
+  min-height: 400px; /* La altura mínima que ya pusimos antes */
+}
+
+/* 1. El contenedor padre debe ser relativo para contener al fantasma */
+.relative-container {
+  position: relative;
+  min-height: 500px; /* Altura mínima para que no colapse */
+}
+
+/* 2. El "Fantasma" (Overlay) */
+.loading-overlay {
+  position: absolute; /* IMPORTANTE: Flota, no ocupa espacio */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  /* Centrado del contenido (spinner o texto) */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Fondo blanco semitransparente (Efecto Vidrio) */
+  background-color: rgba(255, 255, 255, 0.6);
+  z-index: 50; /* Se pone encima de la tabla */
+  border-radius: 12px;
+}
+
+/* 3. El texto o spinner */
+.loading-text {
+  background: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  color: #666;
+}
+
+/* Opcional: Icono giratorio simple con CSS */
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================================
+   SOLUCIÓN ANTI-SALTOS (LAYOUT FREEZE)
+   ========================================= */
+
+/* 1. Congelar la altura de las columnas */
+.panel-col {
+  /* Obliga al panel a tener SIEMPRE esta altura mínima, tenga 1 o 100 datos */
+  min-height: 600px !important;
+
+  /* Asegura que ocupe todo el alto disponible si el padre es grid */
+  height: 100%;
+
+  /* Flexbox para distribuir el contenido internamente */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 2. Congelar el espacio de la tabla */
+.table-container {
+  /* Ocupa todo el espacio sobrante de la columna */
+  flex: 1;
+
+  /* Mantiene el fondo blanco incluso si la tabla es pequeña */
+  background-color: white;
+  border-radius: 0 0 var(--radius) var(--radius);
+
+  /* Evita desbordamientos feos */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 3. Evitar el baile horizontal de la barra de scroll */
+:host {
+  /* Reserva el espacio del scroll siempre, para que no empuje el contenido a la izquierda */
+  scrollbar-gutter: stable;
+}
+
+/* 4. Asegurar que la tabla ocupe el ancho sin empujar */
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Mantiene las columnas estables */
+}

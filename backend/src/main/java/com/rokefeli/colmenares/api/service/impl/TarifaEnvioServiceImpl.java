@@ -7,6 +7,8 @@ import com.rokefeli.colmenares.api.entity.*;
 import com.rokefeli.colmenares.api.entity.enums.*;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.TarifaEnvioMapper;
+import com.rokefeli.colmenares.api.repository.AgenciaEnvioRepository;
+import com.rokefeli.colmenares.api.repository.DistritoRepository;
 import com.rokefeli.colmenares.api.repository.TarifaEnvioRepository;
 import com.rokefeli.colmenares.api.service.interfaces.TarifaEnvioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,12 @@ public class TarifaEnvioServiceImpl implements TarifaEnvioService {
 
     @Autowired
     private TarifaEnvioRepository repository;
+
+    @Autowired
+    private AgenciaEnvioRepository agenciaRepository;
+
+    @Autowired
+    private DistritoRepository distritoRepository;
 
     @Autowired
     private TarifaEnvioMapper mapper;
@@ -74,6 +82,17 @@ public class TarifaEnvioServiceImpl implements TarifaEnvioService {
     @Override
     public TarifaEnvioResponseDTO create(TarifaEnvioCreateDTO createDTO) {
         TarifaEnvio tarifaenvio = mapper.toEntity(createDTO);
+
+        AgenciaEnvio agencia = agenciaRepository.findById(createDTO.getIdAgenciaEnvio())
+                        .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", createDTO.getIdAgenciaEnvio()));
+
+        Distrito distrito = distritoRepository.findById(createDTO.getIdDistrito())
+                        .orElseThrow(() -> new ResourceNotFoundException("Distrito", createDTO.getIdDistrito()));
+
+        tarifaenvio.setDistrito(distrito);
+        tarifaenvio.setAgenciaEnvio(agencia);
+        tarifaenvio.setEstado(EstadoTarifa.ACTIVO);
+
         TarifaEnvio saved = repository.save(tarifaenvio);
         return mapper.toResponseDTO(saved);
     }

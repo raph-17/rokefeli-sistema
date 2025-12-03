@@ -63,6 +63,112 @@
       </div>
     </div>
 
+    <div class="metrics" *ngIf="activeTab === 'ubicaciones'">
+      <div class="card">
+        <h3>Vista Actual</h3>
+        <span class="value" style="font-size: 1.2rem; text-transform: capitalize">
+          {{
+            nivelUbicacion === 'DEPTO'
+              ? 'Departamentos'
+              : nivelUbicacion === 'PROV'
+              ? 'Provincias'
+              : 'Distritos'
+          }}
+        </span>
+      </div>
+      <div class="card">
+        <h3>Total Listado</h3>
+        <span class="value">{{ metricsUbicacion.total }}</span>
+      </div>
+      <div class="card">
+        <h3>Habilitados</h3>
+        <span class="value" style="color: #28a745">{{ metricsUbicacion.activos }}</span>
+      </div>
+      <div class="card">
+        <h3>Deshabilitados</h3>
+        <span class="value" style="color: #dc3545">{{ metricsUbicacion.inactivos }}</span>
+      </div>
+    </div>
+
+    <div class="metrics" *ngIf="activeTab === 'envios'">
+      <ng-container *ngIf="!agenciaSeleccionada">
+        <div class="card">
+          <h3>Agencias Registradas</h3>
+          <span class="value">{{ agencias.length }}</span>
+        </div>
+        <div class="card">
+          <h3>Agencias Activas</h3>
+          <span class="value" style="color: #28a745">
+            <span class="value" style="color: #28a745">
+              {{ agenciasActivasCount }}
+            </span>
+          </span>
+        </div>
+        <div class="card">
+          <h3>Agencias Inactivas</h3>
+          <span class="value">
+            <span class="value" style="color: #dc3545">
+              {{ agencias.length - agenciasActivasCount }}
+            </span>
+          </span>
+        </div>
+        <div class="card">
+          <h3>Seleccione</h3>
+          <span class="value" style="font-size: 1rem; color: #666">una Agencia</span>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="agenciaSeleccionada">
+        <div class="card">
+          <h3>Agencia Actual</h3>
+          <span class="value" style="font-size: 1.2rem; color: #f97316">{{
+            agenciaSeleccionada.nombre
+          }}</span>
+        </div>
+        <div class="card">
+          <h3>Rutas/Tarifas</h3>
+          <span class="value">{{ metricsEnvios.rutasActivas }}</span>
+        </div>
+        <div class="card">
+          <h3>Costo Promedio</h3>
+          <span class="value">{{ metricsEnvios.costoProm | currency : 'S/. ' }}</span>
+        </div>
+        <div class="card">
+          <h3>Tiempo Promedio</h3>
+          <span class="value">{{ metricsEnvios.tiempoProm | number : '1.0-1' }} días</span>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="metrics" *ngIf="activeTab === 'pedidos'">
+      <div
+        class="card"
+        [style.border-left]="metricsPedidos.pendientes > 0 ? '4px solid #f97316' : ''"
+      >
+        <h3>🔔 Por Atender</h3>
+        <span class="value" [style.color]="metricsPedidos.pendientes > 0 ? '#f97316' : '#666'">
+          {{ metricsPedidos.pendientes }}
+        </span>
+      </div>
+
+      <div class="card">
+        <h3>📦 Por Despachar</h3>
+        <span class="value" style="color: #0ea5e9">{{ metricsPedidos.porDespachar }}</span>
+      </div>
+
+      <div class="card">
+        <h3>🚚 En Ruta</h3>
+        <span class="value" style="color: #8b5cf6">{{ metricsPedidos.enRuta }}</span>
+      </div>
+
+      <div class="card">
+        <h3>💰 Venta Hoy</h3>
+        <span class="value" style="color: #28a745">
+          {{ metricsPedidos.totalDia | currency : 'S/. ' }}
+        </span>
+      </div>
+    </div>
+
     <div *ngIf="cargando" class="loading">Cargando datos...</div>
 
     <div class="tabs">
@@ -71,7 +177,7 @@
         [class.active]="activeTab === 'productos'"
         (click)="cambiarTab('productos')"
       >
-        📦 Productos
+        Productos
       </button>
 
       <button
@@ -79,11 +185,27 @@
         [class.active]="activeTab === 'inventario'"
         (click)="cambiarTab('inventario')"
       >
-        📊 Inventario
+        Inventario
       </button>
 
       <button class="tab" [class.active]="activeTab === 'ventas'" (click)="cambiarTab('ventas')">
-        💰 Ventas
+        Ventas
+      </button>
+
+      <button
+        class="tab"
+        [class.active]="activeTab === 'ubicaciones'"
+        (click)="cambiarTab('ubicaciones')"
+      >
+        Ubicaciones
+      </button>
+
+      <button class="tab" [class.active]="activeTab === 'envios'" (click)="cambiarTab('envios')">
+        Envíos
+      </button>
+
+      <button class="tab" [class.active]="activeTab === 'pedidos'" (click)="cambiarTab('pedidos')">
+        Pedidos
       </button>
     </div>
 
@@ -345,6 +467,308 @@
         </tbody>
       </table>
     </div>
+
+    <div *ngIf="activeTab === 'ubicaciones'" class="table-section relative-container">
+      <div class="table-header">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <button
+            *ngIf="nivelUbicacion !== 'DEPTO'"
+            (click)="volverNivel()"
+            class="btn-icon"
+            style="background: #eee"
+          >
+            ⬅
+          </button>
+
+          <h3 *ngIf="nivelUbicacion === 'DEPTO'">Departamentos</h3>
+          <h3 *ngIf="nivelUbicacion === 'PROV'">Provincias de {{ padreSeleccionado?.nombre }}</h3>
+          <h3 *ngIf="nivelUbicacion === 'DIST'">Distritos de {{ padreSeleccionado?.nombre }}</h3>
+        </div>
+
+        <button class="btn add" (click)="abrirModalCrearUbicacion()">
+          + Nuevo
+          {{
+            nivelUbicacion === 'DEPTO'
+              ? 'Departamento'
+              : nivelUbicacion === 'PROV'
+              ? 'Provincia'
+              : 'Distrito'
+          }}
+        </button>
+      </div>
+
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th style="text-align: left">Nombre</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of listaUbicacion">
+            <td>{{ item.id }}</td>
+            <td style="text-align: left; font-weight: 500">{{ item.nombre }}</td>
+            <td>
+              <span class="status" [ngClass]="item.estado === 'ACTIVO' ? 'normal' : 'low'">
+                {{ item.estado }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button
+                  class="btn-icon btn-blue"
+                  *ngIf="nivelUbicacion !== 'DIST'"
+                  (click)="nivelUbicacion === 'DEPTO' ? verProvincias(item) : verDistritos(item)"
+                  title="Ver contenido"
+                >
+                  📂
+                </button>
+
+                <button
+                  class="btn-icon btn-gray"
+                  *ngIf="item.estado === 'ACTIVO'"
+                  (click)="cambiarEstadoUbicacion(item, 'desactivar')"
+                  title="Desactivar"
+                >
+                  🔒
+                </button>
+
+                <button
+                  class="btn-icon btn-green"
+                  *ngIf="item.estado !== 'ACTIVO'"
+                  (click)="cambiarEstadoUbicacion(item, 'activar')"
+                  title="Activar"
+                >
+                  🔓
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="listaUbicacion.length === 0">
+            <td colspan="4" style="text-align: center; padding: 20px">
+              No hay registros en este nivel.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="activeTab === 'envios'" class="logistica-grid">
+      <div class="panel-col">
+        <div class="table-header">
+          <h3>Agencias</h3>
+          <button
+            class="btn-icon btn-green"
+            (click)="mostrarModalAgencia = true"
+            title="Nueva Agencia"
+          >
+            +
+          </button>
+        </div>
+
+        <ul class="agencia-list">
+          <li
+            *ngFor="let ag of agencias"
+            [class.selected]="agenciaSeleccionada?.id === ag.id"
+            (click)="verTarifas(ag)"
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span
+                class="dot"
+                [class.active]="ag.estado === 'ACTIVO'"
+                [class.inactive]="ag.estado !== 'ACTIVO'"
+              ></span>
+              <span>{{ ag.nombre }}</span>
+            </div>
+
+            <div style="display: flex; gap: 5px">
+              <button
+                class="btn-icon small"
+                [class.btn-green]="ag.estado !== 'ACTIVO'"
+                [class.btn-gray]="ag.estado === 'ACTIVO'"
+                (click)="toggleEstadoAgencia(ag); $event.stopPropagation()"
+                [title]="ag.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'"
+              >
+                {{ ag.estado === 'ACTIVO' ? '🔒' : '🔓' }}
+              </button>
+
+              <button
+                class="btn-icon btn-red small"
+                (click)="eliminarAgencia(ag.id); $event.stopPropagation()"
+                title="Eliminar"
+              >
+                ✕
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="panel-col">
+        <div class="table-header">
+          <h3>Tarifas {{ agenciaSeleccionada ? 'de ' + agenciaSeleccionada.nombre : '' }}</h3>
+          <button class="btn add" (click)="abrirModalTarifa()" [disabled]="!agenciaSeleccionada">
+            + Nueva Tarifa
+          </button>
+        </div>
+
+        <div *ngIf="!agenciaSeleccionada" class="empty-state">
+          Seleccione una agencia para ver sus tarifas.
+        </div>
+
+        <table class="products-table" *ngIf="agenciaSeleccionada">
+          <thead>
+            <tr>
+              <th>Departamento</th>
+              <th>Provincia</th>
+              <th>Distrito</th>
+              <th>Costo</th>
+              <th>Tiempo</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of tarifas">
+              <td>{{ t.departamentoDistrito }}</td>
+              <td>{{ t.provinciaDistrito }}</td>
+              <td style="font-weight: bold; color: #333">{{ t.nombreDistrito }}</td>
+
+              <td style="color: #d48300; font-weight: bold">
+                S/ {{ t.costoEnvio | number : '1.2-2' }}
+              </td>
+              <td>{{ t.diasEstimados }} días</td>
+
+              <td>
+                <span class="status" [ngClass]="t.estado === 'ACTIVO' ? 'normal' : 'low'">
+                  {{ t.estado }}
+                </span>
+              </td>
+
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button
+                    class="btn-icon btn-gray"
+                    *ngIf="t.estado === 'ACTIVO'"
+                    (click)="desactivarTarifa(t.id)"
+                    title="Desactivar"
+                  >
+                    🔒
+                  </button>
+
+                  <button
+                    class="btn-icon btn-green"
+                    *ngIf="t.estado !== 'ACTIVO'"
+                    (click)="activarTarifa(t.id)"
+                    title="Activar"
+                  >
+                    🔓
+                  </button>
+
+                  <button class="btn-icon btn-red" (click)="eliminarTarifa(t.id)" title="Eliminar">
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="tarifas.length === 0">
+              <td colspan="7" style="text-align: center; padding: 40px; color: #777">
+                Esta agencia no tiene tarifas registradas.<br />
+                ¡Agrega una para empezar a vender!
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'pedidos'" class="full-width-layout">
+      <div class="panel-col">
+        <div class="table-header orders-header">
+          <div class="header-title">
+            <h3>Gestión de Pedidos</h3>
+            <p>Administra y despacha las compras</p>
+          </div>
+
+          <div class="orders-toolbar">
+            <div class="search-wrapper">
+              <input
+                type="text"
+                class="form-control search-input"
+                placeholder="Buscar cliente..."
+                [(ngModel)]="filtroUsuario"
+                (input)="aplicarFiltros()"
+              />
+            </div>
+
+            <select
+              class="form-control filter-select"
+              [(ngModel)]="filtroEstado"
+              (change)="aplicarFiltros()"
+            >
+              <option value="TODOS">Todos los estados</option>
+              <option *ngFor="let est of estadosPosibles" [value]="est">{{ est }}</option>
+            </select>
+
+            <button class="btn-icon" (click)="cargarPedidos()" title="Actualizar">↻</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th class="col-id"># ID</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th class="col-status">Estado</th>
+                <th class="col-actions">Detalles</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of pedidosFiltrados">
+                <td class="fw-bold">#{{ p.id }}</td>
+                <td>{{ p.fechaCreacion | date : 'dd/MM/yy HH:mm' }}</td>
+                <td>
+                  <div class="client-name">{{ p.nombreUsuario }}</div>
+                  <div class="client-email">{{ p.emailUsuario }}</div>
+                </td>
+                <td class="fw-bold">S/ {{ p.total | number : '1.2-2' }}</td>
+
+                <td class="text-center">
+                  <select
+                    [ngModel]="p.estado"
+                    (ngModelChange)="cambiarEstado(p, $event)"
+                    class="status-select"
+                    [ngClass]="{
+                      pending: p.estado === 'PENDIENTE',
+                      paid: p.estado === 'EN_PREPARACION',
+                      shipped: p.estado === 'EN_REPARTO',
+                      canceled: p.estado === 'CANCELADO'
+                    }"
+                  >
+                    <option *ngFor="let est of estadosPosibles" [value]="est">{{ est }}</option>
+                  </select>
+                </td>
+
+                <td class="col-actions">
+                  <button class="btn-icon" (click)="verDetallePedido(p)" title="Ver Productos">
+                    👁️
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div *ngIf="pedidosFiltrados.length === 0" class="empty-state">
+            <p>No se encontraron pedidos con los filtros actuales.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -400,7 +824,7 @@
 
       <div class="form-group">
         <label>URL de Imagen</label>
-        <input formControlName="imagenUrl" type="text" placeholder="https://..." />
+        <input formControlName="imagenUrl" type="text" placeholder="/img/placehorlder.png" />
       </div>
     </form>
 
@@ -566,6 +990,188 @@
     <div class="modal-actions">
       <button class="btn cancel" (click)="cerrarModalVenta()">Cancelar</button>
       <button class="btn save" (click)="guardarVentaInterna()">Registrar Venta</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalUbicacion">
+  <div class="modal-container" style="width: 400px">
+    <h2 class="modal-title">
+      Registrar
+      {{
+        nivelUbicacion === 'DEPTO'
+          ? 'Departamento'
+          : nivelUbicacion === 'PROV'
+          ? 'Provincia'
+          : 'Distrito'
+      }}
+    </h2>
+
+    <p *ngIf="padreSeleccionado" style="text-align: center; color: #666; margin-bottom: 15px">
+      En: <strong>{{ padreSeleccionado.nombre }}</strong>
+    </p>
+
+    <div class="modal-form">
+      <div class="form-group">
+        <label>Nombre:</label>
+        <input
+          [formControl]="nombreUbicacionControl"
+          type="text"
+          placeholder="Ej. Nuevo Lugar"
+          autofocus
+        />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn cancel" (click)="cerrarModalUbicacion()">Cancelar</button>
+      <button
+        class="btn save"
+        (click)="guardarUbicacion()"
+        [disabled]="nombreUbicacionControl.invalid"
+      >
+        Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalAgencia">
+  <div class="modal-container" style="width: 350px">
+    <h2 class="modal-title">Nueva Agencia</h2>
+    <form [formGroup]="formAgencia" class="modal-form">
+      <div class="form-group">
+        <label>Nombre Comercial</label>
+        <input formControlName="nombre" type="text" placeholder="Ej. Olva Courier" />
+      </div>
+    </form>
+    <div class="modal-actions">
+      <button class="btn cancel" (click)="mostrarModalAgencia = false">Cancelar</button>
+      <button class="btn save" (click)="guardarAgencia()" [disabled]="formAgencia.invalid">
+        Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalTarifa">
+  <div class="modal-container">
+    <h2 class="modal-title">Nueva Ruta de Envío</h2>
+    <p style="text-align: center; color: #666">
+      Agencia: <strong>{{ agenciaSeleccionada?.nombre }}</strong>
+    </p>
+
+    <form [formGroup]="formTarifa" class="modal-form">
+      <div class="form-row">
+        <div class="form-group small">
+          <label>Departamento</label>
+          <select formControlName="idDepartamento" (change)="onDeptoChange()">
+            <option [ngValue]="null" disabled>-- Seleccione --</option>
+            <option *ngFor="let d of deptosTarifa" [ngValue]="d.id">{{ d.nombre }}</option>
+          </select>
+        </div>
+        <div class="form-group small">
+          <label>Provincia</label>
+          <select formControlName="idProvincia" (change)="onProvChange()">
+            <option [ngValue]="null" disabled>-- Seleccione --</option>
+            <option *ngFor="let p of provsTarifa" [ngValue]="p.id">{{ p.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Distrito Destino</label>
+        <select formControlName="idDistrito">
+          <option [ngValue]="null" disabled>-- Seleccione --</option>
+          <option *ngFor="let d of distsTarifa" [ngValue]="d.id">{{ d.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group small">
+          <label>Costo (S/)</label>
+          <input type="number" formControlName="costoEnvio" min="0" placeholder="0.00" />
+        </div>
+        <div class="form-group small">
+          <label>Tiempo (Días)</label>
+          <input type="number" formControlName="diasEstimados" min="1" placeholder="1" />
+        </div>
+      </div>
+    </form>
+
+    <div class="modal-actions">
+      <button class="btn cancel" (click)="mostrarModalTarifa = false">Cancelar</button>
+      <button class="btn save" (click)="guardarTarifa()" [disabled]="formTarifa.invalid">
+        Crear Tarifa
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="mostrarModalPedido && pedidoSeleccionado" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Pedido #{{ pedidoSeleccionado.id }}</h3>
+      <button (click)="mostrarModalPedido = false" class="btn-close">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="info-grid">
+        <div class="info-card">
+          <label>Cliente</label>
+          <div class="info-value">{{ pedidoSeleccionado.nombreUsuario }}</div>
+          <div class="info-sub">{{ pedidoSeleccionado.emailUsuario }}</div>
+        </div>
+
+        <div class="info-card">
+          <label>Resumen Financiero</label>
+          <div class="info-row">
+            <span>Estado:</span>
+            <span
+              [class.text-danger]="pedidoSeleccionado.estado === 'CANCELADO'"
+              [class.text-success]="pedidoSeleccionado.estado !== 'CANCELADO'"
+            >
+              {{ pedidoSeleccionado.estado }}
+            </span>
+          </div>
+          <div class="info-row total-row">
+            <span>Total:</span>
+            <span>S/ {{ pedidoSeleccionado.total | number : '1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 class="modal-section-title">Productos Solicitados</h4>
+      <table class="modal-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="text-center">Cant.</th>
+            <th class="text-right">Precio Unit.</th>
+            <th class="text-right">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of pedidoSeleccionado.detalles">
+            <td>{{ item.nombreProducto }}</td>
+            <td class="text-center">{{ item.cantidad }}</td>
+            <td class="text-right">S/ {{ item.precioUnitario | number : '1.2-2' }}</td>
+            <td class="text-right fw-bold">S/ {{ item.subtotal | number : '1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-footer">
+      <button (click)="mostrarModalPedido = false" class="btn-secondary">Cerrar</button>
+
+      <button
+        *ngIf="pedidoSeleccionado.estado === 'PENDIENTE'"
+        (click)="cambiarEstado(pedidoSeleccionado, 'PAGADO')"
+        class="btn-primary"
+      >
+        Confirmar Pago Manual
+      </button>
     </div>
   </div>
 </div>

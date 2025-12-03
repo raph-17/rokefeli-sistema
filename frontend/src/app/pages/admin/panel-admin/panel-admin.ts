@@ -3,12 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { HeaderAdmin } from '../../../components/header-admin/header-admin.component';
+import { UbicacionService } from '../../../services/ubicacion.service';
 
 // Servicios
 import { ProductoService } from '../../../services/producto.service';
 import { VentaService } from '../../../services/venta.service';
 import { CategoriaService } from '../../../services/categoria.service';
 import { AuthService } from '../../../services/auth.service';
+import { AgenciaService } from '../../../services/agencia.service';
+import { TarifaEnvioService } from '../../../services/tarifa-envio.service';
+import { PedidoService, Pedido, EstadoPedido } from '../../../services/pedido.service';
 
 @Component({
   selector: 'app-panel-admin',
@@ -39,7 +43,8 @@ export class PanelAdmin implements OnInit {
   ticketPromedio: number = 0;
 
   // Pestañas
-  activeTab: 'productos' | 'inventario' | 'ventas' = 'productos';
+  activeTab: 'productos' | 'inventario' | 'ventas' | 'ubicaciones' | 'envios' | 'pedidos' =
+    'productos';
   cargando = true;
 
   // Filtros
@@ -69,9 +74,66 @@ export class PanelAdmin implements OnInit {
   // Controles para agregar item
   productoSeleccionadoId: number | null = null;
   cantidadSeleccionada: number = 1;
-  
+
   // Control para el cliente (ID del distribuidor o comprador local)
   idClienteInterno = new FormControl('', Validators.required);
+
+  // --- VARIABLES UBICACIÓN ---
+  // Nivel actual: 'DEPTO', 'PROV', 'DIST'
+  nivelUbicacion: 'DEPTO' | 'PROV' | 'DIST' = 'DEPTO';
+
+  listaUbicacion: any[] = []; // Aquí cargamos la tabla dinámica
+  padreSeleccionado: any = null; // Guardamos el Depto o Prov actual para el título y el ID
+  abueloSeleccionado: any = null; // Para volver atrás desde Distrito a Provincia
+
+  nombreUbicacionControl = new FormControl('', Validators.required); // Input del modal
+
+  // --- LÓGICA DE ENVÍOS ---
+  agencias: any[] = [];
+  tarifas: any[] = [];
+  agenciaSeleccionada: any = null;
+
+  // Modales
+  mostrarModalAgencia = false;
+  mostrarModalTarifa = false;
+
+  // Formularios
+  formAgencia = new FormGroup({
+    nombre: new FormControl('', Validators.required),
+  });
+
+  formTarifa = new FormGroup({
+    idAgencia: new FormControl(null, Validators.required),
+    // Para los selects en cascada
+    idDepartamento: new FormControl(null),
+    idProvincia: new FormControl(null),
+    idDistrito: new FormControl(null, Validators.required),
+    // Datos de la tarifa
+    costoEnvio: new FormControl(null, [Validators.required, Validators.min(0)]),
+    diasEstimados: new FormControl(null, [Validators.required, Validators.min(1)]),
+  });
+
+  // Listas para selects en cascada
+  deptosTarifa: any[] = [];
+  provsTarifa: any[] = [];
+  distsTarifa: any[] = []; // 'envios', 'productos', 'pedidos'
+
+  // Datos de Pedidos
+  pedidos: Pedido[] = [];
+  pedidosFiltrados: Pedido[] = []; // Lista que se muestra en la tabla
+
+  // Filtros
+  filtroUsuario: string = ''; // Texto para buscar por nombre
+  estadosPosibles = Object.values(EstadoPedido);
+
+  // Modal Detalle
+  mostrarModalPedido = false;
+  pedidoSeleccionado: Pedido | null = null;
+
+  // Variables para métricas
+  metricsPedidos = { pendientes: 0, porDespachar: 0, enRuta: 0, totalDia: 0 };
+  metricsEnvios = { rutasActivas: 0, costoProm: 0, tiempoProm: 0 };
+  metricsUbicacion = { total: 0, activos: 0, inactivos: 0 };
 
   get inventarioFiltrado() {
     // Si el checkbox está marcado, filtramos
@@ -83,11 +145,19 @@ export class PanelAdmin implements OnInit {
     return this.products;
   }
 
+  get agenciasActivasCount(): number {
+    return this.agencias.filter((a) => a.estado === 'ACTIVO').length;
+  }
+
   constructor(
     private productoService: ProductoService,
     private ventaService: VentaService,
     private categoriaService: CategoriaService,
-    private authService: AuthService
+    private authService: AuthService,
+    private ubicacionService: UbicacionService,
+    private agenciaService: AgenciaService,
+    private tarifaService: TarifaEnvioService,
+    private pedidoService: PedidoService
   ) {}
 
   ngOnInit(): void {
@@ -115,14 +185,17 @@ export class PanelAdmin implements OnInit {
     this.productoService.listarAdmin().subscribe({
       next: (data) => {
         this.products = data.sort((a, b) => a.nombre.localeCompare(b.nombre));
-        
+
         // Calculamos métricas de productos una sola vez
-        this.productosActivos = this.products.filter(p => p.estado === 'ACTIVO').length;
+        this.productosActivos = this.products.filter((p) => p.estado === 'ACTIVO').length;
         this.productosInactivos = this.products.length - this.productosActivos;
-        
+
         this.cargando = false;
       },
-      error: (err) => { console.error(err); this.cargando = false; }
+      error: (err) => {
+        console.error(err);
+        this.cargando = false;
+      },
     });
 
     // 2. Categorías
@@ -133,12 +206,12 @@ export class PanelAdmin implements OnInit {
     // 3. Ventas
     this.ventaService.listarAdmin().subscribe({
       next: (data) => {
-        this.allVentas = data;      // Guardamos el TOTAL REAL
+        this.allVentas = data; // Guardamos el TOTAL REAL
         this.ventasFiltradas = data; // Inicialmente mostramos todo
-        
+
         this.calcularMetricasGlobales(); // Calculamos con allVentas
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
 
     this.filtrarVentas();
@@ -159,16 +232,76 @@ export class PanelAdmin implements OnInit {
 
   calcularMetricasGlobales() {
     // Ventas Totales (Solo las pagadas/procesadas cuentan para dinero)
-    const ventasReales = this.allVentas.filter(v => v.estado === 'PAGADA' || v.estado === 'PROCESADA');
-    
+    const ventasReales = this.allVentas.filter(
+      (v) => v.estado === 'PAGADA' || v.estado === 'PROCESADA'
+    );
+
     this.ventasTotales = this.allVentas.length; // Total histórico
     this.ingresosTotales = ventasReales.reduce((acc, v) => acc + (v.montoTotal || 0), 0);
-    
+
     // Ventas Pendientes (Para alertar al admin)
-    this.ventasProcesadas = this.allVentas.filter(v => v.estado === 'PROCESADA').length;
+    this.ventasProcesadas = this.allVentas.filter((v) => v.estado === 'PROCESADA').length;
 
     // Ticket Promedio (Cuánto gasta un cliente promedio)
     this.ticketPromedio = ventasReales.length > 0 ? this.ingresosTotales / ventasReales.length : 0;
+  }
+
+  // 1. LÓGICA PARA PEDIDOS
+  // Llama a esta función dentro del subscribe de cargarPedidos()
+  calcularMetricasPedidos() {
+    const hoy = new Date().toDateString();
+
+    this.metricsPedidos = {
+      pendientes: this.pedidos.filter((p) => p.estado === 'PENDIENTE').length,
+      porDespachar: this.pedidos.filter((p) => p.estado === 'EN_PREPARACION').length, // O el estado que uses para "Listo para enviar"
+      enRuta: this.pedidos.filter((p) => p.estado === 'EN_REPARTO').length,
+      totalDia: this.pedidos
+        .filter((p) => new Date(p.fechaCreacion).toDateString() === hoy)
+        .reduce((acc, curr) => acc + curr.total, 0),
+    };
+  }
+
+  // 2. LÓGICA PARA ENVÍOS
+  // Llama a esta función dentro del subscribe de verTarifas() (cuando seleccionas agencia)
+  calcularMetricasEnvios() {
+    if (!this.tarifas || this.tarifas.length === 0) {
+      this.metricsEnvios = { rutasActivas: 0, costoProm: 0, tiempoProm: 0 };
+      return;
+    }
+
+    // Solo calculamos promedios con las rutas activas para ser realistas
+    const activas = this.tarifas.filter((t) => t.estado === 'ACTIVO');
+    const count = activas.length;
+
+    if (count === 0) {
+      this.metricsEnvios = { rutasActivas: 0, costoProm: 0, tiempoProm: 0 };
+      return;
+    }
+
+    const sumaCosto = activas.reduce((acc, t) => acc + t.costoEnvio, 0);
+    const sumaDias = activas.reduce((acc, t) => acc + t.diasEstimados, 0);
+
+    this.metricsEnvios = {
+      rutasActivas: count,
+      costoProm: sumaCosto / count,
+      tiempoProm: sumaDias / count,
+    };
+  }
+
+  cerrarDetalleAgencia() {
+    this.agenciaSeleccionada = null;
+    this.tarifas = [];
+    this.metricsEnvios = { rutasActivas: 0, costoProm: 0, tiempoProm: 0 }; // Reset metrics
+  }
+
+  // 3. LÓGICA PARA UBICACIONES
+  // Llama a esta función cada vez que cargues una lista (Deptos, Provs o Dists)
+  calcularMetricasUbicacion() {
+    this.metricsUbicacion = {
+      total: this.listaUbicacion.length,
+      activos: this.listaUbicacion.filter((u) => u.estado === 'ACTIVO').length,
+      inactivos: this.listaUbicacion.filter((u) => u.estado !== 'ACTIVO').length,
+    };
   }
 
   // --- MODAL: CREAR Y EDITAR ---
@@ -332,17 +465,19 @@ export class PanelAdmin implements OnInit {
   // --- FILTRADO DE VENTAS ---
   filtrarVentas() {
     // Aquí llamamos al servicio como antes, PERO actualizamos 'ventasFiltradas'
-    this.ventaService.buscarAdmin(
-      this.filtroVentaEstado || undefined,
-      this.filtroVentaCanal || undefined,
-      this.filtroVentaDni || undefined
-    ).subscribe({
-      next: (data) => {
-        this.ventasFiltradas = data; // Solo cambiamos la tabla
-        // NO llamamos a calcularMetricasGlobales() aquí, así que los Ingresos se mantienen fijos.
-      },
-      error: (err) => console.error(err)
-    });
+    this.ventaService
+      .buscarAdmin(
+        this.filtroVentaEstado || undefined,
+        this.filtroVentaCanal || undefined,
+        this.filtroVentaDni || undefined
+      )
+      .subscribe({
+        next: (data) => {
+          this.ventasFiltradas = data; // Solo cambiamos la tabla
+          // NO llamamos a calcularMetricasGlobales() aquí, así que los Ingresos se mantienen fijos.
+        },
+        error: (err) => console.error(err),
+      });
   }
 
   limpiarFiltrosVentas() {
@@ -373,7 +508,7 @@ export class PanelAdmin implements OnInit {
     if (!this.productoSeleccionadoId || this.cantidadSeleccionada < 1) return;
 
     // Buscar producto real en la lista cargada
-    const producto = this.products.find(p => p.id == this.productoSeleccionadoId);
+    const producto = this.products.find((p) => p.id == this.productoSeleccionadoId);
 
     if (!producto) return;
 
@@ -384,7 +519,7 @@ export class PanelAdmin implements OnInit {
     }
 
     // Verificar si ya está en la lista para sumar cantidad
-    const itemExistente = this.itemsVenta.find(i => i.idProducto === producto.id);
+    const itemExistente = this.itemsVenta.find((i) => i.idProducto === producto.id);
 
     if (itemExistente) {
       itemExistente.cantidad += this.cantidadSeleccionada;
@@ -396,13 +531,13 @@ export class PanelAdmin implements OnInit {
         nombre: producto.nombre,
         precioUnitario: producto.precioInterno || producto.precio, // Usa precio interno si existe
         cantidad: this.cantidadSeleccionada,
-        subtotal: (producto.precioInterno || producto.precio) * this.cantidadSeleccionada
+        subtotal: (producto.precioInterno || producto.precio) * this.cantidadSeleccionada,
       });
     }
 
     this.calcularTotalInterno();
     this.productoSeleccionadoId = null; // Resetear select
-    this.cantidadSeleccionada = 1;      // Resetear cantidad
+    this.cantidadSeleccionada = 1; // Resetear cantidad
   }
 
   eliminarItemVenta(index: number) {
@@ -429,19 +564,383 @@ export class PanelAdmin implements OnInit {
     const dto = {
       idEmpleado: this.authService.getUserId(), // TODO: Sacar del Token del usuario logueado (ADMIN)
       idDistribuidor: this.idClienteInterno.value, // ID del usuario comprador
-      detalles: this.itemsVenta.map(i => ({
+      detalles: this.itemsVenta.map((i) => ({
         idProducto: i.idProducto,
-        cantidad: i.cantidad
-      }))
+        cantidad: i.cantidad,
+      })),
     };
 
-    this.ventaService.registrarVentaInterno(dto).subscribe({ // Asegúrate de tener este método en el service
+    this.ventaService.registrarVentaInterno(dto).subscribe({
+      // Asegúrate de tener este método en el service
       next: () => {
         alert('Venta interna registrada con éxito 💰');
         this.cargarDatosDashboard(); // Recargar stock y tabla
         this.cerrarModalVenta();
       },
-      error: (err) => alert('Error al registrar: ' + err.message)
+      error: (err) => alert('Error al registrar: ' + err.message),
+    });
+  }
+
+  // 1. CARGA INICIAL (DEPARTAMENTOS)
+  cargarUbicaciones() {
+    this.cargando = true;
+    this.nivelUbicacion = 'DEPTO';
+    this.padreSeleccionado = null;
+
+    this.ubicacionService.listarDepartamentosAdmin().subscribe((data) => {
+      this.listaUbicacion = data.sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
+      this.cargando = false;
+      this.calcularMetricasUbicacion();
+    });
+  }
+
+  // 2. NAVEGACIÓN (BAJAR DE NIVEL)
+  verProvincias(depto: any) {
+    this.cargando = true;
+    this.nivelUbicacion = 'PROV';
+    this.padreSeleccionado = depto;
+
+    this.ubicacionService.listarProvinciasAdmin(depto.id).subscribe((data) => {
+      this.listaUbicacion = data.sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
+      this.cargando = false;
+      this.calcularMetricasUbicacion();
+    });
+  }
+
+  verDistritos(provincia: any) {
+    this.cargando = true;
+    this.nivelUbicacion = 'DIST';
+    this.abueloSeleccionado = this.padreSeleccionado;
+    this.padreSeleccionado = provincia;
+
+    this.ubicacionService.listarDistritosAdmin(provincia.id).subscribe((data) => {
+      this.listaUbicacion = data.sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
+      this.cargando = false;
+      this.calcularMetricasUbicacion();
+    });
+  }
+
+  // 3. NAVEGACIÓN (SUBIR / VOLVER)
+  volverNivel() {
+    if (this.nivelUbicacion === 'DIST') {
+      // Volver a Provincias
+      this.verProvincias(this.abueloSeleccionado);
+    } else if (this.nivelUbicacion === 'PROV') {
+      // Volver a Departamentos
+      this.cargarUbicaciones();
+    }
+  }
+
+  // 4. GESTIÓN (ACTIVAR/DESACTIVAR)
+  cambiarEstadoUbicacion(item: any, accion: 'activar' | 'desactivar') {
+    let entidad: 'departamentos' | 'provincias' | 'distritos' = 'departamentos';
+    if (this.nivelUbicacion === 'PROV') entidad = 'provincias';
+    if (this.nivelUbicacion === 'DIST') entidad = 'distritos';
+
+    this.ubicacionService.cambiarEstado(entidad, item.id, accion).subscribe(() => {
+      // Recargar la lista actual
+      if (this.nivelUbicacion === 'DEPTO') this.cargarUbicaciones();
+      if (this.nivelUbicacion === 'PROV') this.verProvincias(this.padreSeleccionado);
+      if (this.nivelUbicacion === 'DIST') this.verDistritos(this.padreSeleccionado);
+    });
+  }
+
+  // 5. CREAR NUEVA UBICACIÓN
+  mostrarModalUbicacion = false;
+
+  abrirModalCrearUbicacion() {
+    this.nombreUbicacionControl.reset();
+    this.mostrarModalUbicacion = true;
+  }
+
+  cerrarModalUbicacion() {
+    this.mostrarModalUbicacion = false;
+  }
+
+  guardarUbicacion() {
+    if (this.nombreUbicacionControl.invalid) return;
+    const nombre = this.nombreUbicacionControl.value || '';
+
+    let obs;
+    if (this.nivelUbicacion === 'DEPTO') {
+      obs = this.ubicacionService.crearDepartamento(nombre);
+    } else if (this.nivelUbicacion === 'PROV') {
+      obs = this.ubicacionService.crearProvincia(nombre, this.padreSeleccionado.id);
+    } else {
+      obs = this.ubicacionService.crearDistrito(nombre, this.padreSeleccionado.id);
+    }
+
+    obs.subscribe({
+      next: () => {
+        alert('Registrado con éxito ✅');
+        this.cerrarModalUbicacion();
+        // Recargar vista actual
+        if (this.nivelUbicacion === 'DEPTO') this.cargarUbicaciones();
+        else if (this.nivelUbicacion === 'PROV') this.verProvincias(this.padreSeleccionado);
+        else this.verDistritos(this.padreSeleccionado);
+      },
+      error: (err) => alert('Error: ' + err.message),
+    });
+  }
+
+  // Actualiza cambiarTab para cargar datos si entran a 'ubicaciones'
+  cambiarTab(tab: 'productos' | 'inventario' | 'ventas' | 'ubicaciones' | 'envios' | 'pedidos') {
+    // Ajusta el tipo
+    this.activeTab = tab;
+    if (tab === 'ubicaciones') {
+      this.cargarUbicaciones();
+    }
+    if (tab === 'envios') {
+      this.cargarLogistica();
+    }
+  }
+
+  // --- LÓGICA DE ENVÍOS ---
+  // 1. Cargar lista de Agencias
+  cargarLogistica() {
+    this.cargando = true;
+    this.agenciaService.findAll().subscribe((data) => {
+      this.agencias = data.sort((a, b) => a.id - b.id);
+
+      // Si teníamos una agencia seleccionada, buscamos su versión "actualizada" en la nueva lista
+      if (this.agenciaSeleccionada) {
+        const agenciaActualizada = this.agencias.find((a) => a.id === this.agenciaSeleccionada.id);
+
+        if (agenciaActualizada) {
+          this.agenciaSeleccionada = agenciaActualizada; // Actualizamos la referencia visual (el puntito de color)
+          this.verTarifas(agenciaActualizada); // Forzamos recarga de las tarifas de la derecha
+        } else {
+          this.agenciaSeleccionada = null; // Si desapareció, limpiamos
+          this.tarifas = [];
+          this.cargando = false;
+        }
+      } else {
+        this.cargando = false;
+      }
+    });
+  }
+
+  // 2. Seleccionar Agencia y ver sus tarifas
+  verTarifas(agencia: any) {
+    this.agenciaSeleccionada = agencia;
+    this.cargando = true;
+    this.tarifaService.listarPorAgencia(agencia.id).subscribe({
+      next: (data) => {
+        this.tarifas = data;
+        this.cargando = false;
+        this.calcularMetricasEnvios();
+      },
+      error: () => (this.cargando = false),
+    });
+  }
+
+  // --- GESTIÓN AGENCIA ---
+
+  guardarAgencia() {
+    if (this.formAgencia.invalid) return;
+    // DTO simple { nombre: "..." }
+    this.agenciaService.create(this.formAgencia.value).subscribe(() => {
+      alert('Agencia registrada ✅');
+      this.mostrarModalAgencia = false;
+      this.formAgencia.reset();
+      this.cargarLogistica();
+    });
+  }
+
+  eliminarAgencia(id: number) {
+    if (!confirm('¿Eliminar esta agencia? Sus tarifas también se eliminarán.')) return;
+    this.agenciaService.delete(id).subscribe(() => {
+      this.agenciaSeleccionada = null;
+      this.tarifas = [];
+      this.cargarLogistica();
+    });
+  }
+
+  desactivarTarifa(id: number) {
+    if (!confirm('¿Desactivar esta tarifa?')) return;
+    this.tarifaService.desactivar(id).subscribe(() => {
+      // Recargamos solo la lista derecha para ser rápidos
+      if (this.agenciaSeleccionada) this.verTarifas(this.agenciaSeleccionada);
+    });
+  }
+
+  activarTarifa(id: number) {
+    this.tarifaService.activar(id).subscribe(() => {
+      if (this.agenciaSeleccionada) this.verTarifas(this.agenciaSeleccionada);
+    });
+  }
+
+  toggleEstadoAgencia(agencia: any) {
+    const accion = agencia.estado === 'ACTIVO' ? 'desactivar' : 'activar';
+
+    if (
+      accion === 'desactivar' &&
+      !confirm('¿Desactivar agencia? Sus tarifas también se desactivarán.')
+    )
+      return;
+
+    const obs =
+      accion === 'desactivar'
+        ? this.agenciaService.desactivar(agencia.id)
+        : this.agenciaService.activar(agencia.id);
+
+    obs.subscribe({
+      next: () => {
+        const idSeleccionado = this.agenciaSeleccionada?.id;
+
+        // Recargamos todo
+        this.cargarLogistica();
+      },
+      error: (err) => alert('Error al cambiar estado: ' + err.message),
+    });
+  }
+
+  // --- GESTIÓN TARIFA ---
+
+  abrirModalTarifa() {
+    this.mostrarModalTarifa = true;
+    this.formTarifa.reset();
+
+    // Pre-llenar agencia si ya está seleccionada
+    if (this.agenciaSeleccionada) {
+      this.formTarifa.patchValue({ idAgencia: this.agenciaSeleccionada.id });
+    }
+
+    // Cargar Departamentos para iniciar la cascada
+    this.ubicacionService
+      .listarDepartamentosAdmin()
+      .subscribe(
+        (d) => (this.deptosTarifa = d.sort((a: any, b: any) => a.nombre.localeCompare(b.nombre)))
+      );
+  }
+
+  // Cascada: Al cambiar Depto -> Cargar Provincias
+  onDeptoChange() {
+    const id = this.formTarifa.value.idDepartamento;
+    this.provsTarifa = [];
+    this.distsTarifa = [];
+    if (id) {
+      this.ubicacionService
+        .listarProvinciasAdmin(id)
+        .subscribe(
+          (p) => (this.provsTarifa = p.sort((a: any, b: any) => a.nombre.localeCompare(b.nombre)))
+        );
+    }
+  }
+
+  // Cascada: Al cambiar Prov -> Cargar Distritos
+  onProvChange() {
+    const id = this.formTarifa.value.idProvincia;
+    this.distsTarifa = [];
+    if (id) {
+      this.ubicacionService
+        .listarDistritosAdmin(id)
+        .subscribe(
+          (d) => (this.distsTarifa = d.sort((a: any, b: any) => a.nombre.localeCompare(b.nombre)))
+        );
+    }
+  }
+
+  guardarTarifa() {
+    // 1. Validaciones
+    if (this.formTarifa.invalid) {
+      this.formTarifa.markAllAsTouched();
+      return;
+    }
+
+    if (!this.agenciaSeleccionada) {
+      alert('Error: No hay una agencia seleccionada.');
+      return;
+    }
+
+    // 2. Armar el DTO (Payload)
+    const dto = {
+      // CORRECCIÓN: Usamos el ID directo de la variable, no del formulario.
+      // Esto garantiza que nunca sea null si el panel derecho está abierto.
+      idAgenciaEnvio: this.agenciaSeleccionada.id,
+
+      idDistrito: this.formTarifa.value.idDistrito,
+      costoEnvio: this.formTarifa.value.costoEnvio,
+      diasEstimados: this.formTarifa.value.diasEstimados,
+    };
+
+    console.log('Enviando Tarifa:', dto); // Para depurar si vuelve a fallar
+
+    // 3. Enviar al Servicio
+    this.tarifaService.create(dto).subscribe({
+      next: () => {
+        alert('Tarifa creada correctamente 🚚');
+        this.mostrarModalTarifa = false;
+        this.verTarifas(this.agenciaSeleccionada); // Recargar la lista
+      },
+      error: (e) => {
+        console.error(e);
+        alert('Error al crear tarifa: ' + (e.error?.message || e.message));
+      },
+    });
+  }
+
+  eliminarTarifa(id: number) {
+    if (!confirm('¿Eliminar esta tarifa?')) return;
+    this.tarifaService.delete(id).subscribe(() => this.verTarifas(this.agenciaSeleccionada));
+  }
+
+  // === LÓGICA DE PEDIDOS ===
+
+  cargarPedidos() {
+    this.pedidoService.listarTodos().subscribe({
+      next: (data) => {
+        this.pedidos = data;
+        this.aplicarFiltros();
+      },
+      error: (err) => console.error('Error cargando pedidos', err),
+    });
+  }
+
+  aplicarFiltros() {
+    this.pedidosFiltrados = this.pedidos.filter((p) => {
+      // 1. Filtro por Estado
+      const cumpleEstado = this.filtroEstado === 'TODOS' || p.estado === this.filtroEstado;
+
+      // 2. Filtro por Usuario (Nombre o Email)
+      const busqueda = this.filtroUsuario.toLowerCase();
+      const cumpleUsuario =
+        !busqueda ||
+        p.nombreUsuario.toLowerCase().includes(busqueda) ||
+        p.emailUsuario.toLowerCase().includes(busqueda);
+
+      return cumpleEstado && cumpleUsuario;
+    });
+  }
+
+  // Accion rápida desde la tabla
+  cambiarEstado(pedido: Pedido, nuevoEstado: string) {
+    // string porque viene del select HTML
+    const estadoEnum = nuevoEstado as EstadoPedido;
+
+    if (confirm(`¿Cambiar pedido #${pedido.id} a ${estadoEnum}?`)) {
+      this.pedidoService.cambiarEstado(pedido.id, estadoEnum).subscribe({
+        next: (pedidoActualizado) => {
+          // Actualizamos la lista local sin recargar todo
+          const index = this.pedidos.findIndex((p) => p.id === pedido.id);
+          if (index !== -1) this.pedidos[index] = pedidoActualizado;
+          this.aplicarFiltros();
+
+          // Si el modal está abierto, actualizamos también ahí
+          if (this.pedidoSeleccionado?.id === pedido.id) {
+            this.pedidoSeleccionado = pedidoActualizado;
+          }
+        },
+      });
+    }
+  }
+
+  verDetallePedido(pedido: Pedido) {
+    // A veces el listado general no trae los detalles de productos (depende de tu DTO)
+    // Hacemos una llamada para asegurar traer los items
+    this.pedidoService.obtenerPorId(pedido.id).subscribe((p) => {
+      this.pedidoSeleccionado = p;
+      this.mostrarModalPedido = true;
     });
   }
 
@@ -465,10 +964,6 @@ export class PanelAdmin implements OnInit {
 
   get stockBajo() {
     return this.products.filter((p) => p.stockActual < p.stockMinimo).length;
-  }
-
-  cambiarTab(tab: 'productos' | 'inventario' | 'ventas') {
-    this.activeTab = tab;
   }
 
   compararCategorias(o1: any, o2: any): boolean {
