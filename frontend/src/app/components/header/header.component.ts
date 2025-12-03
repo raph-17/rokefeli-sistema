@@ -9,17 +9,16 @@ import { AuthService } from '../../services/auth.service'; // Ajusta la ruta si 
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.css'
+  styleUrl: './header.component.css',
 })
 export class Header {
-  
   carritoService = inject(CarritoService);
   authService = inject(AuthService);
   router = inject(Router);
 
   // Usamos el Observable directamente con el pipe async en el HTML
   cantidadItems$ = this.carritoService.cartCount$;
-  
+
   // Verifica si hay token para mostrar "Login" o "Logout"
   estoyLogueado(): boolean {
     return !!localStorage.getItem('token'); // O usa tu authService.isLoggedIn()

@@ -1,26 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { CarritoService } from '../../../services/carrito.service';
 
 @Component({
-  selector: 'app-cart',
+  selector: 'app-carrito',
   standalone: true,
-  imports: [CommonModule, RouterModule], // Importa Header/Footer si los usas
+  imports: [CommonModule, RouterModule],
   templateUrl: './cart.component.html',
-  styleUrl: './cart.component.css',
+  styleUrls: ['./cart.component.css'],
 })
-export class CartComponent implements OnInit {
+export class CarritoComponent implements OnInit {
+  private carritoService = inject(CarritoService);
+  private router = inject(Router);
 
   carrito: any = null;
   cargando = true;
+  procesandoId: number | null = null;
 
-  constructor(
-    private carritoService: CarritoService,
-    private router: Router
-  ) {}
-
-  ngOnInit(): void {
+  ngOnInit() {
     this.cargarCarrito();
   }
 
@@ -28,47 +26,81 @@ export class CartComponent implements OnInit {
     this.cargando = true;
     this.carritoService.verCarrito().subscribe({
       next: (data) => {
+        // 🔍 MIRA LA CONSOLA DEL NAVEGADOR (F12)
+        console.log('📦 RESPUESTA DEL BACKEND:', data);
+        console.log('🔍 PRIMER ITEM:', data.detalles[0]);
+
         this.carrito = data;
         this.cargando = false;
       },
       error: (err) => {
         console.error('Error cargando carrito', err);
         this.cargando = false;
-      }
+      },
     });
   }
 
-  actualizarCantidad(idProducto: number, cantidadActual: number, cambio: number) {
-    const nuevaCantidad = cantidadActual + cambio;
-    if (nuevaCantidad < 1) return; // No permitir 0 o negativos
+  cambiarCantidad(item: any, cambio: number) {
+    // 1. VALIDACIÓN DE ID (Aquí está fallando tu botón)
+    if (!item.idProducto) {
+      alert('ERROR CRÍTICO: El backend mandó idProducto = NULL. Revisa tu Mapper en Java.');
+      console.error('Item sin ID:', item);
+      return;
+    }
 
-    this.carritoService.actualizarCantidad(idProducto, nuevaCantidad).subscribe({
-      next: (data) => {
-        this.carrito = data; // Actualizamos la vista con la respuesta del backend
+    const nuevaCantidad = item.cantidad + cambio;
+    if (nuevaCantidad < 1) return;
+
+    // Evitar doble clic
+    if (this.procesandoId === item.idProducto) return;
+
+    this.procesandoId = item.idProducto;
+
+    this.carritoService.actualizarCantidad(item.idProducto, nuevaCantidad).subscribe({
+      next: (res) => {
+        // Actualizamos la vista completa con lo que devuelve el backend
+        this.carrito = res;
+        this.procesandoId = null;
       },
-      error: (err) => alert('No se pudo actualizar (quizás no hay stock)')
+      error: (err) => {
+        console.error(err);
+        this.procesandoId = null;
+      },
     });
   }
 
   eliminarItem(idProducto: number) {
-    if(!confirm('¿Eliminar producto?')) return;
-    
+    if (!idProducto) {
+      alert('No se puede eliminar: ID del producto es NULL');
+      return;
+    }
+
+    if (!confirm('¿Quitar producto del carrito?')) return;
+
+    this.cargando = true;
     this.carritoService.eliminarProducto(idProducto).subscribe({
-      next: (data) => this.carrito = data
+      next: (res) => {
+        this.carrito = res;
+        this.cargando = false;
+      },
+      error: () => (this.cargando = false),
     });
   }
 
-  vaciarCarrito() {
-    if(!confirm('¿Vaciar todo el carrito?')) return;
+  vaciar() {
+    if (!confirm('¿Vaciar todo el carrito?')) return;
 
+    this.cargando = true;
     this.carritoService.vaciarCarrito().subscribe({
       next: () => {
-        this.cargarCarrito(); // Recargar (debería venir vacío)
-      }
+        this.carrito = null;
+        this.cargando = false;
+      },
+      error: () => (this.cargando = false),
     });
   }
 
-  irAlCheckout() {
-    this.router.navigate(['/checkout']);
+  irAPagar() {
+    alert('¡Integración con Pasarela de Pago pendiente! 💳');
   }
 }

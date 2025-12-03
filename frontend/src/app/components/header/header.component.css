@@ -1,73 +1,146 @@
+/* =========================================
+   HEADER FULL WIDTH (Corregido)
+   ========================================= */
 header {
   background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 0 20px;
-  position: sticky; /* Se queda pegado arriba */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra más suave */
+
+  /* Quitamos padding lateral aquí porque lo controla el container interno */
+  padding: 0;
+
+  position: sticky;
   top: 0;
   z-index: 1000;
+  width: 100%;
 }
 
 .container {
-  max-width: 1200px;
+  /* CAMBIO CLAVE: Igualar al catálogo */
+  width: 75%; /* Mismo porcentaje que el catálogo */
+  max-width: 1900px; /* Mismo límite máximo */
+
   margin: 0 auto;
   height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  /* Añadimos un padding interno seguro */
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
+/* =========================================
+   LOGO
+   ========================================= */
 .logo {
-  font-size: 1.2rem;
+  font-size: 1.4rem; /* Un poco más grande */
   font-weight: 800;
-  color: #D48300; /* Color miel */
+  color: #d48300; /* Texto oscuro para "Colmenares" */
   text-decoration: none;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+/* Opcional: Hacer que la palabra "Rokefeli" sea naranja */
+.logo span {
+  color: #d48300;
+}
+
+/* =========================================
+   NAVEGACIÓN
+   ========================================= */
 nav {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 30px; /* Más espacio entre items */
 }
 
 nav a {
   text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  font-size: 15px;
-  transition: color 0.2s;
-  position: relative; /* Para posicionar el badge */
+  color: #555;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-nav a:hover, nav a.active {
-  color: #D48300;
+nav a:hover,
+nav a.active {
+  color: #d48300;
 }
 
-/* El contador rojo del carrito */
-.badge {
-  background-color: #e74c3c;
-  color: white;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 10px;
-  position: absolute;
-  top: -8px;
-  right: -12px;
-}
-
-.btn-logout {
-  background: none;
-  border: 1px solid #ddd;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
+.catalogo {
   font-weight: 600;
 }
 
+.cart-link {
+  font-weight: 600;
+}
+
+/* Badge del carrito */
+.badge {
+  background-color: #e74c3c;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+}
+
+/* =========================================
+   BOTONES ACCIÓN
+   ========================================= */
+.btn-logout {
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  color: #666;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.btn-logout:hover {
+  border-color: #333;
+  color: #333;
+}
+
 .btn-login {
-  background: #D48300;
+  background: #d48300; /* Negro/Gris oscuro moderno */
   color: white !important;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+.btn-login:hover {
+  background: #000;
+  transform: translateY(-1px);
+}
+
+/* MÓVIL */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+  .logo {
+    font-size: 1.1rem;
+  }
+  nav {
+    gap: 15px;
+  }
+  nav a span {
+    display: none;
+  } /* Ocultar texto en móvil si quieres */
 }

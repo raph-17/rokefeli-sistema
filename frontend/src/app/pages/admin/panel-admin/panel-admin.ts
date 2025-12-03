@@ -23,6 +23,7 @@ import { PedidoService, Pedido, EstadoPedido } from '../../../services/pedido.se
 })
 export class PanelAdmin implements OnInit {
   formProducto!: FormGroup;
+  formCategoria!: FormGroup;
   mostrarModal = false;
 
   // Estado de Edición (null = Creando, number = Editando ID)
@@ -43,8 +44,14 @@ export class PanelAdmin implements OnInit {
   ticketPromedio: number = 0;
 
   // Pestañas
-  activeTab: 'productos' | 'inventario' | 'ventas' | 'ubicaciones' | 'envios' | 'pedidos' =
-    'productos';
+  activeTab:
+    | 'productos'
+    | 'inventario'
+    | 'ventas'
+    | 'ubicaciones'
+    | 'envios'
+    | 'pedidos'
+    | 'categorias' = 'productos';
   cargando = true;
 
   // Filtros
@@ -135,6 +142,20 @@ export class PanelAdmin implements OnInit {
   metricsEnvios = { rutasActivas: 0, costoProm: 0, tiempoProm: 0 };
   metricsUbicacion = { total: 0, activos: 0, inactivos: 0 };
 
+  // Variables para gestión de categorías
+  mostrarModalCategoria = false;
+  categoriaSeleccionada: any = null; // Para edición
+  filtroCategoriaNombre: string = '';
+
+  // Métricas para Categorías
+  get categoriasActivas(): number {
+    return this.categorias ? this.categorias.filter((c) => c.estado === 'ACTIVO').length : 0;
+  }
+
+  get categoriasInactivas(): number {
+    return this.categorias ? this.categorias.filter((c) => c.estado !== 'ACTIVO').length : 0;
+  }
+
   get inventarioFiltrado() {
     // Si el checkbox está marcado, filtramos
     if (this.mostrarSoloBajoStock) {
@@ -176,6 +197,11 @@ export class PanelAdmin implements OnInit {
       stockMinimo: new FormControl(5, [Validators.required, Validators.min(0)]),
       imagenUrl: new FormControl(''),
     });
+
+    this.formCategoria = new FormGroup({
+      nombre: new FormControl('', [Validators.required]),
+      descripcion: new FormControl(''),
+    });
   }
 
   cargarDatosDashboard() {
@@ -199,7 +225,7 @@ export class PanelAdmin implements OnInit {
     });
 
     // 2. Categorías
-    this.categoriaService.findAll().subscribe({
+    this.categoriaService.findAllAdmin().subscribe({
       next: (data) => (this.categorias = data),
     });
 
@@ -684,7 +710,9 @@ export class PanelAdmin implements OnInit {
   }
 
   // Actualiza cambiarTab para cargar datos si entran a 'ubicaciones'
-  cambiarTab(tab: 'productos' | 'inventario' | 'ventas' | 'ubicaciones' | 'envios' | 'pedidos') {
+  cambiarTab(
+    tab: 'productos' | 'inventario' | 'ventas' | 'ubicaciones' | 'envios' | 'pedidos' | 'categorias'
+  ) {
     // Ajusta el tipo
     this.activeTab = tab;
     if (tab === 'ubicaciones') {
@@ -942,6 +970,80 @@ export class PanelAdmin implements OnInit {
       this.pedidoSeleccionado = p;
       this.mostrarModalPedido = true;
     });
+  }
+
+  // 1. Cargar (Ya debes tener algo similar, asegúrate de traerlas todas)
+  cargarCategorias() {
+    this.cargando = true;
+    this.categoriaService.findAllAdmin().subscribe({
+      next: (data) => {
+        this.categorias = data;
+        this.cargando = false;
+      },
+      error: () => (this.cargando = false),
+    });
+  }
+
+  // 2. Abrir Modal (Limpio o con datos)
+  abrirModalCategoria(categoria?: any) {
+    this.mostrarModalCategoria = true;
+    if (categoria) {
+      // Modo Edición
+      this.categoriaSeleccionada = categoria;
+      this.formCategoria.patchValue({
+        nombre: categoria.nombre,
+        descripcion: categoria.descripcion,
+      });
+    } else {
+      // Modo Creación
+      this.categoriaSeleccionada = null;
+      this.formCategoria.reset();
+    }
+  }
+
+  // 3. Guardar (Crea o Edita según exista categoriaSeleccionada)
+  guardarCategoria() {
+    if (this.formCategoria.invalid) return;
+
+    const datos = this.formCategoria.value;
+    this.cargando = true;
+
+    if (this.categoriaSeleccionada) {
+      // UPDATE
+      this.categoriaService.update(this.categoriaSeleccionada.id, datos).subscribe(() => {
+        this.cargarCategorias(); // Recarga la lista
+        this.cerrarModalCategoria();
+      });
+    } else {
+      // CREATE
+      this.categoriaService.create(datos).subscribe(() => {
+        this.cargarCategorias();
+        this.cerrarModalCategoria();
+      });
+    }
+  }
+
+  // 4. Cambiar Estado
+  desactivarCategoria(id: number) {
+    if (confirm('Desactivar esta categoría? Esto desactivará los productos asociados.')) {
+      this.categoriaService.desactivar(id).subscribe(() => this.cargarCategorias());
+    }
+  }
+
+  activarCategoria(id: number) {
+    this.categoriaService.activar(id).subscribe(() => this.cargarCategorias());
+  }
+
+  // 5. Eliminar categoría
+  eliminarCategoria(id: number) {
+    if (confirm('¿Eliminar esta categoría permanentemente? Esta acción no se puede deshacer.')) {
+      this.categoriaService.delete(id).subscribe(() => this.cargarCategorias());
+    }
+  }
+
+  cerrarModalCategoria() {
+    this.mostrarModalCategoria = false;
+    this.categoriaSeleccionada = null;
   }
 
   // --- OTRAS ACCIONES ---

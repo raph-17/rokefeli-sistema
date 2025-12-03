@@ -1,18 +1,23 @@
 /* Aseguramos que html y body ocupen toda la altura */
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
+  background-color: #f3f4f6;
 }
 
 /* Forzamos que el contenedor de la app ocupe al menos el 100% de la altura */
 app-root {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* 100% del Viewport Height */
+  min-height: 100vh;
 }
 
 /* Hacemos que el contenido principal empuje el footer hacia abajo */
 main {
-  flex: 1; /* Esto hace que el main crezca para ocupar todo el espacio libre */
+  flex: 1;          /* Ocupa el espacio sobrante entre header y footer */
+  display: flex;    /* Se convierte en contenedor flexible */
+  flex-direction: column; /* Organiza los hijos en columna */
+  width: 100%;      /* Ancho total */
 }

@@ -6,9 +6,8 @@ import { Catalogo } from './pages/cliente/catalogo/catalogo'; // Catálogo
 import { ConfirmarPagoComponent } from './pages/cliente/confirmar-pago/confirmar-pago';
 import { PanelAdmin } from './pages/admin/panel-admin/panel-admin';
 import { Pedidos } from './pages/cliente/pedidos/pedidos';
-import { Users } from './pages/users/users';
 // Importa el Carrito
-import { CartComponent } from './pages/cliente/cart/cart.component'; 
+import { CarritoComponent } from './pages/cliente/cart/cart.component'; 
 
 export const routes: Routes = [
     { path: '', component: Home },
@@ -17,7 +16,7 @@ export const routes: Routes = [
     
     // Catálogo y Carrito
     { path: 'catalogo', component: Catalogo },
-    { path: 'carrito', component: CartComponent }, // <--- ¡AGREGADO!
+    { path: 'carrito', component: CarritoComponent }, // <--- ¡AGREGADO!
     { path: 'confirmar-pago', component: ConfirmarPagoComponent }, // Sugiero usar guion
 
     // Panel Admin (Corregido para coincidir con tu login)
@@ -25,7 +24,6 @@ export const routes: Routes = [
     
     // Otras rutas admin
     { path: 'pedidos', component: Pedidos },
-    { path: 'usuarios', component: Users },
     
     // Ruta comodín (por si escriben algo mal, volver al home o login)
     { path: '**', redirectTo: '' } 

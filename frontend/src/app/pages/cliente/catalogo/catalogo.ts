@@ -18,17 +18,11 @@ interface CatalogoUI {
 @Component({
   selector: 'app-catalogo',
   standalone: true,
-  imports: [
-    FormsModule,
-    CommonModule,
-    MatButtonModule,
-    RouterModule
-  ],
+  imports: [FormsModule, CommonModule, MatButtonModule, RouterModule],
   templateUrl: './catalogo.component.html',
   styleUrls: ['./catalogo.component.css'],
 })
 export class Catalogo implements OnInit {
-
   // --- FILTROS (Solo backend) ---
   filtroNombre: string = '';
   filtroCategoria: number | null = null;
@@ -55,30 +49,29 @@ export class Catalogo implements OnInit {
   }
 
   cargarCategorias() {
-    this.categoriaService.findAll().subscribe(data => this.categorias = data);
+    this.categoriaService.findAllClientes().subscribe((data) => (this.categorias = data));
   }
 
   cargarProductos() {
     this.cargando = true;
-    
-    this.productoService.listarActivos(
-        this.filtroNombre, 
-        this.filtroCategoria || undefined
-    ).subscribe({
+
+    this.productoService
+      .listarActivos(this.filtroNombre, this.filtroCategoria || undefined)
+      .subscribe({
         next: (data: any[]) => {
-          this.paquetes = data.map(p => ({
+          this.paquetes = data.map((p) => ({
             id: p.id,
             nombre: p.nombre,
-            precio: Number(p.precio || p.price || 0), 
+            precio: Number(p.precio || p.price || 0),
             img: p.imagenUrl || '/img/placeholder.png',
-            descripcion: p.descripcion
+            descripcion: p.descripcion,
           }));
           this.cargando = false;
         },
         error: (err) => {
           console.error('Error cargando productos:', err);
           this.cargando = false;
-        }
+        },
       });
   }
 
@@ -107,7 +100,7 @@ export class Catalogo implements OnInit {
         console.error(err);
         alert('No se pudo agregar (verifique stock o inicie sesión)');
         this.agregandoId = null;
-      }
+      },
     });
   }
 
@@ -137,10 +130,14 @@ export class Catalogo implements OnInit {
       this.paginaActual++;
     }
   }
-  
+
   prevPage() {
     if (this.paginaActual > 1) {
       this.paginaActual--;
     }
+  }
+
+  trackById(index: number, item: any): number {
+    return item.id; // Angular solo actualizará si cambia el ID, no repintará todo
   }
 }

@@ -12,4 +12,5 @@ public class DetalleCarritoResponseDTO {
     private Integer cantidad;
     private BigDecimal precioUnitario;
     private BigDecimal subtotal;
+    private String imagenUrl;
 }

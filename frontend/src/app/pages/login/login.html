@@ -1,41 +1,47 @@
-<main>
-    <div class="loginContainer">
-        <div class="imgContainer"><img src="/img/RokefeliLogin.jpg"></div>
-        <div class="Formulario">
-            <form [formGroup]="loginForm" (ngSubmit)="handleSubmit()">
-
-
-    <mat-form-field>
-        <mat-label>Correo Electrónico</mat-label>
-        <input matInput formControlName="email">
-        <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-            El correo es obligatorio
-        </mat-error>
-        <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
-            El correo no es válido
-        </mat-error>
-    </mat-form-field>
-
-    <mat-form-field>
-        <mat-label>Contraseña</mat-label>
-        <input 
-            matInput
-            formControlName="password"
-            [type]="hide() ? 'password' : 'text'"
-        >
-        <button type="button"
-            mat-icon-button
-            matSuffix
-            (click)="clickEvent($event)">
-            <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-
-        <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-            La contraseña es obligatoria
-        </mat-error>
-    </mat-form-field>
-   <button mat-flat-button type="submit"[disabled]="loginForm.invalid">Iniciar Sesión</button>
-            </form>
-        </div>
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="img-container">
+      <img src="/img/RokefeliLogin.jpg" alt="Login Rokefeli" />
     </div>
-</main>
+
+    <div class="form-container">
+      <div class="login-header">
+        <h2>Bienvenido</h2>
+        <p class="subtitle">Ingresa tus credenciales para continuar</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="handleSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Correo Electrónico</mat-label>
+          <input matInput formControlName="email" />
+          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">Requerido</mat-error>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Correo inválido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput formControlName="password" [type]="hide() ? 'password' : 'text'" />
+          <button type="button" mat-icon-button matSuffix (click)="clickEvent($event)">
+            <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">Requerido</mat-error>
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="loginForm.invalid"
+          class="btn-submit"
+        >
+          Iniciar Sesión
+        </button>
+      </form>
+
+      <div class="register-link">
+        <span>¿No tienes cuenta?</span>
+        <a routerLink="/register">Regístrate gratis</a>
+      </div>
+    </div>
+  </div>
+</div>

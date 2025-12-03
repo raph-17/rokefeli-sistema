@@ -1,15 +1,13 @@
 <header>
   <div class="container">
-    <a routerLink="/home" class="logo">
-      🐝 Colmenares Rokefeli
-    </a>
+    <a routerLink="/home" class="logo"> 🐝 Colmenares Rokefeli </a>
 
     <nav>
-      <a routerLink="/catalogo" routerLinkActive="active">Catálogo</a>
+      <a routerLink="/catalogo" routerLinkActive="active" class="catalogo">Catálogo</a>
 
       <a routerLink="/carrito" routerLinkActive="active" class="cart-link">
         🛒 Carrito
-        <span class="badge" *ngIf="(cantidadItems$ | async) as cantidad">
+        <span class="badge" *ngIf="cantidadItems$ | async as cantidad">
           {{ cantidad }}
         </span>
       </a>

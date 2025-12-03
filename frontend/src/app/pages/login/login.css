@@ -1,48 +1,140 @@
-/* Contenedor principal: imagen + formulario */
-.loginContainer {
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Ocupa todo el espacio vertical disponible */
+  width: 100%; /* Ocupa todo el ancho disponible */
+  min-height: 0; /* Evita desbordamientos extraños en flexbox */
+}
+
+/* =========================================
+   WRAPPER PRINCIPAL (Clase correcta: .login-wrapper)
+   ========================================= */
+.login-wrapper {
+  /* LA CLAVE: Ocupa todo el espacio sobrante entre Header y Footer */
+  flex: 1;
+
+  /* Centrado de la tarjeta */
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 40px;               /* separación entre imagen y formulario */
-  padding: 40px;
-  max-width: 1200px;
-  margin: 0 auto;
+
+  /* Ancho total */
+  width: 100%;
+
+  background-color: #faf4ed;
+
+  /* Un poco de aire en móviles */
+  padding: 20px;
+  padding-bottom: 80px;
+
+  box-sizing: border-box;
 }
 
-/* Imagen */
-.imgContainer img {
-  width: 420px;            /* ajusta según tu diseño */
-  height: auto;
+/* =========================================
+   TARJETA (CARD)
+   ========================================= */
+.login-card {
+  display: flex; /* Para poner imagen a la izq y form a la der */
+  background: white;
+  width: 100%;
+  max-width: 900px; /* Ancho máximo elegante */
+
   border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  border: 1px solid #e0e0e0;
+
+  overflow: hidden; /* Para que la imagen respete los bordes redondos */
 }
 
-/* Contenedor del formulario */
-.Formulario {
+/* =========================================
+   IMAGEN (IZQUIERDA)
+   ========================================= */
+.img-container {
+  flex: 1; /* Ocupa el 50% */
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cubre todo el área sin estirarse feo */
+  display: block;
+  min-height: 400px; /* Asegura altura mínima si el form es corto */
+}
+
+/* =========================================
+   FORMULARIO (DERECHA)
+   ========================================= */
+.form-container {
+  flex: 1; /* Ocupa el otro 50% */
+  padding: 40px;
   display: flex;
   flex-direction: column;
-  width: 350px;            /* tamaño del formulario */
+  justify-content: center;
 }
 
-/* Para que cada mat-form-field use el 100% */
-.Formulario form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.login-header h2 {
+  text-align: center;
+  color: #333;
+  margin: 0 0 25px 0;
+  font-size: 1.8rem;
+  font-weight: 700;
 }
 
-/* RESPONSIVO para pantallas pequeñas: imagen arriba, form abajo */
+/* Ajustes de Material */
+.full-width {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+/* Botón Submit */
+.btn-submit {
+  width: 100%;
+  padding: 8px 0;
+  margin-top: 15px;
+  font-size: 16px;
+  background-color: #f97316 !important; /* Tu naranja */
+  color: white !important;
+}
+
+/* Enlace de Registro */
+.register-link {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.register-link a {
+  color: #f97316; /* Tu color naranja */
+  text-decoration: none;
+  font-weight: 700;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   RESPONSIVO (MÓVIL)
+   ========================================= */
 @media (max-width: 768px) {
-  .loginContainer {
-    flex-direction: column;
-    gap: 20px;
-    padding: 20px;
+  .login-card {
+    flex-direction: column; /* Apila imagen arriba, form abajo */
+    max-width: 450px;
   }
 
-  .imgContainer img {
-    width: 80%;
+  .img-container {
+    height: 200px; /* Limita la altura de la imagen en móvil */
   }
 
-  .Formulario {
-    width: 100%;
+  .img-container img {
+    min-height: auto;
   }
 }

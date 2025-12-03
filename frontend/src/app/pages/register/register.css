@@ -1,80 +1,155 @@
-/* Contenedor principal: imagen + formulario */
-.loginContainer {
+/* =========================================
+   1. CONEXIÓN CON APP-ROOT (Sticky Footer)
+   ========================================= */
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Ocupa todo el espacio vertical disponible */
+  width: 100%;
+}
+
+/* =========================================
+   2. WRAPPER PRINCIPAL
+   ========================================= */
+.register-wrapper {
+  flex: 1; /* Empuja el footer hacia abajo */
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 40px;               /* separación entre imagen y formulario */
-  padding: 40px;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  background-color: #faf4ed;
+  padding: 40px 20px; /* Un poco más de padding vertical porque el form es largo */
+  box-sizing: border-box;
 }
 
-/* Imagen */
-.imgContainer img {
-  width: 420px;            /* ajusta según tu diseño */
-  height: auto;
+/* =========================================
+   3. TARJETA (CARD)
+   ========================================= */
+.register-card {
+  display: flex;
+  background: white;
+  width: 100%;
+  max-width: 1000px; /* Un poco más ancho que el login */
   border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
 }
 
-/* Contenedor del formulario */
-.Formulario {
+/* =========================================
+   4. IMAGEN (IZQUIERDA)
+   ========================================= */
+.img-container {
+  flex: 1; /* 50% del ancho */
+  background-color: #fff;
   display: flex;
-  flex-direction: column;
-  width: 350px;            /* tamaño del formulario */
-}
-
-/* Para que cada mat-form-field use el 100% */
-.Formulario form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* Contenedor principal: imagen + formulario */
-.loginContainer {
-  display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 40px;               /* separación entre imagen y formulario */
+  justify-content: center;
+  position: relative;
+  min-height: 550px; /* Altura mínima para que no se vea aplastada */
+}
+
+.img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cubre todo el espacio sin deformarse */
+  display: block;
+  position: absolute; /* Asegura que llene el contenedor padre */
+}
+
+/* =========================================
+   5. FORMULARIO (DERECHA)
+   ========================================= */
+.form-container {
+  flex: 1; /* 50% del ancho */
   padding: 40px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Imagen */
-.imgContainer img {
-  width: 420px;            /* ajusta según tu diseño */
-  height: auto;
-  border-radius: 20px;
-}
-
-/* Contenedor del formulario */
-.Formulario {
   display: flex;
   flex-direction: column;
-  width: 350px;            /* tamaño del formulario */
+  justify-content: center;
 }
 
-/* Para que cada mat-form-field use el 100% */
-.Formulario form {
+.register-header h2 {
+  text-align: center;
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.register-header p {
+  text-align: center;
+  color: #666;
+  margin: 0 0 30px 0;
+  font-size: 0.9rem;
+}
+
+/* Filas de 2 columnas (Nombre/Apellido) */
+.form-row {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
-/* RESPONSIVO para pantallas pequeñas: imagen arriba, form abajo */
-@media (max-width: 768px) {
-  .loginContainer {
+.half-width {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+/* Botón Submit */
+.btn-submit {
+  width: 100%;
+  padding: 8px 0;
+  margin-top: 15px;
+  font-size: 16px;
+  background-color: #f97316 !important;
+  color: white !important;
+}
+
+/* Enlace Login */
+.login-link {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.login-link a {
+  color: #f97316;
+  text-decoration: none;
+  font-weight: 700;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   RESPONSIVE (MÓVIL)
+   ========================================= */
+@media (max-width: 850px) {
+  .register-card {
     flex-direction: column;
-    gap: 20px;
-    padding: 20px;
+    max-width: 500px;
   }
 
-  .imgContainer img {
-    width: 80%;
+  .img-container {
+    min-height: 200px;
+    height: 200px;
+    position: relative;
   }
 
-  .Formulario {
-    width: 100%;
+  .img-container img {
+    position: static; /* En móvil que fluya normal */
+    height: 100%;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
   }
 }

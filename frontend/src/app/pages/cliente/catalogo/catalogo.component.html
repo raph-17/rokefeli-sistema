@@ -1,78 +1,74 @@
 <div class="paquetes-header">
   <h1>Nuestros Productos</h1>
-  
+
   <div class="search-bar">
-    <input type="text" 
-          placeholder="¿Qué estás buscando? (ej. Miel, Polen...)" 
-          [(ngModel)]="filtroNombre" 
-          (keyup.enter)="buscar()">
+    <input
+      type="text"
+      placeholder="¿Qué estás buscando? (ej. Miel, Polen...)"
+      [(ngModel)]="filtroNombre"
+      (keyup.enter)="buscar()"
+    />
     <button (click)="buscar()">🔍</button>
   </div>
-  
-  </div>
+</div>
 
 <main class="paquetes-container">
-
   <aside class="sidebar">
-    <h3>Categorías:</h3>
+    <h3>Categorías</h3>
     <div class="categorias-list">
-      
-      <div class="cat-item" 
-          [class.active]="filtroCategoria === null" 
-          (click)="filtrarPorCategoria(null)">
+      <div
+        class="cat-item"
+        [class.active]="filtroCategoria === null"
+        (click)="filtrarPorCategoria(null)"
+      >
         Todas
       </div>
 
-      <div class="cat-item" 
-          *ngFor="let cat of categorias"
-          [class.active]="filtroCategoria === cat.id"
-          (click)="filtrarPorCategoria(cat.id)">
+      <div
+        class="cat-item"
+        *ngFor="let cat of categorias"
+        [class.active]="filtroCategoria === cat.id"
+        (click)="filtrarPorCategoria(cat.id)"
+      >
         {{ cat.nombre }}
       </div>
     </div>
   </aside>
 
   <section class="lista-paquetes">
-
-    <div *ngIf="cargando" style="width:100%; text-align:center; padding: 40px; grid-column: 1 / -1;">
-      <p>Cargando productos...</p>
+    <div *ngIf="cargando" class="loading-overlay">
+      <div class="spinner"></div>
     </div>
 
-    <div class="paquete-card" *ngFor="let p of paquetesFiltrados">
-      
-      <img [src]="p.img" [alt]="p.nombre" onerror="this.onerror=null; this.src='/img/placeholder.png'">
-      
+    <div class="paquete-card" *ngFor="let p of paquetesFiltrados; trackBy: trackById">
+      <div class="img-wrapper">
+        <img
+          [src]="p.img"
+          [alt]="p.nombre"
+          onerror="this.onerror=null; this.src='/img/placeholder.png'"
+        />
+      </div>
+
       <div class="card-body">
         <h4>{{ p.nombre }}</h4>
-        <p class="precio">S/ {{ p.precio | number:'1.2-2' }}</p>
-        
-        <p *ngIf="p.descripcion" style="font-size: 13px; color: #666; margin-bottom: 15px;">
-            {{ p.descripcion.substring(0, 50) }}...
-        </p>
+        <p class="precio">S/ {{ p.precio | number : '1.2-2' }}</p>
 
-        <button mat-flat-button class="btn-carrito" 
-                (click)="agregarAlCarrito(p)" 
-                [disabled]="agregandoId === p.id">
-          <span *ngIf="agregandoId !== p.id">Añadir al carrito 🛒</span>
-          <span *ngIf="agregandoId === p.id">Agregando... ⏳</span>
+        <p *ngIf="p.descripcion" class="desc">{{ p.descripcion.substring(0, 60) }}...</p>
+
+        <button
+          mat-flat-button
+          class="btn-carrito"
+          (click)="agregarAlCarrito(p)"
+          [disabled]="agregandoId === p.id"
+        >
+          <span *ngIf="agregandoId !== p.id">Añadir al carrito</span>
+          <span *ngIf="agregandoId === p.id">Agregando...</span>
         </button>
       </div>
     </div>
 
-    <div *ngIf="!cargando && paquetes.length === 0" style="width:100%; text-align:center; grid-column: 1 / -1;">
-      <p>No se encontraron productos 🐝</p>
+    <div *ngIf="!cargando && paquetes.length === 0" class="full-width-msg">
+      <p>No se encontraron productos con esos filtros 🐝</p>
     </div>
-
-    <div class="pagination" *ngIf="paginas.length > 1">
-      <span (click)="prevPage()" [class.disabled]="paginaActual === 1">←</span>
-      <span *ngFor="let n of paginas" 
-            [class.active]="n === paginaActual"
-            (click)="setPagina(n)">
-        {{ n }}
-      </span>
-      <span (click)="nextPage()" [class.disabled]="paginaActual === paginas.length">→</span>
-    </div>
-
   </section>
-
 </main>

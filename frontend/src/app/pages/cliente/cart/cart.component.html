@@ -1,58 +1,90 @@
-<div class="cart-container">
-  <h1>Tu Carrito de Compras 🛒</h1>
-
-  <div *ngIf="cargando" class="loading">Cargando carrito...</div>
-
-  <div *ngIf="!cargando && (!carrito?.detalles || carrito?.detalles.length === 0)" class="empty-cart">
-    <p>Tu carrito está vacío.</p>
-    <button routerLink="/paquetes" class="btn-continue">Ver Productos</button>
+<div class="cart-wrapper">
+  <div class="cart-header">
+    <h1>Tu Carrito de Compras 🛒</h1>
+    <button *ngIf="carrito?.detalles?.length" class="btn-clear" (click)="vaciar()">
+      Vaciar Carrito
+    </button>
   </div>
 
-  <div *ngIf="carrito?.detalles?.length > 0" class="cart-content">
-    
+  <div class="loading-overlay" [class.is-loading]="cargando">
+    <div class="spinner"></div>
+  </div>
+
+  <div *ngIf="!cargando && (!carrito || carrito?.detalles?.length === 0)" class="empty-cart">
+    <div class="empty-content">
+      <span style="font-size: 4rem">🛍️</span>
+      <h2>Tu carrito está vacío</h2>
+      <p>¡Nuestras abejas han preparado cosas deliciosas para ti!</p>
+      <a routerLink="/catalogo" class="btn-primary">Ir al Catálogo</a>
+    </div>
+  </div>
+
+  <div class="cart-grid" *ngIf="carrito?.detalles?.length > 0">
     <div class="cart-items">
-      <div *ngFor="let item of carrito.detalles" class="item-card">
-        <img [src]="item.producto.imagenUrl || '/assets/placeholder.png'" alt="img" class="item-img">
-        
+      <div class="item-card" *ngFor="let item of carrito.detalles">
+        <div class="item-img">
+          <img
+            [src]="item.imagenUrl || '/img/placeholder.png'"
+            alt="Producto"
+            onerror="this.src='/img/placeholder.png'"
+          />
+        </div>
+
         <div class="item-info">
-          <h3>{{ item.producto.nombre }}</h3>
-          <p class="price">S/ {{ item.precioUnitario | number:'1.2-2' }}</p>
+          <h3>{{ item.nombreProducto || '⚠️ NOMBRE NULL EN BACKEND' }}</h3>
+
+          <p class="unit-price">Precio unitario: S/ {{ item.precioUnitario | number : '1.2-2' }}</p>
         </div>
 
-        <div class="item-actions">
-          <div class="qty-control">
-            <button (click)="actualizarCantidad(item.producto.id, item.cantidad, -1)">-</button>
-            <span>{{ item.cantidad }}</span>
-            <button (click)="actualizarCantidad(item.producto.id, item.cantidad, 1)">+</button>
-          </div>
-          
-          <p class="subtotal">Sub: S/ {{ item.subtotal | number:'1.2-2' }}</p>
-          
-          <button class="btn-delete" (click)="eliminarItem(item.producto.id)">🗑️</button>
+        <div class="item-quantity">
+          <button
+            class="qty-btn"
+            (click)="cambiarCantidad(item, -1)"
+            [disabled]="item.cantidad <= 1"
+          >
+            -
+          </button>
+          <span class="qty-val">{{ item.cantidad }}</span>
+          <button class="qty-btn" (click)="cambiarCantidad(item, 1)">+</button>
         </div>
+
+        <div class="item-total">
+          <span
+            >S/ {{ item.subtotal || item.cantidad * item.precioUnitario | number : '1.2-2' }}</span
+          >
+        </div>
+
+        <button class="btn-delete" (click)="eliminarItem(item.idProducto)" title="Eliminar">
+          🗑️
+        </button>
       </div>
-
-      <button class="btn-empty" (click)="vaciarCarrito()">Vaciar Carrito</button>
     </div>
 
     <div class="cart-summary">
-      <h2>Resumen</h2>
-      <div class="summary-row">
-        <span>Subtotal</span>
-        <span>S/ {{ carrito.montoTotal | number:'1.2-2' }}</span>
-      </div>
-      <div class="summary-row">
-        <span>Envío</span>
-        <span class="text-muted">(Se calcula en el checkout)</span>
-      </div>
-      <hr>
-      <div class="summary-row total">
-        <span>Total Estimado</span>
-        <span>S/ {{ carrito.montoTotal | number:'1.2-2' }}</span>
-      </div>
+      <div class="summary-card">
+        <h2>Resumen del Pedido</h2>
 
-      <button class="btn-checkout" (click)="irAlCheckout()">Proceder al Pago</button>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>S/ {{ carrito.total | number : '1.2-2' }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Envío estimado</span>
+          <span class="text-success">Gratis 🚚</span>
+        </div>
+
+        <hr />
+
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>S/ {{ carrito.total | number : '1.2-2' }}</span>
+        </div>
+
+        <button class="btn-checkout" (click)="irAPagar()">Proceder al Pago</button>
+
+        <a routerLink="/catalogo" class="link-continue">Seguir comprando</a>
+      </div>
     </div>
-
   </div>
 </div>

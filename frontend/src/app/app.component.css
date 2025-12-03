@@ -1,5 +1,5 @@
-/* Agrega esto al inicio de tu CSS o en styles.css global */
 :host {
-  /* Reserva siempre el espacio del scroll, aunque no se use */
-  scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Obliga a la app a ocupar toda la pantalla */
 }
