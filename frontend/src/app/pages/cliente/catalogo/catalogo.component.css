@@ -9,7 +9,7 @@
   align-items: flex-start;
 
   /* ESTO ES LO QUE PIDES: */
-  width: 98%; /* Ocupa el 98% de la pantalla */
+  width: 95%; /* Ocupa el 98% de la pantalla */
   max-width: 1900px; /* Límite muy alto */
 
   margin: 0 auto;
@@ -23,7 +23,7 @@
    HEADER
    ========================================= */
 .paquetes-header {
-  width: 100%; /* Casi borde a borde */
+  width: 95%; /* Casi borde a borde */
   max-width: 1900px; /* Permitimos pantallas 4K incluso */
   margin: 0 auto;
   padding: 30px 20px;

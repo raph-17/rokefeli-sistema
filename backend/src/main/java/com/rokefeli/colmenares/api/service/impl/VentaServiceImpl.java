@@ -74,42 +74,53 @@ public class VentaServiceImpl implements VentaService {
     @Override
     public VentaResponseDTO crearVentaDesdeCarrito(Long idUsuario) {
 
-        // 1. Buscar el carrito activo del usuario
+        // 1. Buscar el carrito activo (Igual que antes)
         Carrito carrito = carritoRepository.findByUsuario_IdAndEstado(idUsuario, EstadoCarrito.ACTIVO)
                 .orElseThrow(() -> new RuntimeException("No hay un carrito activo para este usuario."));
 
-        // 2. Validar que no esté vacío
         if (carrito.getDetalles() == null || carrito.getDetalles().isEmpty()) {
-            throw new RuntimeException("El carrito está vacío, no se puede iniciar el checkout.");
+            throw new RuntimeException("El carrito está vacío.");
         }
 
-        // 3. Crear la Cabecera de la Venta
-        Venta venta = new Venta();
-        venta.setUsuario(carrito.getUsuario());
-        venta.setEstado(EstadoVenta.PENDIENTE); // Importante: Aún no pagada
-        venta.setCanal(CanalVenta.ONLINE);
-        venta.setMontoTotal(carrito.getMontoTotal()); // Copiamos el total
+        // 2. BUSCAR VENTA PENDIENTE EXISTENTE (PARA RECICLAR)
+        Venta venta = ventaRepository
+                .findFirstByUsuario_IdAndEstadoOrderByFechaDesc(idUsuario, EstadoVenta.PENDIENTE)
+                .orElse(new Venta()); // Si no hay, creamos una nueva vacía
 
-        // 4. Copiar Detalles (Carrito -> Venta)
-        List<DetalleVenta> detallesVenta = new ArrayList<>();
+        // 3. Configurar Cabecera (Actualizamos datos siempre)
+        if (venta.getId() == null) { // Es nueva
+            venta.setUsuario(carrito.getUsuario());
+            venta.setEstado(EstadoVenta.PENDIENTE);
+            venta.setCanal(CanalVenta.ONLINE);
+        }
+
+        venta.setMontoTotal(carrito.getMontoTotal());
+
+        List<DetalleVenta> nuevosDetalles = new ArrayList<>();
 
         for (DetalleCarrito detCarrito : carrito.getDetalles()) {
             DetalleVenta detVenta = new DetalleVenta();
+            // Si reciclamos la venta, asignamos la misma instancia
             detVenta.setVenta(venta);
             detVenta.setProducto(detCarrito.getProducto());
             detVenta.setCantidad(detCarrito.getCantidad());
             detVenta.setPrecioUnitario(detCarrito.getPrecioUnitario());
             detVenta.setSubtotal(detCarrito.getSubtotal());
 
-            detallesVenta.add(detVenta);
+            nuevosDetalles.add(detVenta);
         }
 
-        venta.setDetalles(detallesVenta);
+        // Si la venta ya existía, Hibernate borrará los detalles viejos y pondrá los nuevos
+        if (venta.getDetalles() != null) {
+            venta.getDetalles().clear();
+            venta.getDetalles().addAll(nuevosDetalles);
+        } else {
+            venta.setDetalles(nuevosDetalles);
+        }
 
-        // 5. Guardar la Venta (Cascada guardará los detalles)
+        // 5. Guardar (Update o Insert automático)
         Venta ventaGuardada = ventaRepository.save(venta);
 
-        // 6. Retornar DTO
         return ventaMapper.toResponseDTO(ventaGuardada);
     }
 

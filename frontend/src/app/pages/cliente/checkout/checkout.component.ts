@@ -118,8 +118,10 @@ export class CheckoutComponent implements OnInit {
     // Escuchar respuesta de Culqi (Callback global)
     (window as any).culqi = () => {
       if (Culqi.token) {
+        Culqi.close();
         // ¡Tenemos Token! Volvemos a zona Angular para procesar
         this.ngZone.run(() => {
+          this.cargando = true; // Aseguramos que se vea tu spinner de Angular
           this.enviarPagoAlBackend(Culqi.token.id);
         });
       } else {

@@ -55,49 +55,83 @@ public class PagoServiceImpl implements PagoService {
 
     @Override
     public PagoResponseDTO procesarPago(PagoCreateDTO dto) {
-
+        // 1. Validaciones previas (Venta, Tarifa, Monto)
         Venta venta = ventaRepository.findById(dto.getIdVenta())
                 .orElseThrow(() -> new ResourceNotFoundException("Venta", dto.getIdVenta()));
 
         if (venta.getEstado() != EstadoVenta.PENDIENTE) {
-            throw new IllegalStateException("La venta no está disponible para pago.");
+            throw new IllegalStateException("La venta no está disponible para pago (Ya fue pagada o cancelada).");
         }
 
         TarifaEnvio tarifa = tarifaRepository.findByIdAndEstado(dto.getIdTarifaEnvio(), EstadoTarifa.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Tarifa", dto.getIdTarifaEnvio()));
 
+        // Validación de monto (Suma de productos + envío)
         if (dto.getMonto().compareTo(venta.getMontoTotal().add(tarifa.getCostoEnvio())) != 0) {
-            throw new IllegalArgumentException("El monto enviado no coincide con el monto total de la venta.");
+            throw new IllegalArgumentException("Error de seguridad: El monto no coincide con el total.");
         }
 
+        // 2. Preparar entidad Pago
         Pago pago = pagoMapper.toEntity(dto);
         pago.setVenta(venta);
         pago.setTarifaEnvio(tarifa);
         pago.setEstadoPago(EstadoPago.PENDIENTE);
+        pago.setFechaPago(LocalDateTime.now()); // Guardamos fecha intento
 
-        boolean aprobado = procesarConPasarelaExterna(dto);
+        try {
+            boolean aprobado = procesarConPasarelaExterna(dto);
 
-        if (aprobado) {
-            pago.setFechaPago(LocalDateTime.now());
-            pago.setEstadoPago(EstadoPago.APROBADO);
-            venta.setEstado(EstadoVenta.PAGADA);
-            carritoService.marcarComoComprado(venta.getUsuario().getId());
-        }
-        else {
-            pago.setEstadoPago(EstadoPago.RECHAZADO);
-            venta.setEstado(EstadoVenta.CANCELADA);
+            if (aprobado) {
+                // ✅ PAGO EXITOSO
+                pago.setEstadoPago(EstadoPago.APROBADO);
+                pago.setFechaPago(LocalDateTime.now());
+                venta.setEstado(EstadoVenta.PAGADA);
 
-            for (DetalleVenta det : venta.getDetalles()) {
-                Producto p = det.getProducto();
-                p.setStockActual(p.getStockActual() + det.getCantidad());
-                productoRepository.save(p);
+                // Cerramos el carrito (Aquí muere la reserva y se convierte en venta)
+                carritoService.marcarComoComprado(venta.getUsuario().getId());
+
+            } else {
+                // ❌ PAGO RECHAZADO (Tarjeta sin fondos, etc.)
+                pago.setEstadoPago(EstadoPago.RECHAZADO);
+
+                // ¡OJO AQUÍ! NO cancelamos la venta ni devolvemos stock todavía.
+                // Dejamos la venta en PENDIENTE o creamos un estado FALLIDO_TEMPORAL,
+                // porque el usuario va a reintentar pagar esta misma venta en 5 segundos.
+
+                // Opción A: Dejarla PENDIENTE para reintento inmediato
+                venta.setEstado(EstadoVenta.PENDIENTE);
+
+                // Opción B (Más estricta): Cancelar esta venta, pero NO devolver stock al inventario general
+                // porque los items siguen en el carrito. (Más complejo de manejar).
+
+                // RECOMENDACIÓN: No hagas nada con el stock aquí.
+                // El stock sigue reservado en el carrito del usuario.
             }
-        }
 
-        pagoRepository.save(pago);
-        ventaRepository.save(venta);
+            pagoRepository.save(pago);
+            ventaRepository.save(venta);
+
+        } catch (Exception e) {
+            // 🚨 ERROR CRÍTICO DEL SISTEMA
+            // Aquí sí podríamos devolver stock si decidimos que esto es irrecuperable
+            System.err.println("Error procesando pago: " + e.getMessage());
+            throw e;
+        }
 
         return pagoMapper.toResponseDTO(pago);
+    }
+
+    // --- MÉTODOS AUXILIARES ---
+
+    private void cancelarVentaYDevolverStock(Venta venta) {
+        venta.setEstado(EstadoVenta.CANCELADA);
+
+        // Devolvemos el stock de cada producto reservado
+        for (DetalleVenta det : venta.getDetalles()) {
+            Producto p = det.getProducto();
+            p.setStockActual(p.getStockActual() + det.getCantidad());
+            productoRepository.save(p);
+        }
     }
 
     private boolean procesarConPasarelaExterna(PagoCreateDTO dto) {

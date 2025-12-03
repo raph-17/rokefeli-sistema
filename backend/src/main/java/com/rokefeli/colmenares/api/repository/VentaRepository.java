@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VentaRepository extends JpaRepository<Venta, Long> {
     List<Venta> findByUsuario_Id(Long idUsuario);
@@ -25,4 +26,6 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
             @Param("canal") CanalVenta canal,
             @Param("dni") String dni
     );
+
+    Optional<Venta> findFirstByUsuario_IdAndEstadoOrderByFechaDesc(Long idUsuario, EstadoVenta estado);
 }

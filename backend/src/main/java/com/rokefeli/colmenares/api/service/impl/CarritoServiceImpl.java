@@ -42,10 +42,12 @@ public class CarritoServiceImpl implements CarritoService {
     @Override
     @Transactional(readOnly = true)
     public CarritoResponseDTO verCarrito(Long idUsuario) {
-        Carrito carrito = carritoRepository.findByUsuario_Id(idUsuario)
-                .orElseThrow(() -> new RuntimeException("Carrito no encontrado"));
+        // CORRECCIÓN: Usar obtenerOCrearCarritoActivo para evitar errores si no existe
+        // o usar findByUsuario_IdAndEstado. Si usas findByUsuario_Id simple, puede traer carritos viejos.
+        // Por seguridad en lectura usamos este:
+        Carrito carrito = carritoRepository.findByUsuario_IdAndEstado(idUsuario, EstadoCarrito.ACTIVO)
+                .orElseThrow(() -> new RuntimeException("Carrito no encontrado o inactivo"));
 
-        // Usamos el método auxiliar para garantizar que lleve los datos
         return convertirConDatosCompletos(carrito);
     }
 
@@ -59,8 +61,13 @@ public class CarritoServiceImpl implements CarritoService {
         if (producto.getEstado().equals(EstadoProducto.DESCONTINUADO))
             throw new IllegalArgumentException("Este producto ya no está disponible.");
 
+        // 1. VALIDAR STOCK
         if (producto.getStockActual() < dto.getCantidad())
-            throw new IllegalArgumentException("No hay suficiente stock del producto.");
+            throw new IllegalArgumentException("No hay suficiente stock. Quedan: " + producto.getStockActual());
+
+        // 2. RESTAR STOCK (Reserva)
+        producto.setStockActual(producto.getStockActual() - dto.getCantidad());
+        productoRepository.save(producto);
 
         DetalleCarrito detalle = detalleRepository
                 .findByCarrito_IdAndProducto_Id(carrito.getId(), producto.getId())
@@ -69,23 +76,23 @@ public class CarritoServiceImpl implements CarritoService {
         if (detalle == null) {
             detalle = new DetalleCarrito();
             detalle.setCarrito(carrito);
-            detalle.setProducto(producto); // AQUÍ SE GUARDA BIEN EN BD
+            detalle.setProducto(producto);
             detalle.setPrecioUnitario(producto.getPrecio());
             detalle.setCantidad(dto.getCantidad());
-            carrito.getDetalles().add(detalle); // Importante agregar a la lista en memoria
+            // IMPORTANTE: Agregar a la lista para que el mapper lo vea
+            carrito.getDetalles().add(detalle);
         } else {
+            // Si ya existía, solo sumamos cantidad (el stock ya se restó arriba)
             int nuevaCantidad = detalle.getCantidad() + dto.getCantidad();
-            if (producto.getStockActual() < nuevaCantidad)
-                throw new IllegalArgumentException("Stock insuficiente.");
             detalle.setCantidad(nuevaCantidad);
         }
 
         detalle.calcularSubtotal();
-        // Guardamos el carrito (cascade guarda detalles)
+        detalleRepository.save(detalle); // Asegurar ID del detalle
+
         carrito.calcularTotal();
         carrito = carritoRepository.save(carrito);
 
-        // Retornamos con el parche manual
         return convertirConDatosCompletos(carrito);
     }
 
@@ -99,15 +106,31 @@ public class CarritoServiceImpl implements CarritoService {
                 .findByCarrito_IdAndProducto_Id(carrito.getId(), idProducto)
                 .orElseThrow(() -> new ResourceNotFoundException("DetalleCarrito"));
 
-        if (detalle.getProducto().getStockActual() < nuevaCantidad)
-            throw new IllegalArgumentException("Stock insuficiente.");
+        Producto producto = detalle.getProducto();
+
+        // 🔥 LOGICA STOCK AL ACTUALIZAR 🔥
+        int cantidadActual = detalle.getCantidad();
+        int diferencia = nuevaCantidad - cantidadActual;
+
+        if (diferencia > 0) {
+            // Quiere comprar MÁS -> Validar y Restar Stock
+            if (producto.getStockActual() < diferencia) {
+                throw new IllegalArgumentException("Stock insuficiente para agregar " + diferencia + " unidades más.");
+            }
+            producto.setStockActual(producto.getStockActual() - diferencia);
+        } else if (diferencia < 0) {
+            // Quiere comprar MENOS -> Devolver Stock
+            producto.setStockActual(producto.getStockActual() + Math.abs(diferencia));
+        }
+
+        productoRepository.save(producto); // Guardamos nuevo inventario
 
         detalle.setCantidad(nuevaCantidad);
         detalle.calcularSubtotal();
         detalleRepository.save(detalle);
 
         carrito.calcularTotal();
-        carritoRepository.save(carrito);
+        carrito = carritoRepository.save(carrito);
 
         return convertirConDatosCompletos(carrito);
     }
@@ -120,12 +143,17 @@ public class CarritoServiceImpl implements CarritoService {
                 .findByCarrito_IdAndProducto_Id(carrito.getId(), idProducto)
                 .orElseThrow(() -> new ResourceNotFoundException("DetalleCarrito"));
 
-        // Removemos de la lista en memoria y de la BD
+        // 🔥 DEVOLVER STOCK AL ELIMINAR 🔥
+        Producto p = detalle.getProducto();
+        p.setStockActual(p.getStockActual() + detalle.getCantidad());
+        productoRepository.save(p);
+
+        // Remover de la lista y borrar
         carrito.getDetalles().remove(detalle);
         detalleRepository.delete(detalle);
 
         carrito.calcularTotal();
-        carritoRepository.save(carrito);
+        carrito = carritoRepository.save(carrito);
 
         return convertirConDatosCompletos(carrito);
     }
@@ -133,8 +161,14 @@ public class CarritoServiceImpl implements CarritoService {
     @Override
     public void vaciarCarrito(Long idUsuario) {
         Carrito carrito = obtenerOCrearCarritoActivo(idUsuario);
-        // La forma más limpia de vaciar en JPA manteniendo la relación
-        // es borrar los detalles primero o usar orphanRemoval=true en la entidad
+
+        // 🔥 DEVOLVER STOCK DE TODO 🔥
+        for (DetalleCarrito det : carrito.getDetalles()) {
+            Producto p = det.getProducto();
+            p.setStockActual(p.getStockActual() + det.getCantidad());
+            productoRepository.save(p);
+        }
+
         detalleRepository.deleteAll(carrito.getDetalles());
         carrito.getDetalles().clear();
 
@@ -144,6 +178,8 @@ public class CarritoServiceImpl implements CarritoService {
 
     @Override
     public void marcarComoComprado(Long idUsuario) {
+        // Este método se llama cuando el pago fue EXITOSO.
+        // NO devolvemos stock, solo cerramos el carrito.
         Carrito carrito = obtenerOCrearCarritoActivo(idUsuario);
         carrito.setEstado(EstadoCarrito.COMPRADO);
         carritoRepository.save(carrito);
@@ -166,22 +202,14 @@ public class CarritoServiceImpl implements CarritoService {
                 });
     }
 
-    /**
-     * Este método centraliza tu "Parche Manual".
-     * Se asegura de que el DTO siempre salga con nombre, imagen y ID de producto,
-     * ignorando si el Mapper falló o si Hibernate estaba Lazy.
-     */
     private CarritoResponseDTO convertirConDatosCompletos(Carrito carrito) {
         // 1. Mapeo automático básico
         CarritoResponseDTO dto = carritoMapper.toResponseDTO(carrito);
 
-        // 2. Parche manual (Tu lógica, pero ahora reutilizable)
+        // 2. Parche manual para asegurar datos (ID, Nombre, Imagen, Precio)
         if (carrito.getDetalles() != null && dto.getDetalles() != null) {
-
-            // Usamos dos índices para recorrer ambas listas en paralelo
-            // Asumiendo que el mapper mantiene el orden (generalmente sí)
             for (int i = 0; i < carrito.getDetalles().size(); i++) {
-                if (i >= dto.getDetalles().size()) break; // Seguridad
+                if (i >= dto.getDetalles().size()) break;
 
                 DetalleCarrito entidad = carrito.getDetalles().get(i);
                 var detalleDTO = dto.getDetalles().get(i);
@@ -191,7 +219,6 @@ public class CarritoServiceImpl implements CarritoService {
                     detalleDTO.setNombreProducto(entidad.getProducto().getNombre());
                     detalleDTO.setImagenUrl(entidad.getProducto().getImagenUrl());
 
-                    // Aseguramos precio si falta
                     if(detalleDTO.getPrecioUnitario() == null) {
                         detalleDTO.setPrecioUnitario(entidad.getProducto().getPrecio());
                     }

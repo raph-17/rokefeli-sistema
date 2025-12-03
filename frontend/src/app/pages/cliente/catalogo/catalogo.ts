@@ -30,7 +30,7 @@ export class Catalogo implements OnInit {
 
   // --- PAGINACIÓN ---
   paginaActual = 1;
-  elementosPorPagina = 6;
+  elementosPorPagina = 48;
 
   // --- ESTADO UI ---
   paquetes: CatalogoUI[] = [];
@@ -59,13 +59,18 @@ export class Catalogo implements OnInit {
       .listarActivos(this.filtroNombre, this.filtroCategoria || undefined)
       .subscribe({
         next: (data: any[]) => {
-          this.paquetes = data.map((p) => ({
+          // 1. MAPEAR (Convertir datos)
+          const productosMapeados = data.map((p) => ({
             id: p.id,
             nombre: p.nombre,
             precio: Number(p.precio || p.price || 0),
             img: p.imagenUrl || '/img/placeholder.png',
             descripcion: p.descripcion,
           }));
+
+          // 2. ORDENAR ALFABÉTICAMENTE (A-Z)
+          this.paquetes = productosMapeados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
           this.cargando = false;
         },
         error: (err) => {

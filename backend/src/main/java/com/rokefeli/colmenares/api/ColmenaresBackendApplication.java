@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
@@ -17,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableJpaRepositories(basePackages = "com.rokefeli.colmenares.api.repository")
 // 2. Fuerza la búsqueda de entidades (Tablas) en este paquete específico
 @EntityScan(basePackages = "com.rokefeli.colmenares.api.entity")
+// 3. Activa las tareas automaticas
+@EnableScheduling
 public class ColmenaresBackendApplication {
 
     public static void main(String[] args) {

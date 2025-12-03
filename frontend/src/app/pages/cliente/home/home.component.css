@@ -1,6 +1,6 @@
 /* HERO SECTION */
 .hero {
-  background-image: url('/img/hero-bg.jpg'); /* Busca una imagen bonita de abejas/campo */
+  background-image: url('/img/home.jpeg'); /* Busca una imagen bonita de abejas/campo */
   background-size: cover;
   background-position: center;
   height: 80vh; /* Casi toda la pantalla */
