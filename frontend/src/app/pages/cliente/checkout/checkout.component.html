@@ -1,0 +1,112 @@
+<div class="checkout-wrapper">
+  <div class="checkout-header">
+    <h1>Finalizar Compra 💳</h1>
+  </div>
+
+  <div class="checkout-grid" *ngIf="venta">
+    <div class="steps-column">
+      <div class="step-card">
+        <h2>1. ¿Dónde lo enviamos? 📍</h2>
+        <form [formGroup]="ubicacionForm" class="geo-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Departamento</label>
+              <select formControlName="idDepartamento" (change)="onDeptoChange()">
+                <option [ngValue]="null">-- Seleccione --</option>
+                <option *ngFor="let d of deptos" [ngValue]="d.id">{{ d.nombre }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Provincia</label>
+              <select formControlName="idProvincia" (change)="onProvChange()">
+                <option [ngValue]="null">-- Seleccione --</option>
+                <option *ngFor="let p of provs" [ngValue]="p.id">{{ p.nombre }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Distrito</label>
+            <select formControlName="idDistrito" (change)="onDistChange()">
+              <option [ngValue]="null">-- Seleccione --</option>
+              <option *ngFor="let d of dists" [ngValue]="d.id">{{ d.nombre }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Dirección Exacta</label>
+            <input
+              type="text"
+              formControlName="direccion"
+              placeholder="Av. Principal 123, Mz A Lt 5..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Referencia (Opcional)</label>
+            <input type="text" formControlName="referencia" placeholder="Frente al parque..." />
+          </div>
+        </form>
+      </div>
+
+      <div class="step-card" *ngIf="tarifas.length > 0">
+        <h2>2. Elige tu Envío 🚚</h2>
+        <div class="shipping-options">
+          <div
+            class="shipping-option"
+            *ngFor="let t of tarifas"
+            [class.selected]="tarifaSeleccionada?.id === t.id"
+            (click)="seleccionarTarifa(t)"
+          >
+            <div class="ship-info">
+              <span class="ship-name">{{ t.nombreAgenciaEnvio || 'Agencia' }}</span>
+              <span class="ship-time">Llega en {{ t.diasEstimados }} días aprox.</span>
+            </div>
+            <div class="ship-price">S/ {{ t.costoEnvio | number : '1.2-2' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="step-card empty-shipping"
+        *ngIf="tarifas.length === 0 && ubicacionForm.get('idDistrito')?.valid"
+      >
+        <p>⚠️ No hay agencias con cobertura para este distrito.</p>
+      </div>
+    </div>
+
+    <div class="summary-column">
+      <div class="summary-card">
+        <h3>Resumen del Pedido</h3>
+
+        <div class="summary-row">
+          <span>Productos</span>
+          <span>S/ {{ montoSubtotal | number : '1.2-2' }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Envío</span>
+          <span [class.text-orange]="montoEnvio > 0">
+            {{ montoEnvio > 0 ? 'S/ ' + (montoEnvio | number : '1.2-2') : 'Por calcular' }}
+          </span>
+        </div>
+
+        <hr />
+
+        <div class="summary-row total">
+          <span>Total a Pagar</span>
+          <span>S/ {{ montoTotal | number : '1.2-2' }}</span>
+        </div>
+
+        <button
+          class="btn-pay"
+          (click)="pagar()"
+          [disabled]="cargando || ubicacionForm.invalid || !tarifaSeleccionada"
+        >
+          {{ cargando ? 'Procesando...' : 'Pagar Ahora 💳' }}
+        </button>
+
+        <p class="secure-text">🔒 Pagos procesados de forma segura por Culqi</p>
+      </div>
+    </div>
+  </div>
+</div>

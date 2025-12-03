@@ -41,6 +41,18 @@ public class VentaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(venta);
     }
 
+    @PostMapping("/crear")
+    @PreAuthorize("hasRole('CLIENTE')") // Solo clientes con carrito pueden hacer esto
+    public ResponseEntity<VentaResponseDTO> crearDesdeCarrito(@AuthenticationPrincipal UserDetails userDetails) {
+        // Obtenemos el ID del usuario logueado de forma segura
+        Long idUsuario = ((JwtUserDetails) userDetails).getId();
+
+        // Llamamos al servicio que copia los items del carrito a una nueva venta PENDIENTE
+        VentaResponseDTO ventaPendiente = ventaService.crearVentaDesdeCarrito(idUsuario);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ventaPendiente);
+    }
+
     // Ver historial de ventas propias.
     @GetMapping("/mis-compras")
     public ResponseEntity<?> verMisVentas(@AuthenticationPrincipal UserDetails userDetails) {

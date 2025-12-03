@@ -11,6 +11,8 @@ import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 public interface VentaService {
     VentaResponseDTO registrarOnline(VentaOnlineCreateDTO dto);
 
+    VentaResponseDTO crearVentaDesdeCarrito(Long idUsuario);
+
     VentaResponseDTO registrarInterno(VentaInternoCreateDTO dto);
 
     VentaResponseDTO findById(Long id);

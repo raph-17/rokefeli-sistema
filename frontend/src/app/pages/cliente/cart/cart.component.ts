@@ -22,6 +22,17 @@ export class CarritoComponent implements OnInit {
     this.cargarCarrito();
   }
 
+  get totalCalculado(): number {
+    if (!this.carrito || !this.carrito.detalles) return 0;
+
+    // Suma: (Precio * Cantidad) de cada item
+    return this.carrito.detalles.reduce((acc: number, item: any) => {
+      // Usamos item.precioUnitario (que ya vimos que sí llega)
+      const subtotalItem = item.cantidad * item.precioUnitario;
+      return acc + subtotalItem;
+    }, 0);
+  }
+
   cargarCarrito() {
     this.cargando = true;
     this.carritoService.verCarrito().subscribe({
@@ -101,6 +112,14 @@ export class CarritoComponent implements OnInit {
   }
 
   irAPagar() {
-    alert('¡Integración con Pasarela de Pago pendiente! 💳');
+    // 1. Validación de seguridad (opcional, por si habilitaron el botón con hack)
+    if (!this.carrito || !this.carrito.detalles || this.carrito.detalles.length === 0) {
+      alert('Tu carrito está vacío, agrega productos primero.');
+      return;
+    }
+
+    // 2. Navegación
+    console.log('Navegando al checkout...');
+    this.router.navigate(['/checkout']);
   }
 }

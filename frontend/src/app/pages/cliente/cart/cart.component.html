@@ -66,22 +66,26 @@
 
         <div class="summary-row">
           <span>Subtotal</span>
-          <span>S/ {{ carrito.total | number : '1.2-2' }}</span>
+          <span>S/ {{ totalCalculado | number : '1.2-2' }}</span>
         </div>
 
         <div class="summary-row">
           <span>Envío estimado</span>
-          <span class="text-success">Gratis 🚚</span>
+          <span class="text-success">{{
+            totalCalculado > 100 ? 'Gratis 🚚' : 'Por calcular'
+          }}</span>
         </div>
 
         <hr />
 
         <div class="summary-row total">
           <span>Total</span>
-          <span>S/ {{ carrito.total | number : '1.2-2' }}</span>
+          <span>S/ {{ totalCalculado | number : '1.2-2' }}</span>
         </div>
 
-        <button class="btn-checkout" (click)="irAPagar()">Proceder al Pago</button>
+        <button class="btn-checkout" (click)="irAPagar()" [disabled]="totalCalculado === 0">
+          Proceder al Pago
+        </button>
 
         <a routerLink="/catalogo" class="link-continue">Seguir comprando</a>
       </div>

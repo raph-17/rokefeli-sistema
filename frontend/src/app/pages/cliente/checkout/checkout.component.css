@@ -1,0 +1,202 @@
+/* =========================================
+   LAYOUT
+   ========================================= */
+.checkout-wrapper {
+  max-width: 1400px;
+  width: 95%;
+  margin: 0 auto;
+  padding: 40px 0;
+  min-height: 80vh;
+}
+
+.checkout-header h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 40px;
+  font-size: 2rem;
+}
+
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px; /* Columna Izq grande, Der fija */
+  gap: 40px;
+  align-items: start;
+}
+
+/* =========================================
+   FORMULARIOS (IZQUIERDA)
+   ========================================= */
+.step-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 30px;
+}
+
+.step-card h2 {
+  margin-top: 0;
+  color: #d48300;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f9f9f9;
+  padding-bottom: 10px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+.form-group {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+select,
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  box-sizing: border-box;
+}
+select:focus,
+input:focus {
+  border-color: #d48300;
+  box-shadow: 0 0 0 3px rgba(212, 131, 0, 0.1);
+}
+
+/* Opciones de Envío */
+.shipping-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shipping-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border: 2px solid #eee;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shipping-option:hover {
+  border-color: #ddd;
+  background: #f9f9f9;
+}
+.shipping-option.selected {
+  border-color: #d48300;
+  background-color: #fff8e1;
+}
+
+.ship-name {
+  font-weight: 700;
+  color: #333;
+  display: block;
+}
+.ship-time {
+  font-size: 0.85rem;
+  color: #777;
+}
+.ship-price {
+  font-weight: 800;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+/* =========================================
+   RESUMEN (DERECHA)
+   ========================================= */
+.summary-column {
+  position: sticky;
+  top: 100px;
+}
+
+.summary-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+}
+
+.summary-card h3 {
+  margin-top: 0;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  color: #555;
+}
+.summary-row.total {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: #222;
+  margin-top: 10px;
+}
+.text-orange {
+  color: #d48300;
+  font-weight: 700;
+}
+
+.btn-pay {
+  width: 100%;
+  padding: 15px;
+  background: #222;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.2s;
+}
+.btn-pay:hover {
+  background: #000;
+  transform: translateY(-2px);
+}
+.btn-pay:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secure-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 15px;
+}
+
+/* Móvil */
+@media (max-width: 900px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+  .summary-column {
+    position: static;
+    order: -1;
+    margin-bottom: 30px;
+  } /* Resumen arriba en móvil */
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}

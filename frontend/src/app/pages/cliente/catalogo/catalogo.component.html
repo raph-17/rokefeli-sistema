@@ -53,7 +53,7 @@
         <h4>{{ p.nombre }}</h4>
         <p class="precio">S/ {{ p.precio | number : '1.2-2' }}</p>
 
-        <p *ngIf="p.descripcion" class="desc">{{ p.descripcion.substring(0, 60) }}...</p>
+        <p *ngIf="p.descripcion" class="desc">{{ p.descripcion.substring(0, 60) }}</p>
 
         <button
           mat-flat-button

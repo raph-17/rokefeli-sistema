@@ -9,7 +9,7 @@
   align-items: flex-start;
 
   /* ESTO ES LO QUE PIDES: */
-  width: 100%; /* Ocupa el 98% de la pantalla */
+  width: 98%; /* Ocupa el 98% de la pantalla */
   max-width: 1900px; /* Límite muy alto */
 
   margin: 0 auto;

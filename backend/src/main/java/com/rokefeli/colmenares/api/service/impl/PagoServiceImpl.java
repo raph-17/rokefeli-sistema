@@ -12,6 +12,7 @@ import com.rokefeli.colmenares.api.repository.PagoRepository;
 import com.rokefeli.colmenares.api.repository.ProductoRepository;
 import com.rokefeli.colmenares.api.repository.TarifaEnvioRepository;
 import com.rokefeli.colmenares.api.repository.VentaRepository;
+import com.rokefeli.colmenares.api.service.interfaces.CarritoService;
 import com.rokefeli.colmenares.api.service.interfaces.PagoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,9 @@ public class PagoServiceImpl implements PagoService {
 
     @Autowired
     private TarifaEnvioRepository tarifaRepository;
+
+    @Autowired
+    private CarritoService carritoService;
 
     @Autowired
     private PagoMapper pagoMapper;
@@ -77,6 +81,7 @@ public class PagoServiceImpl implements PagoService {
             pago.setFechaPago(LocalDateTime.now());
             pago.setEstadoPago(EstadoPago.APROBADO);
             venta.setEstado(EstadoVenta.PAGADA);
+            carritoService.marcarComoComprado(venta.getUsuario().getId());
         }
         else {
             pago.setEstadoPago(EstadoPago.RECHAZADO);

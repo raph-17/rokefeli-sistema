@@ -4,15 +4,14 @@ import com.rokefeli.colmenares.api.dto.create.DetalleVentaCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaInternoCreateDTO;
 import com.rokefeli.colmenares.api.dto.create.VentaOnlineCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
-import com.rokefeli.colmenares.api.entity.DetalleVenta;
-import com.rokefeli.colmenares.api.entity.Producto;
-import com.rokefeli.colmenares.api.entity.Usuario;
-import com.rokefeli.colmenares.api.entity.Venta;
+import com.rokefeli.colmenares.api.entity.*;
 import com.rokefeli.colmenares.api.entity.enums.CanalVenta;
+import com.rokefeli.colmenares.api.entity.enums.EstadoCarrito;
 import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.DetalleVentaMapper;
 import com.rokefeli.colmenares.api.mapper.VentaMapper;
+import com.rokefeli.colmenares.api.repository.CarritoRepository;
 import com.rokefeli.colmenares.api.repository.ProductoRepository;
 import com.rokefeli.colmenares.api.repository.UsuarioRepository;
 import com.rokefeli.colmenares.api.repository.VentaRepository;
@@ -38,6 +37,9 @@ public class VentaServiceImpl implements VentaService {
 
     @Autowired
     private ProductoRepository productoRepository;
+
+    @Autowired
+    private CarritoRepository carritoRepository;
 
     @Autowired
     private VentaMapper ventaMapper;
@@ -67,6 +69,48 @@ public class VentaServiceImpl implements VentaService {
         carritoService.marcarComoComprado(dto.getIdUsuario());
 
         return buildResponse(saved, saved.getDetalles());
+    }
+
+    @Override
+    public VentaResponseDTO crearVentaDesdeCarrito(Long idUsuario) {
+
+        // 1. Buscar el carrito activo del usuario
+        Carrito carrito = carritoRepository.findByUsuario_IdAndEstado(idUsuario, EstadoCarrito.ACTIVO)
+                .orElseThrow(() -> new RuntimeException("No hay un carrito activo para este usuario."));
+
+        // 2. Validar que no esté vacío
+        if (carrito.getDetalles() == null || carrito.getDetalles().isEmpty()) {
+            throw new RuntimeException("El carrito está vacío, no se puede iniciar el checkout.");
+        }
+
+        // 3. Crear la Cabecera de la Venta
+        Venta venta = new Venta();
+        venta.setUsuario(carrito.getUsuario());
+        venta.setEstado(EstadoVenta.PENDIENTE); // Importante: Aún no pagada
+        venta.setCanal(CanalVenta.ONLINE);
+        venta.setMontoTotal(carrito.getMontoTotal()); // Copiamos el total
+
+        // 4. Copiar Detalles (Carrito -> Venta)
+        List<DetalleVenta> detallesVenta = new ArrayList<>();
+
+        for (DetalleCarrito detCarrito : carrito.getDetalles()) {
+            DetalleVenta detVenta = new DetalleVenta();
+            detVenta.setVenta(venta);
+            detVenta.setProducto(detCarrito.getProducto());
+            detVenta.setCantidad(detCarrito.getCantidad());
+            detVenta.setPrecioUnitario(detCarrito.getPrecioUnitario());
+            detVenta.setSubtotal(detCarrito.getSubtotal());
+
+            detallesVenta.add(detVenta);
+        }
+
+        venta.setDetalles(detallesVenta);
+
+        // 5. Guardar la Venta (Cascada guardará los detalles)
+        Venta ventaGuardada = ventaRepository.save(venta);
+
+        // 6. Retornar DTO
+        return ventaMapper.toResponseDTO(ventaGuardada);
     }
 
     @Override

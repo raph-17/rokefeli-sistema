@@ -137,13 +137,6 @@
   text-align: center;
 }
 
-/* 3. Columna Acciones (La última) -> A la derecha */
-.products-table td:last-child,
-.products-table th:last-child {
-  text-align: center;
-  padding-right: 24px; /* Un poco más de aire al final */
-}
-
 /* Hover en filas */
 .products-table tbody tr:hover td {
   background-color: #fff7ed; /* Naranja muy suave al pasar el mouse */
