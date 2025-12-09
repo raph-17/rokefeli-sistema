@@ -1,7 +1,6 @@
 package com.rokefeli.colmenares.api.repository;
 
 import com.rokefeli.colmenares.api.entity.Producto;
-import com.rokefeli.colmenares.api.entity.enums.EstadoDistrito;
 import com.rokefeli.colmenares.api.entity.enums.EstadoProducto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

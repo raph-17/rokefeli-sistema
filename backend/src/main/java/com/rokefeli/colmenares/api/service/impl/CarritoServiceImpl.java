@@ -10,7 +10,6 @@ import com.rokefeli.colmenares.api.entity.enums.EstadoCarrito;
 import com.rokefeli.colmenares.api.entity.enums.EstadoProducto;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.CarritoMapper;
-import com.rokefeli.colmenares.api.mapper.DetalleCarritoMapper;
 import com.rokefeli.colmenares.api.repository.CarritoRepository;
 import com.rokefeli.colmenares.api.repository.DetalleCarritoRepository;
 import com.rokefeli.colmenares.api.repository.ProductoRepository;

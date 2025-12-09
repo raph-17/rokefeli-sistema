@@ -1,6 +1,5 @@
 package com.rokefeli.colmenares.api.dto.create;
 
-import com.rokefeli.colmenares.api.entity.enums.CanalVenta;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import java.util.List;

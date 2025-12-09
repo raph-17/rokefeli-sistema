@@ -4,7 +4,6 @@ import com.rokefeli.colmenares.api.dto.create.AgenciaEnvioCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.AgenciaEnvioResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.AgenciaEnvioUpdateDTO;
 import com.rokefeli.colmenares.api.entity.AgenciaEnvio;
-import com.rokefeli.colmenares.api.entity.TarifaEnvio;
 import com.rokefeli.colmenares.api.entity.enums.EstadoAgencia;
 import com.rokefeli.colmenares.api.entity.enums.EstadoTarifa;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;

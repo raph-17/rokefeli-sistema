@@ -1,8 +1,5 @@
 package com.rokefeli.colmenares.api.security;
 
-import com.rokefeli.colmenares.api.entity.Usuario;
-import com.rokefeli.colmenares.api.entity.Venta;
-import com.rokefeli.colmenares.api.repository.UsuarioRepository;
 import com.rokefeli.colmenares.api.repository.VentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -12,12 +9,9 @@ import org.springframework.stereotype.Component;
 public class SecurityService {
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
     private VentaRepository ventaRepository;
 
-    // Verifica que el usuario este logeado
+    // Verifica que el usuario esté logueado
     public boolean isSelf(Authentication auth, Long id) {
         JwtUserDetails user = (JwtUserDetails) auth.getPrincipal();
         return user.getId().equals(id);

@@ -5,7 +5,6 @@ import java.util.List;
 import com.rokefeli.colmenares.api.dto.create.ProvinciaCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.ProvinciaResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.ProvinciaUpdateDTO;
-import com.rokefeli.colmenares.api.entity.enums.EstadoProvincia;
 
 public interface ProvinciaService {
     List<ProvinciaResponseDTO> findAll();

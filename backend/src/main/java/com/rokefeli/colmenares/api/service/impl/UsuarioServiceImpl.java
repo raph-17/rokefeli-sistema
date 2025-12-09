@@ -1,14 +1,11 @@
 package com.rokefeli.colmenares.api.service.impl;
 
-import com.rokefeli.colmenares.api.dto.create.AdminCreateDTO;
-import com.rokefeli.colmenares.api.dto.create.UsuarioCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.UsuarioResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.AdminUpdateDTO;
 import com.rokefeli.colmenares.api.dto.update.PasswordChangeDTO;
 import com.rokefeli.colmenares.api.dto.update.UsuarioUpdateDTO;
 import com.rokefeli.colmenares.api.entity.Usuario;
 import com.rokefeli.colmenares.api.entity.enums.EstadoUsuario;
-import com.rokefeli.colmenares.api.entity.enums.Rol;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.UsuarioMapper;
 import com.rokefeli.colmenares.api.repository.UsuarioRepository;

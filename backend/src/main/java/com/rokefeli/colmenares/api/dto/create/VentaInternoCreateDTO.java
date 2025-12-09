@@ -1,6 +1,5 @@
 package com.rokefeli.colmenares.api.dto.create;
 
-import jakarta.validation.constraints.Null;
 import lombok.Data;
 
 import jakarta.validation.constraints.NotNull;

@@ -94,7 +94,7 @@ public class PagoServiceImpl implements PagoService {
                 // ❌ PAGO RECHAZADO (Tarjeta sin fondos, etc.)
                 pago.setEstadoPago(EstadoPago.RECHAZADO);
 
-                // ¡OJO AQUÍ! NO cancelamos la venta ni devolvemos stock todavía.
+                // ¡OJO AQUÍ! No cancelamos la venta ni devolvemos stock todavía.
                 // Dejamos la venta en PENDIENTE o creamos un estado FALLIDO_TEMPORAL,
                 // porque el usuario va a reintentar pagar esta misma venta en 5 segundos.
 
@@ -134,6 +134,7 @@ public class PagoServiceImpl implements PagoService {
         }
     }
 
+    @SuppressWarnings({"rawtypes", "RedundantIfStatement"})
     private boolean procesarConPasarelaExterna(PagoCreateDTO dto) {
         try {
             RestTemplate restTemplate = new RestTemplate();

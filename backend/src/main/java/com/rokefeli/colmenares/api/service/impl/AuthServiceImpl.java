@@ -43,6 +43,9 @@ public class AuthServiceImpl implements AuthService {
         if (usuarioRepository.existsByEmailIgnoreCase(dto.getEmail())) {
             throw new IllegalArgumentException("El email ya está en uso");
         }
+        if (usuarioRepository.existsByDni(dto.getDni())) {
+            throw new IllegalArgumentException("El dni ya está en uso");
+        }
         Usuario u = usuarioMapper.toEntity(dto);
         u.setPassword(passwordEncoder.encode(dto.getPassword()));
         u.setRol(Rol.CLIENTE);

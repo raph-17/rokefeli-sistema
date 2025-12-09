@@ -46,9 +46,4 @@ public class JwtUtil {
     public Claims getClaims(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
-
-    public Long getUserId(String token) {
-        String sub = getClaims(token).getSubject();
-        return Long.valueOf(sub);
-    }
 }

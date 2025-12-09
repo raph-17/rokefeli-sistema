@@ -12,6 +12,4 @@ public interface CarritoRepository extends JpaRepository<Carrito, Long> {
     Optional<Carrito> findByUsuario_IdAndEstado(Long idUsuario, EstadoCarrito estado);
 
     List<Carrito> findByEstadoAndFechaActualizacionBefore(EstadoCarrito estado, LocalDateTime fechaLimite);
-
-    Optional<Carrito> findByUsuario_Id(Long id);
 }

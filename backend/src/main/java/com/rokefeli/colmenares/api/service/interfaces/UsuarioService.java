@@ -2,8 +2,6 @@ package com.rokefeli.colmenares.api.service.interfaces;
 
 import java.util.List;
 
-import com.rokefeli.colmenares.api.dto.create.AdminCreateDTO;
-import com.rokefeli.colmenares.api.dto.create.UsuarioCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.UsuarioResponseDTO;
 import com.rokefeli.colmenares.api.dto.update.AdminUpdateDTO;
 import com.rokefeli.colmenares.api.dto.update.PasswordChangeDTO;
