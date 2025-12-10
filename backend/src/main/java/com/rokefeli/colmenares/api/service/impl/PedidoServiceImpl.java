@@ -10,6 +10,7 @@ import com.rokefeli.colmenares.api.mapper.PedidoMapper;
 import com.rokefeli.colmenares.api.repository.*;
 import com.rokefeli.colmenares.api.service.interfaces.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +49,7 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     public List<PedidoResponseDTO> findAll() {
-        return pedidoRepository.findAll()
+        return pedidoRepository.findAll(Sort.by(Sort.Direction.DESC, "fechaRegistro"))
                 .stream()
                 .map(pedidoMapper::toResponseDTO)
                 .toList();

@@ -564,6 +564,7 @@
 .action-buttons {
   display: flex;
   justify-content: center;
+  justify-items: center;
   gap: 8px; /* Espacio entre iconos */
 }
 
@@ -946,7 +947,7 @@ button.btn.add:disabled {
 
 /* Contenedor acciones tabla */
 .actions-cell {
-  text-align: right;
+  justify-items: center;
 }
 .action-buttons {
   display: flex;
@@ -1060,7 +1061,7 @@ button.btn.add:disabled {
   width: 160px;
 }
 .col-actions {
-  text-align: right;
+  justify-items: center;
 }
 
 .client-name {
@@ -1542,4 +1543,8 @@ button.btn.add:disabled {
 }
 .btn-reporte:hover {
   background-color: #8a0000;
+}
+
+.info-icon {
+  height: 20px;
 }

@@ -838,9 +838,9 @@
             <tbody>
               <tr *ngFor="let p of pedidosFiltrados">
                 <td class="fw-bold">#{{ p.id }}</td>
-                <td>{{ p.fechaCreacion | date : 'dd/MM/yy HH:mm' }}</td>
+                <td>{{ p.fechaRegistro | date : 'dd/MM/yy HH:mm' }}</td>
                 <td>
-                  <div class="client-name">{{ p.nombreUsuario }}</div>
+                  <div class="client-name">{{ p.nombresUsuario }} {{ p.apellidosUsuario }}</div>
                   <div class="client-email">{{ p.emailUsuario }}</div>
                 </td>
                 <td class="fw-bold">S/ {{ p.total | number : '1.2-2' }}</td>
@@ -863,7 +863,7 @@
 
                 <td class="col-actions">
                   <button class="btn-icon" (click)="verDetallePedido(p)" title="Ver Productos">
-                    👁️
+                    <img class="info-icon" src="/img/informacion.png" alt="Ver" />
                   </button>
                 </td>
               </tr>
@@ -1226,7 +1226,9 @@
       <div class="info-grid">
         <div class="info-card">
           <label>Cliente</label>
-          <div class="info-value">{{ pedidoSeleccionado.nombreUsuario }}</div>
+          <div class="info-value">
+            {{ pedidoSeleccionado.nombresUsuario }} {{ pedidoSeleccionado.apellidosUsuario }}
+          </div>
           <div class="info-sub">{{ pedidoSeleccionado.emailUsuario }}</div>
         </div>
 
@@ -1271,14 +1273,6 @@
 
     <div class="modal-footer">
       <button (click)="mostrarModalPedido = false" class="btn-secondary">Cerrar</button>
-
-      <button
-        *ngIf="pedidoSeleccionado.estado === 'PENDIENTE'"
-        (click)="cambiarEstado(pedidoSeleccionado, 'PAGADO')"
-        class="btn-primary"
-      >
-        Confirmar Pago Manual
-      </button>
     </div>
   </div>
 </div>

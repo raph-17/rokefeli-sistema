@@ -57,7 +57,7 @@ export class PanelAdmin implements OnInit {
   // Filtros
   filtroNombre: string = '';
   filtroCategoria: number | null = null; // O string vacío ''
-  filtroEstado: string = '';
+  filtroEstado: string = 'TODOS';
   mostrarSoloBajoStock: boolean = false;
 
   // Modal de stock
@@ -127,7 +127,7 @@ export class PanelAdmin implements OnInit {
 
   // Datos de Pedidos
   pedidos: Pedido[] = [];
-  pedidosFiltrados: Pedido[] = []; // Lista que se muestra en la tabla
+  pedidosFiltrados: Pedido[] = [];
 
   // Filtros
   filtroUsuario: string = ''; // Texto para buscar por nombre
@@ -282,7 +282,7 @@ export class PanelAdmin implements OnInit {
       porDespachar: this.pedidos.filter((p) => p.estado === 'EN_PREPARACION').length, // O el estado que uses para "Listo para enviar"
       enRuta: this.pedidos.filter((p) => p.estado === 'EN_REPARTO').length,
       totalDia: this.pedidos
-        .filter((p) => new Date(p.fechaCreacion).toDateString() === hoy)
+        .filter((p) => new Date(p.fechaRegistro).toDateString() === hoy)
         .reduce((acc, curr) => acc + curr.total, 0),
     };
   }
@@ -883,8 +883,6 @@ export class PanelAdmin implements OnInit {
 
     // 2. Armar el DTO (Payload)
     const dto = {
-      // CORRECCIÓN: Usamos el ID directo de la variable, no del formulario.
-      // Esto garantiza que nunca sea null si el panel derecho está abierto.
       idAgenciaEnvio: this.agenciaSeleccionada.id,
 
       idDistrito: this.formTarifa.value.idDistrito,
@@ -1074,7 +1072,7 @@ export class PanelAdmin implements OnInit {
     return o1 == o2;
   }
 
-  // En tu componente de lista de ventas
+  // Generar reporte de venta en PDF
 
   generarReporte(idVenta: number) {
     this.cargando = true; // Si tienes spinner

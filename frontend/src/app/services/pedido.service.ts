@@ -13,11 +13,15 @@ export enum EstadoPedido {
 
 export interface Pedido {
   id: number;
-  fechaCreacion: string;
+  idVenta: number;
+  nombresUsuario: string;
+  apellidosUsuario: string;
+  emailUsuario: string;
+  fechaRegistro: string;
+  fechaEstimada: string;
   total: number;
   estado: EstadoPedido;
-  nombreUsuario: string; // Asumo que el DTO de respuesta trae esto
-  emailUsuario: string;
+  nombreUsuario: string;
   detalles?: any[]; // Lista de productos del pedido
 }
 
@@ -47,7 +51,7 @@ export class PedidoService {
     return this.http.patch<Pedido>(`${this.apiUrl}/admin/${id}/estado`, {}, { params });
   }
 
-  // Obtener detalle completo (sirve para el modal)
+  // Obtener detalle completo
   obtenerPorId(id: number): Observable<Pedido> {
     return this.http.get<Pedido>(`${this.apiUrl}/${id}`);
   }

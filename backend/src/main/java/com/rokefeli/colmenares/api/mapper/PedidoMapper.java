@@ -17,6 +17,10 @@ public interface PedidoMapper extends BaseMapper {
     @Mapping(source = "distrito.nombre", target = "nombreDistrito")
     @Mapping(source = "agenciaEnvio.id", target = "idAgenciaEnvio")
     @Mapping(source = "agenciaEnvio.nombre", target = "nombreAgencia")
+    @Mapping(source = "venta.montoTotal", target = "total")
+    @Mapping(source = "venta.usuario.email", target = "emailUsuario")
+    @Mapping(source = "venta.usuario.nombres", target = "nombresUsuario")
+    @Mapping(source = "venta.usuario.apellidos", target = "apellidosUsuario")
     PedidoResponseDTO toResponseDTO(Pedido entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
