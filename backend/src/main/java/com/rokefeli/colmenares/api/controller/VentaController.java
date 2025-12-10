@@ -6,10 +6,13 @@ import com.rokefeli.colmenares.api.dto.response.VentaResponseDTO;
 import com.rokefeli.colmenares.api.entity.enums.CanalVenta;
 import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
 import com.rokefeli.colmenares.api.security.JwtUserDetails;
+import com.rokefeli.colmenares.api.service.impl.ReporteServiceImpl;
 import com.rokefeli.colmenares.api.service.interfaces.VentaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +25,9 @@ public class VentaController {
 
     @Autowired
     private VentaService ventaService;
+
+    @Autowired
+    private ReporteServiceImpl reporteService;
 
     // ==========================================
     //  CLIENTE (Autogestión segura)
@@ -111,5 +117,20 @@ public class VentaController {
             @RequestParam(required = false) String dni
     ) {
         return ResponseEntity.ok(ventaService.buscarAdmin(estado, canal, dni));
+    }
+
+    // ADMIN: Descargar PDF de una venta
+    @GetMapping("/{id}/reporte")
+    @PreAuthorize("hasRole('ADMIN')") // Solo admins pueden sacar reportes
+    public ResponseEntity<byte[]> descargarReporte(@PathVariable Long id) {
+
+        byte[] pdfBytes = reporteService.generarReporteVentaPdf(id);
+
+        HttpHeaders headers = new HttpHeaders();
+        // Inline para ver en navegador, Attachment para forzar descarga
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=venta_" + id + ".pdf");
+        headers.setContentType(MediaType.APPLICATION_PDF);
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 }

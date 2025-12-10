@@ -197,6 +197,6 @@ input:focus {
   } /* Resumen arriba en móvil */
   .form-row {
     flex-direction: column;
-    gap: 0;
+    gap: 0; 
   }
 }

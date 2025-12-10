@@ -50,4 +50,11 @@ export class VentaService {
   registrarVentaInterno(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/interno`, data);
   }
+
+  descargarReporte(idVenta: number): Observable<Blob> {
+    // responseType: 'blob' es obligatorio para archivos
+    return this.http.get(`${this.apiUrl}/${idVenta}/reporte`, { 
+      responseType: 'blob' 
+    });
+  }
 }

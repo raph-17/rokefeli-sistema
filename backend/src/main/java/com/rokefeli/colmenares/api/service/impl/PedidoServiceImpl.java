@@ -102,6 +102,42 @@ public class PedidoServiceImpl implements PedidoService {
     }
 
     @Override
+    public PedidoResponseDTO crearPedidoAutomatico(PedidoCreateDTO dto) {
+
+        Venta venta = ventaRepository.findById(dto.getIdVenta())
+                .orElseThrow(() -> new ResourceNotFoundException("Venta", dto.getIdVenta()));
+
+        if (venta.getEstado() != EstadoVenta.PAGADA) {
+            throw new IllegalStateException("Error: La venta ID " + venta.getId() + " no está en estado PAGADA.");
+        }
+
+        Distrito distrito = distritoRepository.findByIdAndEstado(dto.getIdDistrito(), EstadoDistrito.ACTIVO)
+                .orElseThrow(() -> new ResourceNotFoundException("Distrito", dto.getIdDistrito()));
+
+        AgenciaEnvio agenciaEnvio = agenciaRepository.findByIdAndEstado(dto.getIdAgenciaEnvio(), EstadoAgencia.ACTIVO)
+                .orElseThrow(() -> new ResourceNotFoundException("AgenciaEnvio", dto.getIdAgenciaEnvio()));
+
+        TarifaEnvio tarifa = tarifaRepository.findByAgenciaEnvio_IdAndDistrito_IdAndEstado(agenciaEnvio.getId(), distrito.getId(), EstadoTarifa.ACTIVO)
+                .orElseThrow(() -> new ResourceNotFoundException("Tarifa"));
+
+        Pedido pedido = pedidoMapper.toEntity(dto);
+        pedido.setVenta(venta);
+        pedido.setDistrito(distrito);
+        pedido.setAgenciaEnvio(agenciaEnvio);
+        pedido.setFechaEstimada(LocalDateTime.now().plusDays(tarifa.getDiasEstimados()));
+        pedido.setEstado(EstadoPedido.PENDIENTE);
+
+        Pedido saved = pedidoRepository.save(pedido);
+
+        venta.setEstado(EstadoVenta.PROCESADA);
+        ventaRepository.save(venta);
+
+        System.out.println("[DEBUG]: ✅ PEDIDO CREADO AUTOMÁTICAMENTE ID: " + pedido.getId());
+
+        return pedidoMapper.toResponseDTO(saved);
+    }
+
+    @Override
     public PedidoResponseDTO update(Long id, PedidoUpdateDTO updateDTO) {
         Pedido existing = pedidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", id));

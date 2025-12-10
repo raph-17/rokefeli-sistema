@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { HeaderAdmin } from "../../../components/header-admin/header-admin.component";
 import { Pedido } from '../../../interfaces/pedido';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-pedidos',
-  imports: [HeaderAdmin,CommonModule],
+  imports: [CommonModule],
   templateUrl: './pedidos.html',
   styleUrl: './pedidos.css',
 })

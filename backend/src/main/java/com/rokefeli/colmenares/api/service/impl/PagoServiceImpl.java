@@ -1,11 +1,13 @@
 package com.rokefeli.colmenares.api.service.impl;
 
 import com.rokefeli.colmenares.api.dto.create.PagoCreateDTO;
+import com.rokefeli.colmenares.api.dto.create.PedidoCreateDTO;
 import com.rokefeli.colmenares.api.dto.response.PagoResponseDTO;
 import com.rokefeli.colmenares.api.entity.*;
 import com.rokefeli.colmenares.api.entity.enums.EstadoPago;
 import com.rokefeli.colmenares.api.entity.enums.EstadoTarifa;
 import com.rokefeli.colmenares.api.entity.enums.EstadoVenta;
+import com.rokefeli.colmenares.api.entity.enums.ModalidadEntrega;
 import com.rokefeli.colmenares.api.exception.ResourceNotFoundException;
 import com.rokefeli.colmenares.api.mapper.PagoMapper;
 import com.rokefeli.colmenares.api.repository.PagoRepository;
@@ -14,6 +16,7 @@ import com.rokefeli.colmenares.api.repository.TarifaEnvioRepository;
 import com.rokefeli.colmenares.api.repository.VentaRepository;
 import com.rokefeli.colmenares.api.service.interfaces.CarritoService;
 import com.rokefeli.colmenares.api.service.interfaces.PagoService;
+import com.rokefeli.colmenares.api.service.interfaces.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -45,6 +48,9 @@ public class PagoServiceImpl implements PagoService {
     private CarritoService carritoService;
 
     @Autowired
+    private PedidoService pedidoService;
+
+    @Autowired
     private PagoMapper pagoMapper;
 
     @Value("${culqi.api.key}")
@@ -66,7 +72,7 @@ public class PagoServiceImpl implements PagoService {
         TarifaEnvio tarifa = tarifaRepository.findByIdAndEstado(dto.getIdTarifaEnvio(), EstadoTarifa.ACTIVO)
                 .orElseThrow(() -> new ResourceNotFoundException("Tarifa", dto.getIdTarifaEnvio()));
 
-        // Validación de monto (Suma de productos + envío)
+        // Validación de monto
         if (dto.getMonto().compareTo(venta.getMontoTotal().add(tarifa.getCostoEnvio())) != 0) {
             throw new IllegalArgumentException("Error de seguridad: El monto no coincide con el total.");
         }
@@ -90,22 +96,20 @@ public class PagoServiceImpl implements PagoService {
                 // Cerramos el carrito (Aquí muere la reserva y se convierte en venta)
                 carritoService.marcarComoComprado(venta.getUsuario().getId());
 
+                PedidoCreateDTO pedidoDTO = new PedidoCreateDTO();
+                pedidoDTO.setIdVenta(venta.getId());
+                pedidoDTO.setIdDistrito(tarifa.getDistrito().getId()); // Usamos datos de la tarifa validada
+                pedidoDTO.setIdAgenciaEnvio(tarifa.getAgenciaEnvio().getId());
+                pedidoDTO.setDireccionEnvio(dto.getDireccionEnvio());
+                pedidoDTO.setModalidadEntrega(ModalidadEntrega.ENVIO);
+                pedidoDTO.setReferenciaCliente(dto.getReferenciaCliente());
+
+                pedidoService.crearPedidoAutomatico(pedidoDTO);
+
             } else {
                 // ❌ PAGO RECHAZADO (Tarjeta sin fondos, etc.)
                 pago.setEstadoPago(EstadoPago.RECHAZADO);
-
-                // ¡OJO AQUÍ! No cancelamos la venta ni devolvemos stock todavía.
-                // Dejamos la venta en PENDIENTE o creamos un estado FALLIDO_TEMPORAL,
-                // porque el usuario va a reintentar pagar esta misma venta en 5 segundos.
-
-                // Opción A: Dejarla PENDIENTE para reintento inmediato
                 venta.setEstado(EstadoVenta.PENDIENTE);
-
-                // Opción B (Más estricta): Cancelar esta venta, pero NO devolver stock al inventario general
-                // porque los items siguen en el carrito. (Más complejo de manejar).
-
-                // RECOMENDACIÓN: No hagas nada con el stock aquí.
-                // El stock sigue reservado en el carrito del usuario.
             }
 
             pagoRepository.save(pago);
@@ -113,7 +117,6 @@ public class PagoServiceImpl implements PagoService {
 
         } catch (Exception e) {
             // 🚨 ERROR CRÍTICO DEL SISTEMA
-            // Aquí sí podríamos devolver stock si decidimos que esto es irrecuperable
             System.err.println("Error procesando pago: " + e.getMessage());
             throw e;
         }

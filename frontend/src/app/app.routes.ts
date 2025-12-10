@@ -21,7 +21,7 @@ export const routes: Routes = [
   { path: 'panel-admin', component: PanelAdmin },
 
   // Otras rutas
-  { path: 'pedidos', component: Pedidos },
+  { path: 'mis-pedidos', component: Pedidos },
   { path: 'checkout', component: CheckoutComponent },
 
   // Ruta comodín (por si escriben algo mal, volver al home o login)

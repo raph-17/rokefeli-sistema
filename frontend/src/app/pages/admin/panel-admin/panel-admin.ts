@@ -1073,4 +1073,27 @@ export class PanelAdmin implements OnInit {
     // o si ambos son nulos/indefinidos
     return o1 == o2;
   }
+
+  // En tu componente de lista de ventas
+
+  generarReporte(idVenta: number) {
+    this.cargando = true; // Si tienes spinner
+
+    this.ventaService.descargarReporte(idVenta).subscribe({
+      next: (blob) => {
+        // Crear una URL temporal para el archivo
+        const url = window.URL.createObjectURL(blob);
+
+        // Abrir en nueva pestaña
+        window.open(url);
+
+        this.cargando = false;
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Error al generar el reporte PDF');
+        this.cargando = false;
+      },
+    });
+  }
 }

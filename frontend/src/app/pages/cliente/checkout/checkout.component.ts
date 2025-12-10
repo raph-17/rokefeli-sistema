@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { CheckoutService } from '../../../services/checkout.service';
 import { CarritoService } from '../../../services/carrito.service';
+import { AuthService } from '../../../services/auth.service';
 
 declare var Culqi: any; // Declaramos la variable global de Culqi
 
@@ -17,6 +18,7 @@ declare var Culqi: any; // Declaramos la variable global de Culqi
 export class CheckoutComponent implements OnInit {
   private checkoutService = inject(CheckoutService);
   private carritoService = inject(CarritoService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private ngZone = inject(NgZone); // Para volver al contexto de Angular desde JS puro
@@ -160,10 +162,11 @@ export class CheckoutComponent implements OnInit {
     const payload = {
       idVenta: this.venta.id,
       idTarifaEnvio: this.tarifaSeleccionada.id,
-      monto: this.montoTotal, // El backend validará que coincida
-      emailCliente: 'cliente@ejemplo.com', // Puedes sacarlo del token JWT o form
+      monto: this.montoTotal,
+      emailCliente: this.authService.obtenerEmailDelToken(),
       tokenCulqi: tokenCulqi,
-      direccionEntrega: this.ubicacionForm.get('direccion')?.value,
+      direccionEnvio: this.ubicacionForm.get('direccion')?.value, // Antes era direccionEntrega
+      referenciaCliente: this.ubicacionForm.get('referencia')?.value, // Agregamos la referencia
       metodoPago: metodoDetectado,
     };
 

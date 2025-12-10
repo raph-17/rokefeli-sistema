@@ -12,9 +12,9 @@ public interface PedidoService {
     PedidoResponseDTO findById(Long id);
     List<PedidoResponseDTO> findByEstado(EstadoPedido estado);
     PedidoResponseDTO create(PedidoCreateDTO createDTO);
+    PedidoResponseDTO crearPedidoAutomatico(PedidoCreateDTO pedidoCreateDTO);
     PedidoResponseDTO update(Long id, PedidoUpdateDTO updateDTO);
     PedidoResponseDTO cambiarEstado(Long id, EstadoPedido estado);
     void delete(Long id);
-
     List<PedidoResponseDTO> findByUsuarioId(Long idUsuario);
 }

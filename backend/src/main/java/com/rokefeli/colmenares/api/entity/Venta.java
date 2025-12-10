@@ -38,7 +38,7 @@ public class Venta {
     private BigDecimal montoTotal;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private LocalDateTime fecha;
 
     @Enumerated(EnumType.STRING)

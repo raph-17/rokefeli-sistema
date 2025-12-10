@@ -524,6 +524,7 @@
             <th>Total</th>
             <th>Fecha</th>
             <th>Estado</th>
+            <th>Reporte</th>
           </tr>
         </thead>
         <tbody>
@@ -558,6 +559,11 @@
               >
                 {{ v.estado }}
               </span>
+            </td>
+            <td>
+              <button class="btn-reporte" title="Descargar PDF" (click)="generarReporte(v.id)">
+                📄 PDF
+              </button>
             </td>
           </tr>
           <tr *ngIf="ventasFiltradas.length === 0">
@@ -1296,11 +1302,7 @@
 
       <div class="form-group">
         <label>Descripción</label>
-        <textarea
-          formControlName="descripcion"
-          rows="3"
-          placeholder="Descripción..."
-        ></textarea>
+        <textarea formControlName="descripcion" rows="3" placeholder="Descripción..."></textarea>
       </div>
     </form>
 

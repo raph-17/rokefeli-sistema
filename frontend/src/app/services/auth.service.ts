@@ -97,4 +97,31 @@ export class AuthService {
     const rol = decoded.role || decoded.rol || ''; // Revisa si es 'role' o 'rol'
     return rol === 'ADMIN';
   }
+
+  obtenerEmailDelToken(): string {
+    const token = localStorage.getItem('token');
+    if (!token) return '';
+
+    try {
+      const payload = token.split('.')[1];
+      const decodedString = atob(payload);
+      const json = JSON.parse(decodedString);
+
+      console.log('Contenido del Token:', json); // Para que veas en consola qué trae
+
+      // 1. Buscamos explícitamente el campo 'email'
+      if (json.email) return json.email;
+
+      // 2. Si usamos 'sub', verificamos que parezca un correo (tenga @)
+      // Si json.sub es "2", esto dará falso y no retornará basura
+      if (json.sub && json.sub.toString().includes('@')) return json.sub;
+
+      // 3. Intenta buscar 'username' si tu backend lo guarda así
+      if (json.username && json.username.includes('@')) return json.username;
+
+      return '';
+    } catch (e) {
+      return '';
+    }
+  }
 }

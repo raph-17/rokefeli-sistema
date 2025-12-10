@@ -16,8 +16,53 @@ app-root {
 
 /* Hacemos que el contenido principal empuje el footer hacia abajo */
 main {
-  flex: 1;          /* Ocupa el espacio sobrante entre header y footer */
-  display: flex;    /* Se convierte en contenedor flexible */
+  flex: 1; /* Ocupa el espacio sobrante entre header y footer */
+  display: flex; /* Se convierte en contenedor flexible */
   flex-direction: column; /* Organiza los hijos en columna */
-  width: 100%;      /* Ancho total */
+  width: 100%; /* Ancho total */
+}
+
+/* =========================================
+   TEMA DE COLORES (Variables CSS)
+   ========================================= */
+:root {
+  /* --- MODO CLARO (Por defecto) --- */
+  --primary-color: #d48300;
+  --primary-hover: #b06d00;
+
+  --bg-body: #f4f6f8; /* Fondo general */
+  --bg-card: #ffffff; /* Fondo de tarjetas/contenedores */
+  --bg-input: #ffffff; /* Fondo de inputs */
+
+  --text-main: #333333; /* Texto principal */
+  --text-secondary: #666666; /* Texto secundario/descripciones */
+  --text-inverse: #ffffff; /* Texto sobre botones oscuros */
+
+  --border-color: #e0e0e0; /* Bordes suaves */
+  --shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* --- MODO OSCURO (Se activa con la clase .dark-mode) --- */
+body.dark-mode {
+  /* El naranja se mantiene o se hace un poco más brillante para contrastar */
+  --primary-color: #eba933;
+  --primary-hover: #ffbf4d;
+
+  --bg-body: #121212; /* Negro suave */
+  --bg-card: #1e1e1e; /* Gris oscuro para tarjetas */
+  --bg-input: #2c2c2c; /* Inputs un poco más claros */
+
+  --text-main: #e0e0e0; /* Blanco hueso */
+  --text-secondary: #aaaaaa; /* Gris claro */
+  --text-inverse: #121212; /* Texto negro sobre botones brillantes */
+
+  --border-color: #333333;
+  --shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Sombra más fuerte */
+}
+
+/* APLICAMOS LOS COLORES GLOBALES */
+body {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  transition: background-color 0.3s, color 0.3s; /* Transición suave */
 }

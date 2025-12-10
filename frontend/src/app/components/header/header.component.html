@@ -3,9 +3,15 @@
     <a routerLink="/home" class="logo"> 🐝 Colmenares Rokefeli </a>
 
     <nav>
-      <a *ngIf="estoyLogueado()" routerLink="/pedidos" routerLinkActive="active">Mis Pedidos</a>
+      <a
+        *ngIf="estoyLogueado()"
+        routerLink="/mis-pedidos"
+        routerLinkActive="active"
+        class="header-nav"
+        >Mis Pedidos</a
+      >
 
-      <a routerLink="/catalogo" routerLinkActive="active" class="catalogo">Catálogo</a>
+      <a routerLink="/catalogo" routerLinkActive="active" class="header-nav">Catálogo</a>
 
       <a routerLink="/carrito" routerLinkActive="active" class="cart-link">
         🛒 Carrito

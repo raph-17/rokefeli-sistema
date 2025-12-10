@@ -1530,3 +1530,16 @@ button.btn.add:disabled {
   border-collapse: collapse;
   table-layout: fixed; /* Mantiene las columnas estables */
 }
+
+.btn-reporte {
+  background-color: #ffa412eb; /* Rojo PDF */
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-reporte:hover {
+  background-color: #8a0000;
+}

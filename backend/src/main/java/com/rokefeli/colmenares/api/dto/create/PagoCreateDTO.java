@@ -1,10 +1,7 @@
 package com.rokefeli.colmenares.api.dto.create;
 
 import com.rokefeli.colmenares.api.entity.enums.MetodoPago;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -14,6 +11,11 @@ public class PagoCreateDTO {
 
     @NotNull
     private Long idVenta;
+
+    @NotNull
+    private String direccionEnvio;
+
+    private String referenciaCliente;
 
     @NotNull
     private Long idTarifaEnvio;

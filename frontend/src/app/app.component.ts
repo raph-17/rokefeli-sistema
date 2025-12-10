@@ -22,6 +22,6 @@ export class AppComponent {
   esRutaAdmin(): boolean {
     const url = this.router.url;
     // Si la URL incluye 'panel-admin' o 'admin', devolvemos true
-    return url.includes('/panel-admin') || url.includes('/pedidos') || url.includes('/usuarios');
+    return url.includes('/panel-admin');
   }
 }

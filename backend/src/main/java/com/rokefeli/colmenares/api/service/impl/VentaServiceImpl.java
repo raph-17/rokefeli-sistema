@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,6 +91,7 @@ public class VentaServiceImpl implements VentaService {
         // 3. Configurar Cabecera (Actualizamos datos siempre)
         if (venta.getId() == null) { // Es nueva
             venta.setUsuario(carrito.getUsuario());
+            venta.setFecha(LocalDateTime.now());
             venta.setEstado(EstadoVenta.PENDIENTE);
             venta.setCanal(CanalVenta.ONLINE);
         }
