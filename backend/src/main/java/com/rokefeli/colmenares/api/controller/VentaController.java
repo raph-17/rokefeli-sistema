@@ -47,10 +47,10 @@ public class VentaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(venta);
     }
 
+    // Generar venta desde el carrito de compras
     @PostMapping("/crear")
-    @PreAuthorize("hasRole('CLIENTE')") // Solo clientes con carrito pueden hacer esto
+    @PreAuthorize("hasRole('CLIENTE')")
     public ResponseEntity<VentaResponseDTO> crearDesdeCarrito(@AuthenticationPrincipal UserDetails userDetails) {
-        // Obtenemos el ID del usuario logueado de forma segura
         Long idUsuario = ((JwtUserDetails) userDetails).getId();
 
         // Llamamos al servicio que copia los items del carrito a una nueva venta PENDIENTE

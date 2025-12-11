@@ -68,22 +68,21 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 2. AGREGAR ESTE BEAN (La "Lista Blanca")
+    // 2. "Lista blanca" de orígenes permitidos
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // A. ¿Quién puede entrar? (Frontend de Angular suele ser puerto 4200)
+        // A. Permitimos el ingreso al frontend Angular
         configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        // Si quieres permitir TODO (solo desarrollo): configuration.setAllowedOrigins(List.of("*"));
 
-        // B. ¿Qué métodos pueden usar?
+        // B. Métodos HTTP permitidos
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        // C. ¿Qué cabeceras permitimos? (Authorization es clave para el JWT)
+        // C. Cabeceras permitidas
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
-        // D. ¿Permitir credenciales/cookies?
+        // D. Credenciales permitidas
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -51,12 +51,14 @@ public class PedidoController {
     //  ADMIN / EMPLEADO (Logística)
     // ==========================================
 
+    // Listar todos los pedidos
     @GetMapping("/admin")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
     public ResponseEntity<?> listarTodos() {
         return ResponseEntity.ok(pedidoService.findAll());
     }
 
+    // Filtrar pedidos por estado
     @GetMapping("/admin/estado")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
     public ResponseEntity<?> listarPorEstado(@RequestParam EstadoPedido estado) {

@@ -75,7 +75,7 @@ public class VentaServiceImpl implements VentaService {
     @Override
     public VentaResponseDTO crearVentaDesdeCarrito(Long idUsuario) {
 
-        // 1. Buscar el carrito activo (Igual que antes)
+        // 1. Buscar el carrito activo
         Carrito carrito = carritoRepository.findByUsuario_IdAndEstado(idUsuario, EstadoCarrito.ACTIVO)
                 .orElseThrow(() -> new RuntimeException("No hay un carrito activo para este usuario."));
 
@@ -83,7 +83,7 @@ public class VentaServiceImpl implements VentaService {
             throw new RuntimeException("El carrito está vacío.");
         }
 
-        // 2. BUSCAR VENTA PENDIENTE EXISTENTE (PARA RECICLAR)
+        // 2. Buscar venta pendiente para reciclarla
         Venta venta = ventaRepository
                 .findFirstByUsuario_IdAndEstadoOrderByFechaDesc(idUsuario, EstadoVenta.PENDIENTE)
                 .orElse(new Venta()); // Si no hay, creamos una nueva vacía

@@ -41,9 +41,6 @@ public class CarritoServiceImpl implements CarritoService {
     @Override
     @Transactional(readOnly = true)
     public CarritoResponseDTO verCarrito(Long idUsuario) {
-        // CORRECCIÓN: Usar obtenerOCrearCarritoActivo para evitar errores si no existe
-        // o usar findByUsuario_IdAndEstado. Si usas findByUsuario_Id simple, puede traer carritos viejos.
-        // Por seguridad en lectura usamos este:
         Carrito carrito = carritoRepository.findByUsuario_IdAndEstado(idUsuario, EstadoCarrito.ACTIVO)
                 .orElseThrow(() -> new RuntimeException("Carrito no encontrado o inactivo"));
 
@@ -78,10 +75,8 @@ public class CarritoServiceImpl implements CarritoService {
             detalle.setProducto(producto);
             detalle.setPrecioUnitario(producto.getPrecio());
             detalle.setCantidad(dto.getCantidad());
-            // IMPORTANTE: Agregar a la lista para que el mapper lo vea
             carrito.getDetalles().add(detalle);
         } else {
-            // Si ya existía, solo sumamos cantidad (el stock ya se restó arriba)
             int nuevaCantidad = detalle.getCantidad() + dto.getCantidad();
             detalle.setCantidad(nuevaCantidad);
         }
@@ -107,7 +102,7 @@ public class CarritoServiceImpl implements CarritoService {
 
         Producto producto = detalle.getProducto();
 
-        // 🔥 LOGICA STOCK AL ACTUALIZAR 🔥
+        // Lógica del stock al actualizar
         int cantidadActual = detalle.getCantidad();
         int diferencia = nuevaCantidad - cantidadActual;
 
@@ -142,7 +137,7 @@ public class CarritoServiceImpl implements CarritoService {
                 .findByCarrito_IdAndProducto_Id(carrito.getId(), idProducto)
                 .orElseThrow(() -> new ResourceNotFoundException("DetalleCarrito"));
 
-        // 🔥 DEVOLVER STOCK AL ELIMINAR 🔥
+        // Devolver stock al eliminar
         Producto p = detalle.getProducto();
         p.setStockActual(p.getStockActual() + detalle.getCantidad());
         productoRepository.save(p);
@@ -161,7 +156,7 @@ public class CarritoServiceImpl implements CarritoService {
     public void vaciarCarrito(Long idUsuario) {
         Carrito carrito = obtenerOCrearCarritoActivo(idUsuario);
 
-        // 🔥 DEVOLVER STOCK DE TODO 🔥
+        // Devolver todo el stock
         for (DetalleCarrito det : carrito.getDetalles()) {
             Producto p = det.getProducto();
             p.setStockActual(p.getStockActual() + det.getCantidad());
@@ -178,7 +173,7 @@ public class CarritoServiceImpl implements CarritoService {
     @Override
     public void marcarComoComprado(Long idUsuario) {
         // Este método se llama cuando el pago fue EXITOSO.
-        // NO devolvemos stock, solo cerramos el carrito.
+        // NO se devuelve stock, solo se cierra el carrito.
         Carrito carrito = obtenerOCrearCarritoActivo(idUsuario);
         carrito.setEstado(EstadoCarrito.COMPRADO);
         carritoRepository.save(carrito);

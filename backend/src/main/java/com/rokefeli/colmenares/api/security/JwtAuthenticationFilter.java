@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // ⛔ 1. Saltar rutas públicas
+        // 1. Saltar rutas públicas
         String path = request.getServletPath();
         // permitir solo login y register-client sin token
         if (path.equals("/api/auth/login") || path.equals("/api/auth/register/client")) {
@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ⛔ 2. Obtener el token
+        // 2. Obtener el token
         String header = request.getHeader("Authorization");
         if (!StringUtils.hasText(header) || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -46,17 +46,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = header.substring(7);
 
-        // ⛔ 3. Validar token
+        // 3. Validar token
         if (!jwtUtil.validate(token)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // ⛔ 4. Extraer datos
+        // 4. Extraer datos
         Claims claims = jwtUtil.getClaims(token);
         String email = claims.get("email", String.class);
 
-        // ⛔ 5. Cargar usuario
+        // 5. Cargar usuario
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
         UsernamePasswordAuthenticationToken auth =

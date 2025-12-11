@@ -25,15 +25,13 @@ public class SecurityService {
             return false;
         }
 
-        // 2. Si es ADMIN, pase VIP
-        // (Una forma más corta de verificar el rol)
+        // 2. Si es ADMIN permitir todo
         if (authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return true;
         }
 
-        // 3. OPTIMIZACIÓN: Obtener ID del usuario directamente del Token (Sin ir a la BD)
-        // Como tu filtro ya configuró el contexto con JwtUserDetails, hacemos un cast seguro
+        // 3. Obtener ID del usuario directamente del Token
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof JwtUserDetails)) {
             return false; // Por si acaso es un usuario anónimo
@@ -41,7 +39,6 @@ public class SecurityService {
         Long userId = ((JwtUserDetails) principal).getId();
 
         // 4. Buscar solo la venta
-        // Usamos map/orElse para hacerlo más funcional y limpio
         return ventaRepository.findById(idVenta)
                 .map(venta -> venta.getUsuario().getId().equals(userId))
                 .orElse(false); // Si no existe la venta, retorna false (403 Forbidden)

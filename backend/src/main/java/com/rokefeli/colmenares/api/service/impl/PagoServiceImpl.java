@@ -88,7 +88,7 @@ public class PagoServiceImpl implements PagoService {
             boolean aprobado = procesarConPasarelaExterna(dto);
 
             if (aprobado) {
-                // ✅ PAGO EXITOSO
+                // PAGO EXITOSO
                 pago.setEstadoPago(EstadoPago.APROBADO);
                 pago.setFechaPago(LocalDateTime.now());
                 venta.setEstado(EstadoVenta.PAGADA);
@@ -107,7 +107,7 @@ public class PagoServiceImpl implements PagoService {
                 pedidoService.crearPedidoAutomatico(pedidoDTO);
 
             } else {
-                // ❌ PAGO RECHAZADO (Tarjeta sin fondos, etc.)
+                // PAGO RECHAZADO
                 pago.setEstadoPago(EstadoPago.RECHAZADO);
                 venta.setEstado(EstadoVenta.PENDIENTE);
             }
@@ -116,7 +116,7 @@ public class PagoServiceImpl implements PagoService {
             ventaRepository.save(venta);
 
         } catch (Exception e) {
-            // 🚨 ERROR CRÍTICO DEL SISTEMA
+            // ERROR CRÍTICO DEL SISTEMA
             System.err.println("Error procesando pago: " + e.getMessage());
             throw e;
         }
@@ -147,8 +147,7 @@ public class PagoServiceImpl implements PagoService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + culqiKey);
 
-            // 2. Preparar el Cuerpo de la Petición (El Cargo)
-            // Culqi pide el monto en CENTIMOS (S/ 100.00 -> 10000)
+            // 2. Preparar el Cuerpo de la Petición
             HttpEntity<Map<String, Object>> request = getMapHttpEntity(dto, headers);
 
             // 3. Enviar Petición a Culqi
@@ -157,7 +156,7 @@ public class PagoServiceImpl implements PagoService {
 
             // 4. Validar Respuesta
             if (response.getStatusCode() == HttpStatus.CREATED) {
-                return true; // ¡Pago Exitoso!
+                return true; // Pago Exitoso
             } else {
                 return false;
             }

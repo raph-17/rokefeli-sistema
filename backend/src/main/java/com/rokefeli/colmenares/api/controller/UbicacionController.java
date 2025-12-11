@@ -29,11 +29,13 @@ public class UbicacionController {
     //  PÚBLICO (Para Selects en Cascada)
     // ==========================================
 
+    // Listar departamentos Activos
     @GetMapping("/departamentos")
     public ResponseEntity<?> listarDepartamentosActivos() {
         return ResponseEntity.ok(departamentoService.findAllActivos());
     }
 
+    // Listar provincias Activas por departamento
     @GetMapping("/provincias/departamento/{idDepartamento}")
     public ResponseEntity<?> listarProvinciasPorDepartamentoActivos(@PathVariable Long idDepartamento) {
         return ResponseEntity.ok(provinciaService.findByDepartamentoIdActivos(idDepartamento));

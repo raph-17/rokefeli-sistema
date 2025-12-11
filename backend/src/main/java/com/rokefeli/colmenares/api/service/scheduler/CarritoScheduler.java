@@ -25,7 +25,7 @@ public class CarritoScheduler {
 
     // Se ejecuta cada minuto (60000 ms) para revisar
     @Scheduled(fixedRate = 60000)
-    @Transactional // Importante para manejar la devolución de stock
+    @Transactional
     public void liberarCarritosAbandonados() {
 
         // 1. Definir el límite (Hace 2 horas)
@@ -36,10 +36,10 @@ public class CarritoScheduler {
                 .findByEstadoAndFechaActualizacionBefore(EstadoCarrito.ACTIVO, haceDosHoras);
 
         if (carritosExpirados.isEmpty()) {
-            return; // Nada que hacer
+            return;
         }
 
-        System.out.println("🧹 SCHEDULER: Encontrados " + carritosExpirados.size() + " carritos abandonados. Liberando stock...");
+        System.out.println("[SCHEDULER]: Encontrados " + carritosExpirados.size() + " carritos abandonados. Liberando stock...");
 
         // 3. Procesar cada carrito
         for (Carrito carrito : carritosExpirados) {
@@ -51,8 +51,7 @@ public class CarritoScheduler {
                 productoRepository.save(p);
             }
 
-            // Cambiar estado a ABANDONADO (o podrías borrarlos con .delete)
-            // Es mejor marcarlos como abandonados para métricas futuras
+            // Cambiar estado a EXPIRADO
             carrito.setEstado(EstadoCarrito.EXPIRADO);
             carritoRepository.save(carrito);
 

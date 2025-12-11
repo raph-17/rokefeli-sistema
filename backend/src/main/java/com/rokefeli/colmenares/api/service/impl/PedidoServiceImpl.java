@@ -133,7 +133,7 @@ public class PedidoServiceImpl implements PedidoService {
         venta.setEstado(EstadoVenta.PROCESADA);
         ventaRepository.save(venta);
 
-        System.out.println("[DEBUG]: ✅ PEDIDO CREADO AUTOMÁTICAMENTE ID: " + pedido.getId());
+        System.out.println("[DEBUG]: PEDIDO CREADO AUTOMÁTICAMENTE ID: " + pedido.getId());
 
         return pedidoMapper.toResponseDTO(saved);
     }
